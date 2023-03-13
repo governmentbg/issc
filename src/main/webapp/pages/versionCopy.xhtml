@@ -1,0 +1,103 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:jsf="http://xmlns.jcp.org/jsf"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components"
+	template="/template/template.xhtml">
+
+	<ui:define name="title">#{navTexts['/pages/versionCopy.xhtml']}</ui:define>
+
+	<ui:define name="viewname">
+		<li>
+			<p:commandLink title="#{ui_labels['general.back']}" action="#{navigation.goBack()}" rendered="#{navigation.navPath.size()>1}">
+				<i class="fas fa-caret-left" />
+			</p:commandLink>
+		</li>
+		<li>#{navTexts['/pages/versionCopy.xhtml']}</li>
+	</ui:define>
+
+	<ui:define name="content">
+
+		<f:metadata>
+			<f:viewAction action="#{userData.checkPageAccess(109)}" onPostback="false" />		
+			<f:importConstants type="com.ib.nsiclassif.system.NSIConstants" />			
+		</f:metadata>
+
+		<h:form id="formVersionCopy">
+		
+			<div class="#{guestPreferences.containerPosition}">
+
+				<div class="card">
+
+					<p:toolbar id="panelButtons" styleClass="margin-bottom">
+
+						<f:facet name="left">
+
+							<p:commandButton icon="fas fa-copy" value="#{labels['versionEdit.copy']}" action="#{versionCopy.actionCopyVersion}" id="btnCopy"
+								ajax="false" update="panelCopy" process="@this panelCopy" partialSubmit="true" />
+								
+						</f:facet>
+						
+					</p:toolbar>
+					
+					<h:panelGroup id="panelCopy" layout="block">
+
+						<div class="title-group">
+							<p:commandLink class="extended-search-toggle expanded" onclick="toggleSection(this, '#formVersionCopy:copy')">
+								<h:outputText value="#{labels['versionEdit.versionListForCopy']}" />
+								<i class="fas fa-caret-right"></i>
+							</p:commandLink>
+						</div>
+						
+						<div jsf:id="copy">
+							
+							<div class="p-grid ui-fluid p-align-center">
+	
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-4 p-xl-4 ui-fluid">
+									<h:outputText value="#{labels['versionEdit.versionSource']}" styleClass="form-label req" />
+									<p:selectOneMenu id="idVerCopy" value="#{versionCopy.idVerForCopy}">
+										<f:selectItem value="#{null}" itemValue="#{null}" />
+										<f:selectItems value="#{versionCopy.versionsListForCopy}" var="var" itemLabel="#{var[1]}" itemValue="#{var[0]}" />
+									</p:selectOneMenu>
+								</div>
+								
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-3 p-xl-3 ui-fluid" align="center"> 											
+									<p:selectBooleanCheckbox value="#{versionCopy.copyBasicData}" itemLabel="#{labels['versionCopy.copyBasicData']}" styleClass="form-label" disabled="true" style="width:250px;"/>										
+								</div>
+								
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-2 p-xl-2 ui-fluid" align="center"> 											
+									<p:selectBooleanCheckbox value="#{versionCopy.copyLevels}" itemLabel="#{labels['versionCopy.copyLevels']}" styleClass="form-label" style="width:250px;"/>										
+								</div>
+								
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-3 p-xl-3 ui-fluid" align="center"> 											
+									<p:selectBooleanCheckbox value="#{versionCopy.copyTables}" itemLabel="#{labels['versionCopy.copyTables']}" styleClass="form-label" style="width:250px;"/>										
+								</div>
+								
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-4 p-xl-4 ui-fluid">
+								</div>
+								
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-3 p-xl-3 ui-fluid" align="center"> 											
+									<p:selectBooleanCheckbox value="#{versionCopy.copyUsers}" itemLabel="#{labels['versionCopy.copyUsers']}" styleClass="form-label" style="width:250px;"/>										
+								</div>
+								
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-2 p-xl-2 ui-fluid" align="center"> 											
+									<p:selectBooleanCheckbox value="#{versionCopy.copyScheme}" itemLabel="#{labels['versionCopy.copyScheme']}" styleClass="form-label" style="width:250px;"/>										
+								</div>							
+								
+							</div>
+						
+						</div>
+					
+					</h:panelGroup>
+				
+				</div>
+				
+			</div>
+		
+		</h:form>
+		
+	</ui:define>
+
+</ui:composition>

@@ -1,0 +1,490 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components"
+	template="/template/template.xhtml"
+	xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+	<ui:define name="metadata">
+		<f:metadata>
+			<f:viewAction action="#{userData.checkPageAccess(108)}" onPostback="false" />
+			
+			<f:importConstants type="com.ib.nsiclassif.system.NSIConstants" />
+		</f:metadata>
+	</ui:define>
+
+	<ui:define name="title">#{navTexts['/pages/corespTable.xhtml']}</ui:define>
+
+
+	<ui:define name="viewname">
+		
+		<li><p:commandLink title="#{ui_labels['general.back']}" action="#{navigation.goBack()}" rendered="#{navigation.navPath.size()>1}">
+				<i class="fas fa-caret-left" />
+			</p:commandLink></li>
+		<li>
+			<h:outputText value="#{navTexts['/pages/corespTable.xhtml']}" />
+		</li>
+
+	</ui:define>
+
+	<ui:define name="content">
+
+		<h:form id="corespTableForm">
+			
+			<p:tabView id="tabViewCorespTable" dynamic="true" >
+				
+				<!-- Таб Основни данни -->
+				<p:tab title="#{labels['corespTable.basicData']}" id="tabCorTabBasicData">
+
+					<div style="left: calc(100% - 135px); top: -55px; position: relative; width: 150px">
+						<p:selectOneMenu id="lang" value="#{corespTableBean.lang}"  style="width:150px">
+							<f:selectItems value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LANG, now, corespTableBean.lang)}"
+								var="lang" itemLabel="#{lang.tekst}" itemValue="#{lang.code}" />
+							<p:ajax event="change" listener="#{corespTableBean.actionChangeLang}" update="dataPanel" process="@this dataPanel" />
+						</p:selectOneMenu>
+					</div>
+					
+					<h:panelGroup style=" top:-25px; position: relative; " id="mainData">
+
+					<p:toolbar id="panelButtons" styleClass="margin-bottom" rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}">
+						
+						<f:facet name="left">
+							<div title="#{corespTableBean.corespTable.publicated?'Кореспондиращата таблица е публикувана!':''}">
+							<p:commandButton icon="fas fa-save" value="#{ui_labels['general.save']}" action="#{corespTableBean.actionSave}"
+									id="btnSave" update="corespTableForm" process="@this corespTableForm" partialSubmit="true" disabled="#{corespTableBean.corespTable.publicated}" 
+									/>
+							</div>
+							<span class="p-mx-2" jsf:rendered="#{corespTableBean.corespTable.id ne null}"> 
+								<span class="fas fa-ellipsis-v SoftGray" />
+							</span>
+							
+							<h:outputText class="p-mr-2" value="Публикувана на сайта: " /> 
+							<p:selectBooleanCheckbox value="#{corespTableBean.corespTable.publicated}" >
+					            <p:ajax listener="#{corespTableBean.actionPublicate}" process="@this corespTableForm" update="corespTableForm" partialSubmit="true"/>
+					        </p:selectBooleanCheckbox>
+							 
+					        
+							<ui:remove>
+								<span class="fas fa-ellipsis-v SoftGray p-mx-2" />
+
+								<p:commandButton rendered="false" icon="fas fa-plus" id="btnNew" value="#{ui_labels['general.new']}" 
+									update="corespTableForm" process="@this" partialSubmit="true" styleClass="ui-button-success"
+									actionListener="#{corespTableBean.actionNew}" />
+							</ui:remove>
+						
+						</f:facet>
+						
+						<f:facet name="right">
+
+							<ibg:compObjAudit idObj="#{corespTableBean.corespTable.id}"
+								rendered="#{corespTableBean.corespTable.id ne null}"
+								codeObj="#{corespTableBean.corespTable.codeMainObject}"
+								identInfo="#{corespTableBean.corespTable.langMap.get(NSIConstants.CODE_DEFAULT_LANG).name}" />
+							
+								<span class="p-mx-2" jsf:rendered="#{corespTableBean.corespTable.id ne null}">
+									<span class="fas fa-ellipsis-v SoftGray" />
+								</span>
+
+								<p:commandButton id="btnDelete" icon="fas fa-times" value="#{ui_labels['general.delete']}"
+									rendered="#{corespTableBean.corespTable.id ne null}" styleClass="ui-button-danger" disabled="#{corespTableBean.corespTable.publicated}" 
+									actionListener="#{corespTableBean.actionDelete}" update="corespTableForm" process="corespTableForm @this" partialSubmit="true">
+									<p:confirm header="#{ui_labels['general.comfirmation']}" message="#{beanMessages['general.confirmDeleteMsg']}" icon="fas fa-exclamation-triangle" />
+								</p:commandButton>							
+
+						</f:facet>
+				
+					</p:toolbar>
+
+					<div class="card">
+						
+						<div class="p-grid ui-fluid " jsf:id="dataPanel">
+
+							<!--Версия/ вариант източник-->
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-4 p-xl-4 ui-fluid">
+								<h:outputText value="#{labels['corespTable.versionSource']}" styleClass="form-label req" />
+								<p:selectOneMenu id="idVersSource" value="#{corespTableBean.corespTable.idVersSource}" filter="true" filterMatchMode="contains">
+									<f:selectItem value="#{null}" itemValue="#{null}" />
+									<f:selectItems value="#{corespTableBean.versionsByGroup}" var="item" itemLabel="#{item[1]}" itemValue="#{item[0]}" />
+								</p:selectOneMenu>
+							</div>
+
+							<!--Версия/ вариант наследник-->
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-4 p-xl-4 ui-fluid">
+								<h:outputText value="#{labels['corespTable.versionInh']}" styleClass="form-label req" />
+								<p:selectOneMenu id="idVersInh" value="#{corespTableBean.corespTable.idVersTarget}" filter="true" filterMatchMode="contains">
+									<f:selectItem value="#{null}" itemValue="#{null}" />
+									<f:selectItems value="#{corespTableBean.versionsByGroup}" var="item" itemLabel="#{item[1]}" itemValue="#{item[0]}" />
+								</p:selectOneMenu>
+
+							</div>
+
+							<!--Индетификатор-->
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-4 p-xl-4 ui-fluid">
+								<h:outputText value="#{labels['classificEdit.ident']}" styleClass="form-label req" />
+								<p:inputText id="identifikator" value="#{corespTableBean.corespTableLang.ident}" />
+							</div>
+
+							<!--Наименование-->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12 ui-fluid">
+								<h:outputText value="#{labels['classificEdit.name']}" styleClass="form-label req" />
+								<p:inputText id="name" value="#{corespTableBean.corespTableLang.name}" />
+							</div>
+
+							<!--Статус-->
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-4 p-xl-4 ui-fluid">
+								<h:outputText value="#{labels['versionEdit.status']}" styleClass="form-label req" />
+								<p:selectOneMenu id="status" value="#{corespTableBean.corespTable.status}">
+									<f:selectItem value="#{null}" itemValue="#{null}" />
+									<f:selectItems value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_CORESP_STATUS, now, corespTableBean.lang)}"
+										var="item" itemLabel="#{item.tekst}" itemValue="#{item.code}" />
+								</p:selectOneMenu>
+
+							</div>
+
+							<!--Тип на таблицата-->
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-4 p-xl-4 ui-fluid">
+								<h:outputText value="#{labels['corespTable.typeTable']}" styleClass="form-label req" />
+			
+								<p:selectOneMenu id="typeTable" value="#{corespTableBean.corespTable.tableType}">
+									<f:selectItem value="#{null}" itemValue="#{null}" />
+									<f:selectItems value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_CORESP_TYPE, now, corespTableBean.lang)}"
+										var="item" itemLabel="#{item.tekst}" itemValue="#{item.code}" />
+								</p:selectOneMenu>
+
+							</div>
+
+							<!--Режим на свързване-->
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-4 p-xl-4 ui-fluid">
+								<h:outputText value="#{labels['corespTable.typeConn']}" styleClass="form-label req" />
+
+								<p:selectOneMenu id="typeConn" value="#{corespTableBean.corespTable.relationType}">
+									<f:selectItem value="#{null}" itemValue="#{null}" />
+									<f:selectItems value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_CORESP_RELATION_TYPE, now, corespTableBean.lang)}"
+										var="item" itemLabel="#{item.tekst}" itemValue="#{item.code}" />
+								</p:selectOneMenu>
+							</div>
+
+							
+							<!--Брой релации-->
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-4 p-xl-4 ui-fluid">
+								<h:outputText value="#{labels['corespTable.numberRelations']}" styleClass="form-label" />
+								<p:inputNumber decimalPlaces="0" id="numberRelations" value="#{corespTableBean.corespTable.relationsCount}" disabled="true" />
+							</div>
+
+							<!--Брой позиции - източници-->
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-4 p-xl-4 ui-fluid">
+								<h:outputText value="#{labels['corespTable.numPossitionsSource']}" styleClass="form-label req" />
+								<p:inputNumber decimalPlaces="0" id="numberPossSource" value="#{corespTableBean.corespTable.sourcePosCount}"  disabled="true" />
+							</div>
+
+							<!--Брой позиции - цели-->
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-4 p-xl-4 ui-fluid">
+								<h:outputText value="#{labels['corespTable.numberPossTarget']}" styleClass="form-label req" />
+								<p:inputNumber decimalPlaces="0" id="numberPossTarget" value="#{corespTableBean.corespTable.targetPosCount}"  disabled="true" />
+							</div>
+
+							<!--Пътека за индиректни таблици-->	
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12 ui-fluid">
+								<h:outputText value="#{labels['corespTable.path']}" styleClass="form-label" />
+								<div class="ui-inputgroup">
+									<p:inputTextarea rows="3" id="path" value="#{corespTableBean.corespTable.path}" autoResize="false" style="width:99%" >
+										<p:ajax event="change" update="corespTableForm:tabViewCorespTable:pathPanel" />
+									</p:inputTextarea>
+									<p:commandButton icon="fas fa-book-open" title="#{labels['corespTable.path']}" id="btnPath" styleClass="inputgroup-button" />
+								</div>
+								
+								<p:overlayPanel for="btnPath" appendTo="@form" showEffect="fade" dynamic="true" hideEffect="fade" dismissable="false" style="width:85%" showCloseIcon="true" my="left center">
+									<p:inputTextarea id="pathPanel" value="#{corespTableBean.corespTable.path}" rows="15" style="width:100%;" autoResize="false">
+										<p:ajax event="change" update="corespTableForm:tabViewCorespTable:path" />
+									</p:inputTextarea>
+								</p:overlayPanel>
+							</div>
+
+							<!--Област на приложение-->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12 ui-fluid">
+								<h:outputText value="#{labels['corespTable.region']}" styleClass="form-label" />
+								<div class="ui-inputgroup">
+									<p:inputTextarea rows="5" id="region" value="#{corespTableBean.corespTableLang.region}" autoResize="false" style="width:99%" >
+										<p:ajax event="change" update="corespTableForm:tabViewCorespTable:regPanel" />
+									</p:inputTextarea>
+									<p:commandButton icon="fas fa-book-open" title="#{labels['corespTable.region']}" id="btnReg" styleClass="inputgroup-button" />
+								</div>
+								
+								<p:overlayPanel for="btnReg" appendTo="@form" showEffect="fade" dynamic="true" hideEffect="fade" dismissable="false" style="width:85%" showCloseIcon="true" my="left center">
+									<p:inputTextarea id="regPanel" value="#{corespTableBean.corespTableLang.region}" rows="15" style="width:100%;" autoResize="false">
+										<p:ajax event="change" update="corespTableForm:tabViewCorespTable:region" />
+									</p:inputTextarea>
+								</p:overlayPanel>
+							</div>
+
+							<!--Коментар-->													
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12 ui-fluid">
+								<h:outputText value="#{labels['classificEdit.comment']}" styleClass="form-label" />
+								<div class="ui-inputgroup">
+									<p:inputTextarea rows="5" id="comment" value="#{corespTableBean.corespTableLang.comment}" autoResize="false" style="width:99%" >
+										<p:ajax event="change" update="corespTableForm:tabViewCorespTable:commentPanel" />
+									</p:inputTextarea>
+									<p:commandButton icon="fas fa-book-open" title="#{labels['classificEdit.comment']}" id="btnComment" styleClass="inputgroup-button" />
+								</div>
+								
+								<p:overlayPanel for="btnComment" appendTo="@form" showEffect="fade" dynamic="true" hideEffect="fade" dismissable="false" style="width:85%" showCloseIcon="true" my="left center">
+									<p:inputTextarea id="commentPanel" value="#{corespTableBean.corespTableLang.comment}" rows="15" style="width:100%;" autoResize="false">
+										<p:ajax event="change" update="corespTableForm:tabViewCorespTable:comment" />
+									</p:inputTextarea>
+								</p:overlayPanel>
+							</div>
+
+						</div>
+					
+					</div>
+					
+					</h:panelGroup>
+				
+				</p:tab>
+				
+				<!-- Таб Релации -->
+				<p:tab title="#{labels['corespTable.relations']}" id="tabCorTabRelations" rendered="#{corespTableBean.corespTable.id ne null}"> 
+				<h:panelGroup id="relationsPanel">
+					<div class="p-grid ">
+					
+						<div class="p-col-12 p-sm-4 p-md-4 p-lg-4 p-xl-4  ui-fluid">
+							<div class="p-grid " jsf:rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}">
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12  ui-fluid">
+									<h:outputText value="#{labels['relations.allRelations']}" styleClass="form-label" rendered="#{corespTableBean.corespTable.tableType!=NSIConstants.CODE_ZNACHENIE_COR_TAB_HIST or corespTableBean.relationsList.rowCount>0}"/>
+								</div>
+								<div class="p-col-12 p-sm-6 p-md-3 p-lg-3 p-xl-3  ui-fluid" jsf:rendered="#{corespTableBean.corespTable.tableType==NSIConstants.CODE_ZNACHENIE_COR_TAB_HIST and corespTableBean.relationsList.rowCount==0}">
+									<div title="#{corespTableBean.corespTable.publicated?'Кореспондиращата таблица е публикувана!':''}">
+										<p:commandButton value="Създай релации" action="#{corespTableBean.actionGenerateRelations}"
+										disabled="#{corespTableBean.corespTable.publicated}"
+										 update="corespTableForm:tabViewCorespTable:relationsPanel"  partialSubmit="true" rendered="#{corespTableBean.corespTable.tableType==NSIConstants.CODE_ZNACHENIE_COR_TAB_HIST and corespTableBean.relationsList.rowCount==0}"/>
+									</div>
+								</div>
+								<div class="p-col-12 p-sm-6 p-md-4 p-lg-4 p-xl-4  ui-fluid" jsf:rendered="#{corespTableBean.corespTable.tableType!=NSIConstants.CODE_ZNACHENIE_COR_TAB_HIST or corespTableBean.relationsList.rowCount>0}">	
+									<p:inputText value="#{corespTableBean.relationSearch.searchCode}" id="searchCode" onkeydown="if (event.keyCode === 13) { goSearchCommand(); return false; }">	
+									</p:inputText>
+									
+									<p:remoteCommand name="goSearchCommand"
+						                 action="#{corespTableBean.searchCodeChange}" update="tblPos"
+						                 process="@this searchRelWhere searchCode"/>
+								</div>
+								<div class="p-col-12 p-sm-6 p-md-4 p-lg-4 p-xl-4  ui-fluid" jsf:rendered="#{corespTableBean.corespTable.tableType!=NSIConstants.CODE_ZNACHENIE_COR_TAB_HIST or corespTableBean.relationsList.rowCount>0}">
+									<p:selectOneMenu id="searchRelWhere" value="#{corespTableBean.relationSearch.searchLocation}">
+										<f:selectItems
+											value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_RELATION_SEARCH, now, corespTableBean.currentLang)}"
+											var="expl" itemLabel="#{expl.tekst}" itemValue="#{expl.code}" />
+										<p:ajax event="change" listener="#{corespTableBean.searchLocationChange}" update="tblPos" process="@this searchCode" />	
+									</p:selectOneMenu>
+								</div>
+								
+								<div class="p-col-12 p-sm-9 p-md-9 p-lg-9 p-xl-9  ui-fluid" jsf:rendered="#{corespTableBean.corespTable.tableType==NSIConstants.CODE_ZNACHENIE_COR_TAB_HIST and corespTableBean.relationsList.rowCount==0}">
+										<p:selectBooleanCheckbox value="#{corespTableBean.oneToOne}" itemLabel="Едно към едно"/>
+										<p:selectBooleanCheckbox value="#{corespTableBean.oneToZero}" itemLabel="Едно към нула"/>
+										<p:selectBooleanCheckbox value="#{corespTableBean.zeroToOne}" itemLabel="Нула към едно"/>
+								</div>
+								<div class="p-col-12 p-sm-6 p-md-3 p-lg-3 p-xl-3  ui-fluid">
+									<p:menuButton   ajax="false"   value="#{labels['export.fullExport']}" styleClass="ui-button-success" rendered="#{corespTableBean.corespTable.tableType!=NSIConstants.CODE_ZNACHENIE_COR_TAB_HIST or corespTableBean.relationsList.rowCount>0}">
+							            <p:menuitem value="ODS" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFile?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;format=ods">
+							             </p:menuitem>
+							            <p:menuitem value="Excel" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFile?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;format=xlsx">
+							             </p:menuitem>
+							            <p:menuitem value="PDF" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFile?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;format=pdf">
+							             </p:menuitem>
+							            <p:menuitem value="HTML" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFile?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;format=html">
+							             </p:menuitem>
+							            <p:menuitem value="CSV" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFile?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;format=csv">
+							             </p:menuitem>
+							            <p:menuitem value="TXT" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFile?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;format=txt">
+							             </p:menuitem>
+							            <p:menuitem value="SDMX" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFile?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;format=sdmx">
+							             </p:menuitem>
+							            <p:menuitem value="SDMX-JSON" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFile?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;format=sdmx-json">
+							             </p:menuitem>
+							          
+							            
+							        </p:menuButton>
+						        </div>
+								
+							</div>	 
+							
+							<p:dataTable id="tblPos" value="#{corespTableBean.relationsList}" var="row" widgetVar="tblPos"
+								rowKey="#{row[0]}"
+								rowIndexVar="rkv" lazy="true"
+								rows="10" emptyMessage="#{ui_labels['general.norows']}"
+								paginator="true" paginatorPosition="bottom"
+								paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} "
+								selection="#{corespTableBean.rowSelectedRel}"  selectionMode="single">
+
+		                        <p:ajax event="rowSelect"
+		                            listener="#{corespTableBean.rowSelectedChange}"
+		                            update="corespTableForm:tabViewCorespTable:details" process="@this"/>
+								
+								
+								<p:column headerText="#{ui_labels['general.No-symbol']}" width="10">
+			                        <h:outputText value="#{rkv + 1}"/>
+			                    </p:column>
+								<p:column headerText="#{labels['relations.positionSource']}">
+									#{row[1]}
+								</p:column>
+								<p:column headerText="#{labels['relations.positionTarget']}" >
+									#{row[2]}
+								</p:column>
+								<p:column width="30" exportable="false" rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}">
+									<p:commandButton icon="fas fa-trash" style="font-size:5px;" action="#{corespTableBean.actionDeleteRelation(row[0])}" ajax="true" styleClass="ui-button-danger" 
+												title="#{ui_labels['general.delete']}" update="corespTableForm:tabViewCorespTable:relationsPanel corespTableForm:tabViewCorespTable:tblPos corespTableForm" partialSubmit="true" process="@this">
+											<p:confirm header="#{ui_labels['general.comfirmation']}" message="#{ui_labels['general.confirmationMessage']}" icon="fas fa-exclamation-triangle" />
+										</p:commandButton>
+								</p:column>					 
+							</p:dataTable>
+						</div>
+						<div class="p-col-8">
+							<p:panel id="details" widgetVar="detailsSelected">
+								<div class="p-grid ">
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12 ui-fluid">
+									<h:outputText value="#{labels['classificEdit.ident']}: " styleClass="form-label" />
+									<h:outputText value="#{corespTableBean.corespTableLang.ident}" />
+								</div>
+								
+									<div class="p-col-12 p-sm-6 p-md-6 p-lg-6 p-xl-6  " style="margin-top:18px;" jsf:rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}">
+										<div title="#{corespTableBean.corespTable.publicated?'Кореспондиращата таблица е публикувана!':''}">
+											<p:commandButton value="#{ui_labels['general.save']}" action="#{corespTableBean.actionSaveRelation}" 
+												disabled="#{corespTableBean.corespTable.publicated}"
+												update="relationsPanel mainData"  partialSubmit="true"/>
+										</div>
+									</div>
+									
+									<div class="p-col-12 p-sm-6 p-md-6 p-lg-6 p-xl-6  " style="margin-top:18px;" jsf:rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}">
+										<div title="#{corespTableBean.corespTable.publicated?'Кореспондиращата таблица е публикувана!':''}">
+											<p:commandButton value="#{ui_labels['general.new']}" action="#{corespTableBean.actionNewRelation}"
+												disabled="#{corespTableBean.corespTable.publicated}"
+											 	update="corespTableForm:tabViewCorespTable:relationsPanel"  ajax="true"/>
+										 </div>
+									</div>
+									 
+									<div class="p-col-12 p-sm-6 p-md-2 p-lg-2 p-xl-2  ui-fluid">
+										<h:outputText value="#{labels['relations.codeSource']}" styleClass="form-label" />
+										<p:inputText value="#{corespTableBean.rel.sourceCode}" id="sourceCode" style="background-color:#b7e6ac;">
+											<p:ajax event="change" listener="#{corespTableBean.sourceCodeChange}" update="tblPosRelations sourceCodeText details" process="@this" />
+										</p:inputText>
+									</div>
+									<div class="p-col-12 p-sm-6 p-md-10 p-lg-10 p-xl-10  ui-fluid" style="margin-top:18px;">
+										<h:outputText value="#{corespTableBean.sourceCodeText}" id="sourceCodeText"  escape="false"/>
+									</div>
+									
+									
+									<div class="p-col-12 p-sm-6 p-md-2 p-lg-2 p-xl-2  ui-fluid">
+										<h:outputText value="#{labels['relations.codeTarget']}" styleClass="form-label" />
+										<p:inputText value="#{corespTableBean.rel.targetCode}" id="targetCode" style="background-color:#f5bdae;">
+											<p:ajax event="change" listener="#{corespTableBean.targetCodeChange}" update="tblPosRelations targetCodeText details" process="@this" />
+										</p:inputText>
+									</div>
+									<div class="p-col-12 p-sm-6 p-md-10 p-lg-10 p-xl-10  ui-fluid" style="margin-top:18px;">										
+										<h:outputText value="#{corespTableBean.targetCodeText}" id="targetCodeText"  />
+									</div>
+									
+									
+									 
+									<div class="p-col-12 p-sm-12 p-md-12 p-lg-8 p-xl-4  ui-fluid">
+										<h:outputText value="#{labels['relations.explanation']}" styleClass="form-label" />
+										<p:selectOneMenu id="explanation" value="#{corespTableBean.rel.explanation}">
+											<f:selectItem />
+											<f:selectItems
+												value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_EXPLANATION, now, corespTableBean.currentLang)}"
+												var="expl" itemLabel="#{expl.tekst}" itemValue="#{expl.code}" />
+										</p:selectOneMenu>
+										 
+									</div>
+									 
+									
+									
+									
+							 
+									
+									<div class="p-col-12 p-sm-12 p-md-9 p-lg-9 p-xl-9  ui-fluid" style="margin-top:18px;">
+										<h:outputText value="#{labels['relations.typeRelation']}: "  styleClass="form-label"/>
+										<h:outputText value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_RELATION_TYPE, corespTableBean.typeRelation, corespTableBean.currentLang, null)}" />									
+									</div>
+									<div class="p-col-12 p-sm-12 p-md-12 p-lg-10 p-xl-8   right">
+										<p:dataTable id="tblPosRelations" value="#{corespTableBean.currentPositionsList}" var="row" widgetVar="tblPosRel"
+											rowKey="#{row.id}"
+											rowIndexVar="rkv" rows="10"
+											paginator="true" paginatorPosition="bottom"
+											paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} "
+											emptyMessage="#{ui_labels['general.norows']}"
+											reflow="true">
+											<p:column headerText="#{ui_labels['general.No-symbol']}" width="10">
+					                            <h:outputText value="#{rkv + 1}"/>
+					                        </p:column>
+											<p:column  headerText="#{labels['relations.positionSource']}" width="200">
+												<div style="#{row.sourceCode==corespTableBean.rel.sourceCode?'background-color:#b7e6ac;':(row.sourceCode==corespTableBean.rel.targetCode?'background-color:#f5bdae;':'')};">
+													<h:outputText value="#{row.sourceCode}" />
+												</div>
+											</p:column>
+											<p:column   headerText="#{labels['relations.positionTarget']}"  width="200">
+												<div style="#{row.targetCode==corespTableBean.rel.sourceCode?'background-color:#b7e6ac;':(row.targetCode==corespTableBean.rel.targetCode?'background-color:#f5bdae;':'')}">
+													<h:outputText value="#{row.targetCode}" style="#{row.targetCode==corespTableBean.rel.sourceCode?'background-color:#b7e6ac;':(row.targetCode==corespTableBean.rel.targetCode?'background-color:#f5bdae;':'')}"/>
+												</div>
+											</p:column>
+										</p:dataTable>
+									</div>
+								</div>
+							</p:panel>
+						</div>
+					</div>
+					</h:panelGroup>
+				</p:tab>
+				
+				<!-- Таб Импорт -->
+				<p:tab title="#{labels['corespTable.import']}"  id="tabCorTabImport" rendered="#{corespTableBean.corespTable.id ne null and  request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}"> 
+					<ui:include src="importRelacii.xhtml" >
+						<ui:param name="idTable" value="#{corespTableBean.corespTable.id}" />
+						<ui:param name="disableButtons" value="#{corespTableBean.corespTable.publicated}" />
+
+					</ui:include>
+				</p:tab>
+				
+				<!-- Таб Експорт -->
+				<p:tab title="#{labels['export.chooseExport']}" id="tabCorTabExport" rendered="#{corespTableBean.corespTable.id ne null and  request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}"> 
+				<ui:include src="exportRelacii.xhtml" >
+						<ui:param name="idTable" value="#{corespTableBean.corespTable.id}" />
+						<ui:param name="disableButtons" value="#{corespTableBean.corespTable.publicated}" />
+					</ui:include>
+				
+				</p:tab>
+				
+				<!-- Таб Потребители -->				
+				<p:tab title="#{labels['general.users']}" id="tabCorTabUsers" rendered="#{corespTableBean.corespTable.id ne null}">
+					<div style="left:calc(100% - 135px); top:-55px; position: relative; width: 150px">
+						<p:selectOneMenu id="langUsers" value="#{corespTableBean.lang}" style="width:150px">
+							<f:selectItems value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LANG, now, NSIConstants.CODE_DEFAULT_LANG)}"
+								var="lang" itemLabel="#{lang.tekst}" itemValue="#{lang.code}" />
+							<p:ajax event="change" listener="#{corespTableBean.actionChangeLang}" update="compusers" process="@this" partialSubmit="ture"/>
+						</p:selectOneMenu>
+					</div>
+					<div jsf:id="compusers" style=" top:-25px; position: relative; ">
+						<ibg:compОbjectUsers isButtonDisabled="#{corespTableBean.corespTable.publicated}" id="corTabCompUsers" idObject="#{corespTableBean.corespTable.id}" codeObject="#{NSIConstants.CODE_ZNACHENIE_JOURNAL_CORESP_TABLE}" lang="#{corespTableBean.lang}"/>
+					</div>
+				</p:tab>
+				
+				<!-- Таб Документи -->				
+				<p:tab title="#{labels['general.docs']}" id="tabCorTabDocs" rendered="#{corespTableBean.corespTable.id ne null}">
+					<div style="left:calc(100% - 135px); top:-55px; position: relative; width: 150px">
+						<p:selectOneMenu id="langDocs" value="#{corespTableBean.lang}" style="width:150px">
+							<f:selectItems value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LANG, now, NSIConstants.CODE_DEFAULT_LANG)}"
+								var="lang" itemLabel="#{lang.tekst}" itemValue="#{lang.code}" />
+							<p:ajax event="change" listener="#{corespTableBean.actionChangeLang}" update="compdocs" process="@this" partialSubmit="ture"/>
+						</p:selectOneMenu>
+					</div>
+					<div jsf:id="compdocs" style=" top:-25px; position: relative; ">
+						<ibg:compObjectDocs isButtonDisabled="#{corespTableBean.corespTable.publicated}" id="corTabCompDocs" idObject="#{corespTableBean.corespTable.id}" codeObject="#{NSIConstants.CODE_ZNACHENIE_JOURNAL_CORESP_TABLE}" lang="#{corespTableBean.lang}" readonly="#{corespTableBean.corespTable.publicated ? true: false}"/>
+					</div>
+				</p:tab>
+			
+			</p:tabView>
+		
+		</h:form>
+	
+	</ui:define>
+
+</ui:composition>

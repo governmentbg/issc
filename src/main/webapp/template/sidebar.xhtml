@@ -1,0 +1,83 @@
+<ui:composition
+		xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:pm="http://primefaces.org/mirage"
+		xmlns:o="http://omnifaces.org/ui">
+		
+	
+	<p:importConstants type="com.ib.nsiclassif.system.NSIConstants" />
+		
+		
+    <div class="layout-sidebar">
+        <div class="sidebar-logo">
+
+            <a href="classificationsList.xhtml">
+            	<p:graphicImage id="logoSidebar" name="nsi_logo_vector.png" library="images" />
+            </a>
+            <a href="#" class="sidebar-pin" title="Toggle Menu">
+                <i class="fas fa-thumbtack"></i>
+            </a>
+            <div>
+            	<a href="classificationsList.xhtml" class="app-name">#{labels['general.systemName']}</a>
+            </div>
+
+        </div>
+
+        <div class="layout-menu-container">
+            <div class="nano">
+                <div class="nano-content menu-scroll-content">
+                    <h:form id="menuform">	
+                    	<o:cache time="3600" key="docuMenuCache">
+	                        <pm:menu>
+	                            	
+								<p:menuitem id="classifications" value="Класификации" icon="fas fa-th-list" outcome="classificationsList.xhtml@clear@?faces-redirect=true"  ajax="false"
+									rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,108)}"/>  
+									                        
+								<p:menuitem id="search" value="Търсене" icon="fas fa-th-list" outcome="search.xhtml@clear@?faces-redirect=true"  ajax="false"
+									rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,115)}"/>                          
+	                           <ui:remove> 
+		                        <p:submenu id="spravki" label="Справки" icon="fas fa-th-list"
+		                        	rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,64)}">
+		                        	<p:menuitem id="kazusi" value="Решени класификационни казуси" icon="fas fa-th-list" outcome="accessDenied"  ajax="false"
+		                        		rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,112)}"/>
+		                        	<p:menuitem id="vrazki" value="Връзки с институции и системи" icon="fas fa-th-list" outcome="accessDenied"  ajax="false"
+		                        		rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,113)}"/>
+		                        </p:submenu>
+		                      </ui:remove>
+		                        
+		                       <p:submenu id="spravki" label="Справки" icon="fas fa-th-list"
+		                        	rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,64)}">
+		                       	<p:menuitem id="kazusi" value="Решени класификационни казуси" icon="fas fa-th-list" outcome="publExtListLoc.xhtml?faces-redirect=true&amp;sect=#{NSIConstants.CODE_ZNACHENIE_SECT_CASES}&amp;locale=#{!empty(param['locale'])?param['locale']:'bg'}&amp;lang=#{!empty(param['lang'])?param['lang']:1}"  ajax="false"
+		                        		rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,112)}"/>
+		                        	<p:menuitem id="vrazki" value="Връзки с институции и системи" icon="fas fa-th-list" outcome="publExtListLoc.xhtml?faces-redirect=true&amp;sect=#{NSIConstants.CODE_ZNACHENIE_SECT_RELATIONS_INST_SYST}&amp;locale=#{!empty(param['locale'])?param['locale']:'bg'}&amp;lang=#{!empty(param['lang'])?param['lang']:1}"  ajax="false"
+		                        		rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,113)}"/>
+		                        </p:submenu>   	
+		                       	<p:submenu id="admin" label="Администриране" icon="fas fa-fw fa-cog" 
+		                       		rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,1)}">
+		                       	   <p:menuitem id="adminUser" value="Потребители" outcome="userList.xhtml@clear@?faces-redirect=true" ajax="false" 	icon="fas fa-user"
+		                       	   		rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,7)}"/>
+	                       	       <p:menuitem id="adminGrupiUser"  value="Групи потребители" outcome="groupsList.xhtml@clear@?faces-redirect=true" ajax="false"   icon="fas fa-fw fa-list" 
+	                       	       		rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,8)}"/>
+	                           	   <p:menuitem id="adminKlassif" value="Класификации" outcome="systemClassifList.xhtml@clear@?faces-redirect=true" ajax="false" title="Класификации" icon="fas fa-fw fa-tree"
+	                           	   		rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,2)}"/>
+		                           <p:menuitem id="spravkiJurnal" value="Журнал" outcome="journal.xhtml@clear@?faces-redirect=true" ajax="false" title="Журнал" icon="fas fa-fw fa-eye" 
+		                           		rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,111)}"/>
+		                           <ui:remove>
+		                           <!-- <p:menuitem id="adminLogSpisaci" value="Логически списъци" outcome="syslogicListOpis.xhtml@clear@?faces-redirect=true" ajax="false" title="Логически списъци" icon="fas fa-fw fa-list"/>  -->
+		                           </ui:remove>
+		                           <p:menuitem id="adminSysNastr" value="Системни настройки" outcome="systemOptions.xhtml@clear@?faces-redirect=true" ajax="false" title="Системни настройки" icon="fas fa-fw fa-screwdriver" 
+		                           		rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,4)}"/>
+								   <p:menuitem id="adminPortalContManage" value="#{labels['section.portalContMangSystem']}" outcome="publDataList.xhtml@clear@?faces-redirect=true" ajax="false" title="Секции на портала" icon="fas fa-sitemap" 
+								   		rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,114)}"/>
+		   						</p:submenu>
+	                            
+							</pm:menu>
+                    	</o:cache>
+                    </h:form>
+                </div>
+            </div>
+        </div>
+    </div>
+</ui:composition>

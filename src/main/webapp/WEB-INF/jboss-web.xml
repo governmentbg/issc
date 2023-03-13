@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jboss-web>
+  <!-- <context-root>/</context-root>  -->
+  <!-- Enable Java Security -->
+ <security-domain>jaspitest</security-domain>
+ <!--  <security-domain>client-cert-policy</security-domain> -->
+</jboss-web>
+

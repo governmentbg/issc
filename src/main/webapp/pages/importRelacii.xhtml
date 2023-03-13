@@ -1,0 +1,156 @@
+
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components"
+	xmlns:jsf="http://xmlns.jcp.org/jsf">
+ 
+  	<h:panelGroup id="ImportPanel" layout="block">
+  
+   
+
+		<h:panelGroup id="tablePanel1">
+		
+			<div class="title-group">
+				
+				<p:commandLink class="extended-search-toggle expanded"
+					onclick="toggleSection(this, '#corespTableForm:tabViewCorespTable:tblImportPanel')">
+					<h:outputText value="#{labels['importRelacii.importRelacii']} #{importRalacii.mainBean.versionLang.ident}" />
+					<i class="fas fa-caret-right"></i>
+				</p:commandLink>
+			
+			</div>
+			<div jsf:id="tblImportPanel">
+		
+			        <p:growl>
+			            <p:autoUpdate/>
+			        </p:growl>
+	<ui:remove>		        <b> 
+			        	<h:outputText value="Збранени символи за разделител: #{importRelacii.zabrSimvoli} "/>
+			        </b>
+	</ui:remove>
+				    <div class="p-col-12">
+				        <STRONG>
+	            			<h:outputText value=" Непозволени символи за разделител: #{importRelacii.zabrSimvoli} "/>
+				        </STRONG>
+  		            </div>
+			        <div class="p-col-12">
+             			<h:outputText value="Импорт на файлове с разширения: xls, xlsx, csv, html, pdf, ods, txt " styleClass="form-label"/>
+  		            </div>
+			        
+			        <div class="p-col-12">
+            			<h:outputText value="Избора на атрибути трябва точно да съответства на броя колони и реда им!!! "/>
+  		            </div>
+            		<div class="p-col-12 ">	
+ 			    		<h:outputText value="Избор на атрибути за импорт:" styleClass="form-label req" />
+				        <p:pickList id="attributes" value="#{importRelacii.attributes}" var="attributes" itemLabel="#{attributes}" itemValue="#{attributes}" transferOnCheckboxClick="true"
+				                     showSourceControls="false" showTargetControls="false" 
+				                     styleClass="picklist-wide">
+							<p:ajax event="transfer" listener="#{importRelacii.onTransfer}" update="attributes"/>
+				 		</p:pickList>
+   		            </div>
+
+<ui:remove>
+			        <div class="p-col-4 p-md-4 ui-fluid" >
+				        <p:selectCheckboxMenu id="menu" value="#{importRelacii.selectedItems}" label="Вид и ред на атрибутите във файла" style="min-width: 15rem"
+				               multiple="true" filter="true"  filterMatchMode="startsWith">
+			                <f:selectItems value="#{importRelacii.relaciis}" />
+				            <p:ajax event="change" update="selectedItemText " listener="#{importRelacii.actionSelect}"/>
+ 				        </p:selectCheckboxMenu>
+				        <h:outputText id="selectedItemText" value="#{importRelacii.selectedItems}" rendered="false"/>
+		            </div>
+</ui:remove>		            
+		            
+		            <div class="p-col-4 p-md-4 ui-fluid">
+			    		<h:outputText value="Разделител :" />
+	
+						<h:inputText id="razdelitel" value="#{importRelacii.razdelitel}" maxlength="2" size="3" >
+						     <p:ajax event="change" update="razdelitel " />
+						</h:inputText>
+					</div>
+<ui:remove>				<div class="p-grid">
+							<div class="p-col-12 p-md-6 p-lg-3">A</div>
+							<div class="p-col-12 p-md-6 p-lg-3">B</div>
+							<div class="p-col-12 p-md-6 p-lg-3">C</div>
+							<div class="p-col-12 p-md-6 p-lg-3">D</div>
+					</div>
+</ui:remove>		
+				    <div class="p-col-12 p-md-12 ui-fluid">
+				 		<p:fileUpload listener="#{importRelacii.handleFileUpload}" mode="advanced" dragDropSupport="false"
+	                      update="tabl butoni "   allowTypes="/(\.|\/)(txt|xls|xlsx|htm|html|csv|xml|sdmx-json|ods|pdf)$/" 
+	                      validateContentType="true"  label="Избери файл" cancelButtonTitle="Откажи" 
+	                     onupload="return confirm('Сигурен ли си?')" uploadLabel="Импорт" cancelLabel="Oтменете" />
+		
+					</div>
+					<div class="p-col-12 p-md-6 p-lg-3"   jsf:id="butoni" >
+						<p:commandButton icon="fas fa-save" action="#{importRelacii.actionSave}" id="ww"
+						      	value="Запис" styleClass="p-mr-2" rendered="#{importRelaciii.errMe==null}"
+						      	onclick="PF('pbAjax').start();PF('startButton3').disable()"  ajax="true" 
+		                        widgetVar="startButton3"  
+						        >
+						      <f:param value="#{idTable}" name="idTable"></f:param>
+						 </p:commandButton>
+						 <p:commandButton icon="fas fa-save" action="#{importRelacii.actionVerification}"
+					      	value="Проверка" styleClass="p-mr-2"
+					      	 update="tabl butoni qq ww pdf"
+						        >
+					      <f:param value="#{idTable}" name="idTable"></f:param>
+						 </p:commandButton>
+						 <p:commandButton id="pdf" value="Печат на PDF" styleClass="mr-2 mb-2" rendered="#{importRelacii.errMe!=null}" >
+		  					<p:dataExporter type="pdf"  target="tabl" fileName="VersiPdf" encoding="windows-1251"
+								preProcessor="#{importRelacii.preProcessPDF}" options="#{importRelacii.pdfOptions()}" />						
+		                 </p:commandButton>
+						 
+		                 <p:selectOneRadio id="qq" value="#{importRelacii.insertType}"  rendered="#{importRelacii.errMe!=null}" >
+		                    <f:selectItem itemLabel="Всички редове " itemValue="0"/>
+		                    <f:selectItem itemLabel="Само редовете с грешки" itemValue="1"/>
+		                    <p:ajax update="tabl " event="change" listener="#{importRelacii.changeType}"/>
+		                 </p:selectOneRadio>
+	
+	  				    <br /><br />   
+				        <p:progressBar widgetVar="pbAjax" ajax="true" value="#{importRelacii.progress}" id="pBar"
+				                       labelTemplate="{value}%" styleClass="p-mt-3" global="false" interval="500">
+				        </p:progressBar>
+			        </div>
+
+					<div class="p-col-12 ">
+						<p:dataTable id="tabl" var="red" value="#{importRelacii.importedRow}" 
+							emptyMessage="Празен файл" 
+							paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {Exporters}"
+							rows="5" rowsPerPageTemplate="5,15,20,25" paginatorPosition="bottom"
+							paginatorAlwaysVisible="true" paginator="true" editable="true" >
+						    <p:column headerText="#{importRelacii.selectedRelacii[0]}" rendered="#{importRelacii.selectedRelacii[0] != null}">
+				                <h:outputText value="#{red[0]}" />
+				            </p:column>
+				
+				            <p:column headerText="#{importRelacii.selectedRelacii[1]}" rendered="#{importRelacii.selectedRelacii[1] != null}">
+				                <h:outputText value="#{red[1]}" />
+				            </p:column>
+					        <p:column headerText="#{importRelacii.selectedRelacii[2]}" rendered="#{importRelacii.selectedRelacii[2] != null}">
+				                <h:outputText value="#{red[2]}" />
+				            </p:column>
+					            <p:column headerText="#{importRelacii.selectedRelacii[3]}" rendered="#{importRelacii.selectedRelacii[3] != null}">
+				                <h:outputText value="#{red[3]}" />
+				            </p:column>
+					            <p:column headerText="#{importRelacii.selectedRelacii[4]}" rendered="#{importRelacii.selectedRelacii[4] != null}">
+				                <h:outputText value="#{red[4]}" />
+				            </p:column>
+					            <p:column headerText="#{importRelacii.selectedRelacii[5]}" rendered="#{importRelacii.selectedRelacii[5] != null}">
+				                <h:outputText value="#{red[5]}" />
+				            </p:column>
+					            <p:column headerText="#{importRelacii.selectedRelacii[6]}" rendered="#{importRelacii.selectedRelacii[6] != null}">
+				                <h:outputText value="#{red[6]}" />
+				            </p:column>
+				
+						
+						</p:dataTable>
+					</div>
+			</div>
+		</h:panelGroup>
+ 	
+	</h:panelGroup>
+	
+	
+</ui:composition>

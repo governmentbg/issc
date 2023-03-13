@@ -1,0 +1,225 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components"
+	xmlns:jsf="http://xmlns.jcp.org/jsf">
+	
+	
+	
+	<f:event type="preRenderComponent" listener="#{level.initData}" />
+	
+	
+	<div style="left:calc(100% - 135px); top:-55px; position: relative; width: 150px">
+		<p:selectOneMenu id="levelLang" value="#{level.lang}" style="width:150px">
+			<f:selectItems value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LANG, now, NSIConstants.CODE_DEFAULT_LANG)}"
+				var="lang" itemLabel="#{lang.tekst}" itemValue="#{lang.code}" />
+			<p:ajax event="change" listener="#{level.actionChangeLang}" update="levelPanel levelsPanel"  process="@this" partialSubmit="true"/>
+		
+		</p:selectOneMenu>
+	</div>
+	
+	<h:panelGroup id="levelsPanel" layout="block" style=" top:-25px; position: relative; ">
+
+		<h:panelGroup id="tablePanel">
+			 
+			<div class="title-group">
+				
+				<p:commandLink class="extended-search-toggle expanded"
+					onclick="toggleSection(this, '#versionEditForm:tabsVersion:tblLevelsPanel');" process="@this" partialSubmit="true">
+					<h:outputText value="#{labels['levelsEdit.levelsInVersion']} #{level.versionIdent}" />
+					<i class="fas fa-caret-right"></i>
+				</p:commandLink>
+			
+			</div>
+
+			<div jsf:id="tblLevelsPanel">
+				
+				<p:dataTable id="tblLevelsList" var="row" lazy="false" value="#{level.levelsInVersionList}" rowIndexVar="idx"
+					scrollable="true" sortMode="single" reflow="true" emptyMessage="#{ui_labels['general.norows']}"
+					paginatorPosition="bottom" paginatorAlwaysVisible="false" paginator="true"
+					paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+					rows="5" rowsPerPageTemplate="5,15,20,25" rowKey="#{row.id}">
+
+					<p:column width="15" headerText="#{ui_labels['general.No-symbol']}">
+						<h:outputText value="#{row.levelNumber}" />
+					</p:column>
+
+					<p:column style="text-align: center" width="50">
+						<p:commandButton id="btnSelect" partialSubmit="true" action="#{level.actionEdit(row.id)}" 
+							process="versionEditForm:tabsVersion:levelPanel versionEditForm:tabsVersion:tlbButton @this" update="versionEditForm:tabsVersion:levelPanel versionEditForm:tabsVersion:tlbButton" onclick="highlightElement(this ,'tr');" 
+							icon="fas #{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109) and !isPublicated ? 'fa-edit' : 'fa-eye' }"
+							title=" #{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109) and !isPublicated ? ui_labels['general.edit'] : ui_labels['general.view']}"/>
+					</p:column>
+
+					<p:column headerText="#{labels['levelsEdit.name']}">
+						<h:outputText value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_LEVEL_NAME, row.levelName, level.lang, null)}" />
+					</p:column>
+
+					<p:column width="50" exportable="false">
+						<p:commandButton icon="fas fa-trash" action="#{level.actionDeleteRow(row.id)}" ajax="true" styleClass="ui-button-danger" title="#{ui_labels['general.delete']}"
+							disabled="#{isPublicated}"
+							partialSubmit="versionEditForm:tabsVersion:levelsPanel true" process="@this" update="versionEditForm:tabsVersion:levelsPanel"
+							 rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}">
+							<p:confirm header="#{ui_labels['general.comfirmation']}" message="#{ui_labels['general.confirmationMessage']}" icon="fas fa-exclamation-triangle" />
+						</p:commandButton>
+					</p:column>
+
+				</p:dataTable>
+			
+			</div>
+		
+		</h:panelGroup>
+		<br/>
+
+		<p:toolbar id="tlbButton" styleClass="margin-bottom margin-top" rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}">
+			
+			<f:facet name="left">
+				
+				<p:commandButton icon="fas fa-save" value="#{ui_labels['general.save']}" id="btnSave" disabled="#{isPublicated}"
+					action="#{level.actionSave()}" partialSubmit="true" update="versionEditForm:tabsVersion:levelsPanel"
+					process="versionEditForm:tabsVersion:levelDataPanel  @this" />
+
+				<span class="p-mx-2"> <span
+					class="fas fa-ellipsis-v SoftGray" />
+				</span>
+				
+				<p:commandButton icon="fas fa-plus" id="btnNew" value="#{labels['levelsEdit.newLevel']}"
+					styleClass="ui-button-success" disabled="#{level.level.id eq null or isPublicated}"
+					actionListener="#{level.actionNewLevel}" partialSubmit="true" 
+					update="versionEditForm:tabsVersion:levelDataPanel versionEditForm:tabsVersion:tblLevelsList @this"
+					process="versionEditForm:tabsVersion:levelDataPanel @this" />
+			</f:facet>
+
+			<f:facet name="right">
+				
+				<ibg:compObjAudit idObj="#{level.level.id}" rendered="#{level.level.id ne null}"
+					codeObj="#{level.level.codeMainObject}"
+					identInfo="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_LEVEL_NAME, level.level.levelName, level.lang, null)}" />
+
+				<span class="p-mx-2" jsf:rendered="#{level.level.id ne null}"> 
+					<span class="fas fa-ellipsis-v SoftGray" />
+				</span>
+
+				<p:commandButton icon="fas fa-trash" id="btnDeleteLevel" value="#{ui_labels['general.delete']}"  disabled="#{isPublicated}"
+					partialSubmit="versionEditForm:tabsVersion:levelsPanel true" process="@this" update="versionEditForm:tabsVersion:levelsPanel"
+					styleClass="ui-button-danger" rendered="#{level.level.id ne null}" action="#{level.actionDelete}">
+					<p:confirm header="#{ui_labels['general.comfirmation']}" message="#{ui_labels['general.confirmationMessage']}" icon="fas fa-exclamation-triangle" />
+				</p:commandButton>
+			
+			</f:facet>
+		
+		</p:toolbar>
+
+		<h:panelGroup id="levelPanel" class="p-grid ui-fluid">
+			
+			<div class="p-col-12 p-md-12 p-lg-12 p-xl-12">
+
+				<div class="title-group">
+					<p:commandLink class="extended-search-toggle expanded"
+						onclick="toggleSection(this, '#versionEditForm:tabsVersion:levelDataPanel')">
+						<h:outputText value="#{labels['levelsEdit.defNewLevel']}" />
+						<i class="fas fa-caret-right"></i>
+					</p:commandLink>
+				</div>
+
+				<div class="p-grid ui-fluid p-align-end p-ai-stretch vertical-container" jsf:id="levelDataPanel">
+					
+					<div class="p-col-12 p-md-12 p-lg-12 p-xl-8 box box-stretched">
+
+						<div class="p-grid  ui-fluid">
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-3 p-xl-3  ui-fluid">
+								<h:outputText value="#{labels['levelsEdit.levelNum']}" styleClass="form-label req" />
+								<p:inputText value="#{level.level.levelNumber}" id="levelNumber" readonly="true" />
+							</div>
+
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-6 p-xl-6  ui-fluid">
+								<h:outputText value="#{labels['levelsEdit.name']}" styleClass="form-label req" />
+								<p:selectOneMenu value="#{level.level.levelName}" id="levelName" autoWidth="false" disabled="#{isPublicated}">
+									<f:selectItem value="#{null}" itemValue="#{null}" />
+									<f:selectItems value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LEVEL_NAME, now, level.lang)}"
+										var="var" itemLabel="#{var.tekst}" itemValue="#{var.code}" />
+								</p:selectOneMenu>
+							</div>
+
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-3 p-xl-3  ui-fluid">
+								<h:outputText value="#{labels['levelsEdit.codeType']}" styleClass="form-label" />
+								<p:selectOneMenu value="#{level.level.codeType}" id="codeType" autoWidth="false" disabled="#{isPublicated}">
+									<f:selectItem value="#{null}" itemValue="#{null}" />
+									<f:selectItems value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LEVEL_CODE_TYPE, now, level.lang)}"
+										var="var" itemLabel="#{var.tekst}" itemValue="#{var.code}" />
+								</p:selectOneMenu>
+							</div>
+
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12">
+								<h:outputText value="#{labels['levelsEdit.description']}" styleClass="form-label" />
+								<p:inputTextarea id="levelDesc" autoResize="false" value="#{level.levelLang.description}" style="max-width: 100%; min-width: 100%;" readonly="#{isPublicated}" />
+							</div>
+						</div>
+
+						<div class="p-grid  ui-fluid">
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-6 p-xl-4 ui-fluid">
+								<h:outputText value="#{labels['levelsEdit.maskReal']}" styleClass="form-label req" />
+								<p:inputText value="#{level.level.maskReal}" id="maskReal" readonly="#{isPublicated}" />
+							</div>
+
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-6 p-xl-4  ui-fluid">
+								<h:outputText value="#{labels['levelsEdit.maskInherit']}" styleClass="form-label" />
+								<p:inputText value="#{level.level.maskInherit}" id="maskInherit" readonly="#{isPublicated}" />
+							</div>
+
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-6 p-xl-2 ui-fluid">
+								<h:outputText value="#{labels['levelsEdit.symbolCount']}" styleClass="form-label" />
+								<p:inputText value="#{level.level.symbolCount}" id="symbolCount" readonly="true" />
+							</div>
+
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-6 p-xl-2 ui-fluid">
+								<h:outputText value="#{labels['levelsEdit.positions']}" styleClass="form-label" />
+								<p:inputText value="#{level.level.positionCount}" id="positionCount" readonly="#{isPublicated}" />
+							</div>
+
+						</div>
+					</div>
+
+					<div class="p-col-12 p-md-12 p-lg-12 p-xl-4 box box-stretched">
+						
+						<div class="p-grid  ui-fluid">
+							
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12">
+
+								<p:divider align="center">
+									<span class="ui-tag" style="font-size: 14px; padding: 7px 12px;">#{labels['levelsEdit.rules']}</span>
+								</p:divider>
+
+								<p>
+									1. Ако не се контролира кода на маската, се задава символ <b>*</b>.
+								</p>
+
+								<p>
+									2. Ако се контролира кода, всеки символ от маската, освен
+									разделителите, се кодира с: <br /> <b
+										style="margin-left: 2em;">9</b> - цифра; <br /> <b
+										style="margin-left: 2em;">C</b> - число или буква; <br /> <b
+										style="margin-left: 2em;">L</b> - латиница - главна буква; <br />
+									<b style="margin-left: 2em;">l</b> - латиница - малкa буква; <br />
+									<b style="margin-left: 2em;">К</b> - кирилица - главна буква; <br />
+									<b style="margin-left: 2em;">к</b> - кирилица - малка буква; <br />
+									<b style="margin-left: 2em;">X</b>- произволен символ, който не подлежи на проверка.<br />
+								</p>
+							
+							</div>
+						
+						</div>
+					
+					</div>
+
+				</div>
+			
+			</div>
+		
+		</h:panelGroup>
+	
+	</h:panelGroup>
+	
+</ui:composition>

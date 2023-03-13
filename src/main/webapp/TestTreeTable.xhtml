@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mytags="http://www.krasig.org/jedi"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components"
+	xmlns:of="http://omnifaces.org/functions"
+	xmlns:c="http://java.sun.com/jstl/core">
+
+<h:head>
+	<ui:define name="metadata">
+		<f:metadata>
+			<f:importConstants type="com.ib.nsiclassif.system.NSIConstants" />
+		</f:metadata>
+	</ui:define>
+	<style>
+
+</style>
+</h:head>
+<body>
+	<p:separator />
+	++
+	<div class="p-grid ui-fluid">
+		<div class="p-col-2">
+			<p:outputLabel styleClass="form-label" for="huy" value="Alabala" />
+			<p:outputLabel styleClass="form-label" value="Alabala" />
+			<p:inputText value="aaa" id="huy" />
+
+		</div>
+		<div class="p-col-10">
+			<p:outputLabel styleClass="form-label" for="huy2" value="Baba meca" />
+			<p:inputText value="bbb" id="huy2" />
+			<p:inputText value="aaa" id="huy3" />
+		</div>
+		<div class="p-col-12 box">3</div>
+	</div>
+	<p:separator />
+
+	<h:form id="testForm">
+		<p:messages id="messages" showDetail="true" showSummary="true" />
+
+		
+
+		
+		<p:treeTable id="tTable" value="#{testTreeTable.root}" var="node" nodeVar="nVar"  widgetVar="customersTable3"  
+								 globalFilterFunction="#{testTreeTable.globalFilterFunction1}" 
+								 >
+		<f:facet name="header">aa
+			<p:inputText widgetVar="wFilter"  id="globalFilter" onkeyup="PF('customersTable3').filter()" style="width:300px"
+                                 placeholder="Search all fields using global function" />
+		</f:facet>
+			<p:column>
+				<p:treeNode type="class" rendered="#{nVar.type=='class'}">
+	                <h:outputText value="#{node.langMap[(1).intValue()].ident}"/>(#{nVar.type})
+	            </p:treeNode>
+	            
+	            <p:treeNode type="ver" rendered="#{nVar.type=='ver'}">
+	                <h:outputText value="#{node[1]}"/>
+	            </p:treeNode>
+	            
+	         </p:column>
+	         <p:column>
+				<p:treeNode type="class" rendered="#{nVar.type=='class'}">
+	                <h:outputText value="#{node.langMap[(1).intValue()].nameClassif}"/>(#{nVar.type})
+	            </p:treeNode>
+	            
+	            <p:treeNode type="ver" rendered="#{nVar.type=='ver'}">
+	                <h:outputText value="#{node[2]}"/>
+	            </p:treeNode>
+	            
+	         </p:column>
+	         
+		</p:treeTable>
+bb
+	</h:form>
+
+	<h:outputStylesheet name="css/primeicons.css" library="mirage-layout" />
+	<h:outputStylesheet name="css/primeflex.min.css"
+		library="mirage-layout" />
+
+	<h:outputStylesheet name="css/all.css" library="font-awesome" />
+	<h:outputStylesheet name="css/nsiclassif.css" />
+
+</body>
+</html>

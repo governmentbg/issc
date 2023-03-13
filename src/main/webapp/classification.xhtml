@@ -1,0 +1,154 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui" 
+	xmlns:jsf="http://xmlns.jcp.org/jsf"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components"
+	template="/templateSite/template.xhtml"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:c="http://java.sun.com/jstl/core">
+
+	<ui:define name="title">#{navTexts['/classificationView.xhtml']}</ui:define>
+
+	<ui:define name="viewname">
+		<li>#{navTexts['/classificationView.xhtml']}</li>
+	</ui:define>
+
+	<ui:define name="metadata">
+		<f:metadata>
+			<f:importConstants type="com.ib.nsiclassif.system.NSIConstants" />
+			<f:viewParam name="idObj" />
+			<f:viewParam name="lang" />
+			<f:viewParam name="locale" />
+		</f:metadata>
+	</ui:define>
+
+	<ui:define name="panelInfo">
+		<h:outputText value="#{classificationView.classifLang.ident}" />
+	</ui:define>
+
+	<ui:define name="content">
+
+		<h:form id="formClassifView">
+
+				<div class="card">
+					
+					<p:commandButton id="langButton" type="button" icon="fas fa-solid fa-globe" style="float: right; z-index: 1;"
+						value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_LANG, (param['lang']!=null?param['lang']:'1'), 1, null)}" />
+
+					<p:menu overlay="true" trigger="langButton" my="left top" at="left bottom">
+						<c:forEach items="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LANG, now, 1)}" var="lang">
+							<p:menuitem value="#{lang.tekst}" immediate="true" ajax="false"
+								icon="fas fa-solid fa-flag"
+								outcome="#{view.viewId}?faces-redirect=true&amp;includeViewParams=true&amp;lang=#{lang.code}">
+							</p:menuitem>
+						</c:forEach>
+					</p:menu>					
+
+					<p:tabMenu activeIndex="0">
+						<p:menuitem value="#{labels['classificationView.basicData']}" icon="fas fa-info" 
+							outcome="classification?faces-redirect=true&amp;idObj=#{param['idObj']}&amp;lang=#{param['lang']}&amp;locale=#{param['locale']}">
+						</p:menuitem>
+
+						<p:menuitem value="#{labels['classificEdit.versions']}" icon="fas fa-code-branch"
+							outcome="versionsList?faces-redirect=true&amp;idObj=#{param['idObj']}&amp;lang=#{param['lang']}&amp;locale=#{param['locale']}">
+						</p:menuitem>
+						
+						<p:menuitem value="#{labels['documentsListView.title']}" icon="fas fa-fw fa-files-o"
+							outcome="documentsList?faces-redirect=true&amp;idObj=#{param['idObj']}&amp;lang=#{param['lang']}&amp;locale=#{param['locale']}&amp;codeObj=#{NSIConstants.CODE_ZNACHENIE_JOURNAL_STAT_CLASSIF}">
+						</p:menuitem>
+					</p:tabMenu>
+
+					<h:panelGroup id="dataPanel" style="padding:0.5rem;">
+
+						<div class="p-grid ui-fluid p-align-end">
+
+							<!-- Идентификатор -->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-3 p-xl-3  ui-fluid">
+								<h:outputText value="#{labels['classificEdit.ident']}: " styleClass="form-label" />
+								<p> <p:outputLabel value="#{classificationView.classifLang.ident}" /> </p>
+							</div>
+
+							<!-- Наименование -->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-6 p-xl-6  ui-fluid">
+								<h:outputText value="#{labels['classificEdit.name']}: " styleClass="form-label" />
+								<p> <p:outputLabel value="#{classificationView.classifLang.nameClassif}" /> </p>
+							</div>
+							
+							
+							<!-- Тип на класификацията -->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-3 p-xl-3  ui-fluid">
+								<h:outputText value="#{labels['classificEdit.type']}: " styleClass="form-label" />
+								<p> <p:outputLabel value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_CLASSIFICATION_TYPE, classificationView.classif.classType, classificationView.lang, now)}" /> </p>
+							</div>
+							
+							
+							<!-- Семейство -->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-6 p-xl-6  ui-fluid">
+								<h:outputText value="#{labels['classificationsList.family']}: " styleClass="form-label" />
+								<p> <p:outputLabel value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_CLASSIFICATION_FAMILY, classificationView.classif.family, classificationView.lang, now)}" /> </p>
+							</div>
+
+							
+							<!-- Класификационна единица -->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-6 p-xl-6  ui-fluid">
+								<h:outputText value="#{labels['classificEdit.unit']}: " styleClass="form-label" />
+								<p> <p:outputLabel value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_CLASSIFICATION_UNIT, classificationView.classif.classUnit, classificationView.lang, now)}" /> </p>
+							</div>
+
+							<!-- Описание -->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12">
+								<p:outputPanel>
+									<h:outputText value="#{labels['classificEdit.opisanie']}: " styleClass="form-label" />
+									<p> <p:outputLabel value="#{classificationView.classifLang.description}" /> </p>
+								</p:outputPanel>
+							</div>
+
+							<!-- Коментар -->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12">
+								<p:outputPanel>
+									<h:outputText value="#{labels['classificEdit.comment']}: " styleClass="form-label" />
+									<p> <p:outputLabel value="#{classificationView.classifLang.comment}" /> </p>
+								</p:outputPanel>
+							</div>
+
+
+							<!-- Актуални новини -->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12">
+								<p:outputPanel>
+									<h:outputText value="#{labels['classificEdit.currentNews']}: " styleClass="form-label" />
+									<p> <p:outputLabel value="#{classificationView.classifLang.news}" /> </p>
+								</p:outputPanel>
+							</div>
+
+							<!-- Област на приложение -->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12">
+								<p:outputPanel>
+									<h:outputText value="#{labels['classificEdit.fieldOfApplication']}: " styleClass="form-label" />
+									<p> <p:outputLabel value="#{classificationView.classifLang.area}" /> </p>
+								</p:outputPanel>
+							</div>
+
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12">
+								<h:outputText value="#{labels['classificEdit.posAttr']}: " styleClass="form-label" />
+
+								<div style="display: flex; flex-wrap: wrap;">
+									<p:repeat var="row" value="#{classificationView.classAtrr}">
+										<p:outputLabel value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_POSITION_ATTRIBUTES, row.codeAttrib, classificationView.lang, now)}" style="width:33.33%; padding:0.5rem;" />
+									</p:repeat>
+								</div>
+							</div>
+
+						</div>
+
+					</h:panelGroup>
+
+				</div>
+
+
+		</h:form>
+
+	</ui:define>
+
+</ui:composition>

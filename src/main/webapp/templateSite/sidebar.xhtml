@@ -1,0 +1,82 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+<div class="sticky-side">
+	<header class="header-wrapper">
+		<div class="header">
+			<h:form id="headerForm">
+
+				<div class="top-menu-wrapper">
+					<div class="top-menu">
+					
+						<div class="menu-option">
+						
+							<a href="publExtList?faces-redirect=true&amp;sect=#{NSIConstants.CODE_ZNACHENIE_SECT_HELP}&amp;locale=#{!empty(param['locale'])?param['locale']:'bg'}&amp;lang=#{!empty(param['lang'])?param['lang']:1}" 
+								title="#{labels['instructions.download']}" class="topbar-icon">
+								<i class="fas fa-info-circle"></i>
+							</a>
+							
+							<span class="separator">|</span>
+							
+							<p:commandLink id="access-trigger" styleClass="topbar-icon" title="Опции за достъпност" partialSubmit="true" process="@none">
+								<i class="fas fa-universal-access"></i>
+							</p:commandLink>
+
+							<span class="separator">|</span>
+							
+							<h:link outcome="#{view.viewId}" includeViewParams="true"
+								value="Български">
+								<f:param name="locale" value="bg" />
+							</h:link>
+
+							<span class="separator">|</span>
+
+							<h:link outcome="#{view.viewId}" includeViewParams="true"
+								value="English">
+								<f:param name="locale" value="en" />
+							</h:link>
+						</div>
+					</div>
+				</div>
+
+				<div style="position: relative">
+					<div class="logo-container" id="logo-container">
+						<div class="logos-wrapper">
+							<a href="classificationsList?faces-redirect=true"><img src="#{param['locale'] == 'en' ? 'resources/images/BGR_NSI_Logo_en.png' : 'resources/images/BGR_NSI_Logo.png'}" class="logo-gerb" id="logo-gerb" alt="#{labels['general.systemName']}"/> </a>
+							<a href="classificationsList?faces-redirect=true"><img src="resources/images/nsi_logo_vector.png" class="logo-image" id="logo-image" alt="#{labels['general.systemName']}" /> </a>
+						</div>
+					</div>
+				</div>
+			</h:form>
+		</div>
+	</header>
+
+	<!-- MENU -->
+	<h:form id="menuForm">
+	  <nav>
+		<div class="topnav" id="myTopnav">
+
+			<a href="javascript:void(0);" class="icon" onclick="changeMenuJs()"> <i class="fa fa-bars"></i> </a> 
+			<a href="classificationsList?faces-redirect=true&amp;locale=#{!empty(param['locale'])?param['locale']:'bg'}&amp;lang=#{!empty(param['lang'])?param['lang']:1}" class="btn classifsListItem">#{labels['sidebar.classification']}</a> 
+			<a href="search?faces-redirect=true&amp;locale=#{!empty(param['locale'])?param['locale']:'bg'}&amp;lang=#{!empty(param['lang'])?param['lang']:1}" class="btn searchItem">#{ui_labels['general.search']}</a>
+			<a href="publExtList?faces-redirect=true&amp;sect=#{NSIConstants.CODE_ZNACHENIE_SECT_CASES}&amp;locale=#{!empty(param['locale'])?param['locale']:'bg'}&amp;lang=#{!empty(param['lang'])?param['lang']:1}" class="casesItem">#{labels['sidebar.kazusi']}</a>
+			<a href="publExtList?faces-redirect=true&amp;sect=#{NSIConstants.CODE_ZNACHENIE_SECT_RELATIONS_INST_SYST}&amp;locale=#{!empty(param['locale'])?param['locale']:'bg'}&amp;lang=#{!empty(param['lang'])?param['lang']:1}" class="relationsItem">#{labels['sidebar.links']}</a>
+			<a href="publExtList?faces-redirect=true&amp;sect=#{NSIConstants.CODE_ZNACHENIE_SECT_CONTACTS}&amp;locale=#{!empty(param['locale'])?param['locale']:'bg'}&amp;lang=#{!empty(param['lang'])?param['lang']:1}" class="contactsItem">#{labels['sidebar.contacts']}</a>
+						
+			<h:link outcome="#{view.viewId}" includeViewParams="true" value="EN" styleClass="nav-links">
+				<f:param name="locale" value="en" />
+			</h:link>
+			
+			<h:link outcome="#{view.viewId}" includeViewParams="true" value="BG" styleClass="nav-links">
+				<f:param name="locale" value="bg" />
+			</h:link>
+
+		</div>
+	  </nav>
+	</h:form>
+</div>
+	
+</ui:composition>

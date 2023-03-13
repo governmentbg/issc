@@ -1,0 +1,133 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui" xmlns:jsf="http://xmlns.jcp.org/jsf"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components"
+	template="/template/templateLoc.xhtml"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:c="http://java.sun.com/jstl/core">
+  
+	<ui:define name="title">#{systemData.decodeItem(NSIConstants.CODE_SYSCLASS_SECT_PUBL, publExtData.codeSection, publExtData.lang, now)}</ui:define>
+
+	<ui:define name="panelInfo">
+		<ui:remove>
+			<p:link outcome="publExtListLoc" title="#{labels['general.back']}"
+				rendered="#{publExtData.navi eq null}"></p:link>
+		</ui:remove>
+
+		<p:link
+			outcome="publExtListLoc?faces-redirect=true&amp;sect=#{publExtData.codeSection}&amp;locale=#{publExtData.locale}&amp;lang=#{publExtData.lang}"
+			title="#{labels['general.back']}"
+			rendered="#{publExtData.navi eq null}">
+			<f:param name="sect" value="#{publExtData.codeSection}" />
+			<f:param name="locale" value="#{publExtData.locale}" />
+			<f:param name="lang" value="#{publExtData.lang}" />
+			<i class="fas fa-caret-left"></i>
+		</p:link>
+
+		<h:outputText value="#{publExtData.publSelLang.title}" />
+	</ui:define>
+
+	<ui:define name="metadata">
+		<f:metadata>
+			<f:importConstants type="com.ib.nsiclassif.system.NSIConstants" />
+			<f:importConstants type="com.ib.indexui.system.Constants" />
+			<f:viewParam name="lang" />
+			<f:viewParam name="locale" />
+			<f:viewParam name="sect" />
+			<f:viewParam name="idPubl" />
+		</f:metadata>
+	</ui:define>
+
+	<ui:define name="content">
+		<h:form id="formPublExt">
+		
+			<div class="card">
+				<div class="p-grid">
+
+					<div class="#{publExtData.classL}">
+						<ui:remove>
+							<div jsf:rendered="#{publExtData.publication.typePub eq 2}"
+								jsf:id="slideshowContainer">
+								<ui:repeat var="imgig" value="#{publExtData.images}">
+									<div class="hideImage fade">
+										<p:graphicImage value="#{imgig[0]}" height="80px"
+											stream="false" id="idImage2" />
+
+									</div>
+								</ui:repeat>
+								<a class="prev" onclick="plusSlides(-1)"><i
+									class="fas fa-caret-left"></i></a> <a class="next"
+									onclick="plusSlides(1)"><i class="fas fa-caret-right"></i></a>
+							</div>
+						</ui:remove>
+
+						<p:galleria value="#{publExtData.images}" var="photo"
+							style="max-width: 100%" effect="fade" showCaption="true"
+							rendered="#{publExtData.publication.typePub eq NSIConstants.CODE_ZNACHENIE_TYPE_PUBL_IMAGES and null ne publExtData.images}">
+							<p:graphicImage value="#{photo[0]}" stream="false"
+								style="width: 100%; display: block;" title="#{photo[1]}" />
+
+						</p:galleria>
+						<p:graphicImage id="idImage1" value="#{publExtData.imageCont}"
+							style="width:100%;" stream="false"
+							rendered="#{publExtData.publication.typePub eq NSIConstants.CODE_ZNACHENIE_TYPE_PUBL_MATERIALI and null ne publExtData.imageCont}" />
+
+					</div>
+					<div class="#{publExtData.classR}">
+
+						<ui:remove>
+							<div
+								jsf:rendered="#{publExtData.publication.typePub eq NSIConstants.CODE_ZNACHENIE_TYPE_PUBL_VIDEO and !empty publExtData.publSelLang.urlPub}"
+								jsf:id="videoContainerTube">
+								<embed class="video-container"
+									src="#{publExtData.publSelLang.urlPub}" />
+							</div>
+						</ui:remove>
+
+						<p:outputLabel id="idFullTextQ" rendered="#{publExtData.publication.section eq NSIConstants.CODE_ZNACHENIE_SECT_CASES}"
+							value="#{publExtData.publSelLang.title}" escape="false" styleClass="outputLabels" />
+
+						<p:outputLabel id="idFullTextO"
+							value="#{publExtData.publSelLang.fullText}" escape="false" styleClass="outputLabels" />
+
+						<h:outputText value=" #{labels['general.files']}"
+							style="font-weight: bold;"
+							rendered="#{publExtData.publication.typePub eq NSIConstants.CODE_ZNACHENIE_TYPE_PUBL_MATERIALI and publExtData.filesList.size() > 0}"
+							escape="false" />
+						
+						<p:dataTable var="row" value="#{publExtData.filesList}"
+							rendered="#{publExtData.publication.typePub eq NSIConstants.CODE_ZNACHENIE_TYPE_PUBL_MATERIALI and publExtData.filesList.size() > 0}">
+
+							<p:column width="50">
+								<p:commandButton id="download" ajax="false"
+									actionListener="#{publExtData.download(row)}"
+									icon="fa fa-fw fa-download" title="#{labels['file.download']}" />
+							</p:column>
+
+							<p:column>
+								<h:outputText value="#{row.fileInfo}"
+									rendered="#{row.fileInfo ne null}" />
+								<h:outputText value="#{row.filename}"
+									rendered="#{row.fileInfo eq null or row.fileInfo eq ''}" />
+							</p:column>
+
+						</p:dataTable>
+
+					</div>
+
+				</div>
+			</div>
+
+		</h:form>
+
+		<script>
+		$(document).ready(function() {
+			if($('.slideshow-container').length > 0) {
+				showSlides(1);
+			}
+		});
+	</script>
+	</ui:define>
+</ui:composition>

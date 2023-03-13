@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ibg="http://java.sun.com/jsf/composite/components"
+      xmlns:c="http://java.sun.com/jstl/core">
+
+<f:metadata>
+<ui:remove> 
+     <!-- 
+    <f:viewAction action="#{userData.checkPageAccess(null)}" onPostback="false"/>
+     -->
+    </ui:remove>
+</f:metadata>
+
+<p:log rendered="false"></p:log>
+<p:tooltip escape="false"/>
+
+<h:form id="formUserEdit">
+
+    <!-- Page title -->
+    <div class="page-title-wrapper-search">
+	    <div class="page-title-wrapper">
+	        <div class="container title">
+				<span class="title-back">
+					<p:commandLink title="Назад" action="#{navigation.goBack()}" rendered="#{navigation.navPath.size()>1}">
+						<i class="fas fa-caret-left"/>
+					</p:commandLink>
+				</span>
+	            <h:outputText rendered="#{!entEdit.externalMode}" value="#{navTexts['/pages/userEdit.xhtml']}" styleClass="titleSpecEvent"/>
+	        </div>
+	    </div>
+	</div>
+	
+    <div class="container">
+            <p:panel   styleClass="container-white card" rendered="#{userEdit.textErr != null}">
+                <h:outputLabel value="#{userEdit.textErr}"  style="color:blue"/>
+           </p:panel>  
+        <p:toolbar styleClass="options-toolbar">
+            <f:facet name="left">
+            <ui:remove >
+                <p:commandButton value="#{ui_labels['general.save']}" action="#{userEdit.actionSave()}" update="formUserEdit"
+                                 icon="fas fa-save" styleClass="btn-save p-mr-2"  rendered="#{!userEdit.useLdap or (userEdit.user != null and userEdit.user.username != null and  userEdit.user.names != null  and  (userEdit.textErr == null or (userEdit.textErr != null and !userEdit.prAktDirY)  or (userEdit.textErr != null and userEdit.prAktDirY )))}" />
+              </ui:remove>
+                <p:commandButton value="#{ui_labels['general.save']}" action="#{userEdit.actionSave()}" update="formUserEdit"
+                                 icon="fas fa-save" styleClass="btn-save p-mr-2"  rendered="#{!userEdit.useLdap or (userEdit.user != null and userEdit.user.username != null and  userEdit.user.names != null  and  userEdit.prOpenAll  )}" />
+                <p:commandButton value="#{ui_labels['users.new']}" action="#{userEdit.newUser(0)}" update="formUserEdit"
+                                 icon="fas fa-plus" styleClass="ui-button-success"  rendered="#{false and !userEdit.useLdap or (userEdit.user.id == null and userEdit.textErr == null)}"/>
+            </f:facet>  
+    
+            <f:facet name="right">
+            	<h:panelGroup id="pRegInfoUser" rendered="false">    <ui:remove> <!--  #{userEdit.user.id != null}  --> </ui:remove>
+					<ibg:compObjAudit idObj="#{userEdit.user.id}"    
+								 	codeObj="#{Constants.CODE_ZNACHENIE_JOURNAL_USER}"
+								 	identInfo="#{userEdit.user.names} (#{userEdit.user.username})"/>
+					</h:panelGroup>	
+                <p:commandButton id="deleteBtn" action="#{userEdit.actionDelete()}" rendered="false" value="#{ui_labels['general.delete']}"
+                                 icon="fas fa-times" styleClass="btn-delete" title="#{ui_labels['general.delete']} ">
+                    <p:confirm header="#{ui_labels['general.comfirmation']}" message="#{ui_labels['general.confirmationMessage']}" icon="pi pi-exclamation-triangle"/>
+                </p:commandButton>
+            </f:facet>
+        </p:toolbar>
+        
+           <p:panel id="inpUserName" styleClass="container-white card" rendered="false">
+                <!--First row-->
+                    <div class="p-col-12">
+                    <ui:remove >
+                        <h:outputText value="#{ui_labels['users.username']}" title="#{userEdit.usernameRegexInfo}" styleClass="form-label req"/>
+                      </ui:remove>  
+                      <h:outputText value="#{ui_labels['users.username']}"  styleClass="form-label req"/>
+                        <div class="ui-inputgroup">
+                            <p:inputText value="#{userEdit.user.username}" id="username0"  style="width:250px">
+                               
+                            </p:inputText>
+                          	 <h:outputLabel value="         Натиснете клавиш TAB след въвеждане на потребителско име в полето!" style="color:blue" />                         
+                        </div>
+                    </div>
+          </p:panel>
+          
+        <p:panel id="userData" styleClass="container-white card" header="Данни за потребител:" rendered="#{userEdit.prOpenAll or (userEdit.user.id== null and !userEdit.prOpenAll)}">
+            <div class="p-col-12">
+                <span style="float:right;" >
+                 <h:panelGroup rendered="#{userEdit.userBlockYes}" >
+                     <h:outputLabel value="#{labels['userEdit.blockPotreb']} "  style="color:red"/>
+                       <p:selectBooleanButton value="#{userEdit.blockPotreb}" 
+                               onLabel="#{ui_labels['general.yes']}" offLabel="#{ui_labels['general.no']}"
+                               onIcon="ui-icon-check" offIcon="ui-icon-close" styleClass="inputgroup-button"  >
+                                 <p:ajax event="change" listener="#{userEdit.actionChangeBlock()}"  update="formUserEdit"/>
+                        </p:selectBooleanButton>       
+                 </h:panelGroup>
+                 </span>
+            </div>
+            
+             <div class="p-col-12">
+	           <p:selectOneButton styleClass="btn-search p-mr-3 "  value="#{userEdit.typePanelData}" id="typePanelData" immediate="true" unselectable="false" valueChangeListener="#{userEdit.actionChangeTypePanel}"   rendered="#{!userEdit.isPotrebZXC}">						
+					<f:selectItem itemLabel="Основни данни " itemValue="1"   />
+					<f:selectItem itemLabel="Достъпи" itemValue="2" />	
+						<p:ajax event="change" update="formUserEdit:mainUserData formUserEdit:panelDostapi" partialSubmit="true" process=" @this"  />
+				</p:selectOneButton>
+				 <p:selectOneButton  styleClass="btn-search p-mr-3 "  value="#{userEdit.typePanelData}" id="typePanelDataPass" immediate="true" unselectable="false" valueChangeListener="#{userEdit.actionChangeTypePanel}"   rendered="false">						
+					<f:selectItem itemLabel="Основни данни " itemValue="1"   />
+					<f:selectItem itemLabel="Достъпи " itemValue="2"/>	
+					<f:selectItem itemLabel="Смяна на парола" itemValue="3"  />				
+					<p:ajax event="change" update="formUserEdit:mainUserData formUserEdit:panelDostapi formUserEdit:mainUserData"     partialSubmit="true" process=" @this"  />
+				</p:selectOneButton>
+             </div>
+             
+            <!-- Основни даннни-->
+            <h:panelGroup id="mainUserData" layout="block">
+				<h:panelGroup rendered="#{userEdit.typePanelData eq 1}">
+                
+                <div class="p-my-2">
+                    <p:commandLink class="extended-search-toggle expanded" onclick="toggleSection(this, '#main-toggle')">
+                        <h:outputText value="Основни данни"/>
+                        <i class="fas fa-caret-right"></i>
+                    </p:commandLink>
+                </div>
+                
+
+                <div id="main-toggle" class="p-grid ui-fluid">
+
+                    <!--First row-->
+                    <div class="p-col-4">
+		                 	                    
+		                    <ui:remove>  <h:outputText value="#{ui_labels['users.username']}"  styleClass="form-label req"  title="Натиснете клавиш TAB след въвеждане на потребителско име в полето!" rendered="#{userEdit.user.id== null and !userEdit.prOpenAll}"/> </ui:remove>
+		                     <h:outputText value="#{ui_labels['users.username']}"  styleClass="form-label req"  title="Въведете потребителско име за търсене в активната директория и натиснете клавиш TAB!" rendered="#{userEdit.user.id== null and !userEdit.prOpenAll}"/>
+		                      <h:outputText value="#{ui_labels['users.username']}"  styleClass="form-label"  rendered="#{userEdit.prOpenAll}"/>
+		                        <div class="ui-input">
+		                            <p:inputText value="#{userEdit.user.username}" id="username1"    disabled="true"
+		                               onkeypress="if(event.keyCode == 13) {event.preventDefault(); $(':focus').blur()} "
+		                              rendered="#{userEdit.user.id== null and !userEdit.prOpenAll}"  tabindex="10">
+		                                
+		                            </p:inputText>
+		                          	 <ui:remove ><h:outputLabel value="         Натиснете клавиш TAB след въвеждане на потребителско име в полето!" style="color:blue" />    </ui:remove>                     
+		                        </div>
+		               
+                        <div class="ui-inputgroup">
+                            <p:inputText value="#{userEdit.user.username}" id="username" readonly="#{userEdit.useLdap}"  rendered="#{userEdit.prOpenAll}" />   <ui:remove > <!-- <p:ajax event="change" listener="#{userEdit.checkUserName()}"/>   -->  </ui:remove>
+                                                        
+                            <p:commandButton type="button" ajax="true" icon="fas fa-unlock-alt" 
+                                             title="#{userEdit.changePass ? ui_labels['users.passreject'] : ui_labels['users.passchange']}"  rendered="false" >
+                                <p:ajax event="click" listener="#{userEdit.setChangePass(!userEdit.changePass)}" update="formUserEdit:userData"/>
+                            </p:commandButton>
+                        </div>
+                      </div>
+   
+                    <p:outputPanel  class="p-col-4">
+                   
+                         <h:outputText value="#{ui_labels['users.names']}" styleClass="form-label"  rendered="#{userEdit.prAktDirNamesY or (!userEdit.prAktDirNamesY and  userEdit.textErr != null ) or (userEdit.user.id== null and !userEdit.prOpenAll)}"  />
+                        <h:outputText value="#{ui_labels['users.names']}" styleClass="form-label req"  rendered="#{!userEdit.prAktDirNamesY and  userEdit.textErr == null and !(userEdit.user.id== null and !userEdit.prOpenAll)}"/>
+                        <p:inputText id="names" value="#{userEdit.user.names}" readonly="#{userEdit.useLdap and (userEdit.prAktDirNamesY or (!userEdit.prAktDirNamesY and  userEdit.textErr != null ) or (userEdit.user.id== null and !userEdit.prOpenAll))}"/>
+                    </p:outputPanel>
+                         
+                    <div class="p-col-4">
+                        <h:outputText value="#{ui_labels['users.email']}" styleClass="form-label"  rendered="#{userEdit.prAktDirEmailY or (!userEdit.prAktDirEmailY and  userEdit.textErr != null ) or (userEdit.user.id== null and !userEdit.prOpenAll)}"  />
+                         <h:outputText value="#{ui_labels['users.email']}" styleClass="form-label"  rendered="#{!userEdit.prAktDirEmailY and  userEdit.textErr == null and !(userEdit.user.id== null and !userEdit.prOpenAll)}"  />
+                        <p:inputText value="#{userEdit.user.email}" id="email" readonly="#{userEdit.useLdap and (userEdit.prAktDirEmailY or (!userEdit.prAktDirEmailY and  userEdit.textErr != null ) or (userEdit.user.id== null and !userEdit.prOpenAll)) }" />
+                    </div>
+
+
+                     <!--Second row change pass is HIDDEN -->
+                    <h:panelGroup class="p-col-12" rendered="#{userEdit.changePass}">
+	                    <div class="p-grid grid-normal-margin">
+	
+	                        <div class="p-col-12 p-md-4">
+	                            <h:outputText value="#{ui_labels['general.password']}" title="#{userEdit.passwordRegexInfo}" styleClass="form-label req"/>
+	                            <p:password value="#{userEdit.passPlain}" id="passPlain" redisplay="true" autocomplete="off">
+	                            	 <p:ajax event="change" listener="#{userEdit.actionCheckPass}"/>
+	                            </p:password>
+	                        </div>
+	
+	                        <div class="p-col-12 p-md-4">
+	                            <h:outputText value="#{ui_labels['general.passconfirm']}" styleClass="form-label req"/>
+	                            <p:password value="#{userEdit.passRepeat}" id="passRepeat" autocomplete="off" redisplay="true">
+	                            	 <p:ajax event="change" listener="#{userEdit.actionCheckPassRepeat}"/>
+	                            </p:password>
+	                        </div>
+	
+	                    </div>
+                    </h:panelGroup>
+                         
+                          <p:outputPanel  class="p-col-4">
+                                                   
+		                             <h:outputText value="#{labels['userEdit.bisnessRol']}" styleClass="form-label  req" rendered="#{userEdit.prAktDirY}"  />
+		                             <h:outputText value="#{labels['userEdit.bisnessRol']}" styleClass="form-label "  rendered="#{!userEdit.prAktDirY}"/>
+		                            
+		                            <p:selectOneMenu id="tip" value="#{userEdit.user.userType}"  rendered="#{!userEdit.useLdap or userEdit.prAktDirY}" tabindex="200" >
+		                                <f:selectItem value="#{null}" itemValue="#{null}"/>
+		                                <f:selectItems value="#{userEdit.typeItemList}"/>
+		                                <p:ajax event="change" update="@this"/>
+		                             </p:selectOneMenu>
+		                             
+		                             <div class="ui-input">
+		                                <h:inputText value="#{systemData.decodeItem (Constants.CODE_CLASSIF_BUSINESS_ROLE, userEdit.user.userType, userEdit.currentLang, userEdit.currentDate)}"  readonly="true" 
+		                                    styleClass="p-col-8"     rendered="#{userEdit.useLdap and !userEdit.prAktDirY}"/>		
+		                              </div>                               
+		                     
+		                      
+                        </p:outputPanel>
+                        
+                     
+	                       <p:outputPanel id="admStr"   class="p-col-8" rendered="false">
+		                    
+		                       <ui:remove >  <h:outputText value="#{labels['userEdit.admStr']}"   styleClass="form-label req"/> </ui:remove>
+		                        <h:outputText value="Връзка със 'Служби и лица' "   styleClass="form-label req"  rendered="#{userEdit.prAktDirY}" />
+		                         <h:outputText value="Връзка със 'Служби и лица' "   styleClass="form-label"  rendered="#{!userEdit.prAktDirY}" />
+		                        
+		                        <ibg:selectOneModalA id="chooseAdmStr"                rendered="#{!userEdit.useLdap or userEdit.prAktDirY}"
+		                                              codeClassif="#{NSIConstants.CODE_CLASSIF_CLASSIFICATION_SLUJBI_LICA}"
+		                                              dateClassif="#{userEdit.currentDate}"
+		                                              selectedCode="#{userEdit.user.userAdmStr}"
+		                                              saveStateTree="true" withBtnClear="true"
+		                                              dopInfoAutoComp="true"
+		                                              dopInfoTitleAutoComp="Избор "
+		                                              minQueryLength="3" styleAutoComp=""
+		                                              specifics="" isSelectNode="true"
+		                                              compType="2" onComplete="loadAdmStr()"  />
+		                        <p:remoteCommand name="loadAdmStr" actionListener="#{userEdit.loadAdmStrData}"  />
+		                        
+		                                 <div class="ui-input">
+				                             <h:inputText value="#{systemData.decodeItem (NSIConstants.CODE_CLASSIF_CLASSIFICATION_SLUJBI_LICA, userEdit.user.userAdmStr, userEdit.currentLang, userEdit.currentDate)}"  readonly="true" 
+				                                 styleClass="p-col-8" rendered="#{userEdit.useLdap and !userEdit.prAktDirY}"  />
+				                          </div>       
+				                  
+                    </p:outputPanel>
+                  
+               
+                 
+                     <div class="p-col-4" >
+                                                            
+                                <h:outputText value="#{ui_labels['users.status']}" styleClass="form-label req" rendered="#{userEdit.prAktDirY}" />
+                                 <h:outputText value="#{ui_labels['users.status']}" styleClass="form-label"   rendered="#{!userEdit.prAktDirY}" />
+                               
+		                        <p:selectOneMenu id="stat" value="#{userEdit.user.status}"  rendered="#{userEdit.prAktDirY}"  >
+		                            <f:selectItems value="#{userEdit.statusItemList}"/>
+		                            <p:ajax event="change" update="@this" listener="#{userEdit.actionChangeStatus}"/>
+		                        </p:selectOneMenu>
+		                 	    
+		                 		    <div class="ui-input">                    
+		                               <h:inputText value="#{systemData.decodeItem (Constants.CODE_CLASSIF_STATUS_POTREB, userEdit.user.status, userEdit.currentLang, userEdit.currentDate)}"  readonly="true"
+		                                    styleClass="p-col-8"   rendered="#{!userEdit.prAktDirY}" />
+		                             </div> 
+		                    	                       
+                     </div>
+                                                         
+                     <div class="p-col-4">
+                        
+                    	    <h:outputText value="#{labels['userEdit.tel']}"  styleClass="form-label" rendered="#{userEdit.prAktDirY}" />
+                    	     <h:outputText value="#{labels['userEdit.tel']}"  styleClass="form-label"  rendered="#{!userEdit.prAktDirY}" />
+                    	                     	    
+                    	        <p:inputText value="#{userEdit.user.userTel}" id="tel"  readonly="#{userEdit.prAktDirY?false:true}"  />
+                    
+                     </div>
+                     <div class="p-col-4">
+                      </div>
+                     
+                     <ui:remove>
+		                    <c:if test="${userEdit.langItemList.size() > 1}">
+		                        <div class="p-col-4">
+		                            <h:outputText value="#{ui_labels['users.lang']}"/>
+		                            <p:selectOneMenu id="lang" value="#{userEdit.user.lang}">
+		                                <f:selectItem value="#{null}" itemValue="#{null}"/>
+		                                <f:selectItems value="#{userEdit.langItemList}"/>
+		                            </p:selectOneMenu>
+		                        </div>
+		                    </c:if>
+                      </ui:remove>  
+                          
+                   <ui:remove>
+                    <div class="p-col-4">
+                        <h:outputText value="#{ui_labels['users.statusExplain']}" styleClass="form-label"/>
+                        <p:inputText value="#{userEdit.user.statusExplain}" id="statusExplain"/>
+                    </div>
+					</ui:remove>
+					      
+               <!--  --> 
+                       <div class="p-col-12">
+                      </div>
+                      
+            <!-- Служебна информация-->
+             <h:panelGroup id="systemData" layout="block"   rendered="#{userEdit.prOpenAll}">
+             <div>
+                <div class="p-mb-2">
+                    <p:commandLink  class="extended-search-toggle expanded" onclick="toggleSection(this, '#sysInfo')"    >
+                        <h:outputText value="#{ui_labels['users.sysInfo']}" styleClass="titleSpecEvent"/>
+                        <i class="fas fa-caret-right"  ></i>
+                        
+                    </p:commandLink>
+                </div>
+                                
+                <div id="sysInfo" class="p-grid ui-fluid"  >
+               
+                    <div class="p-col-3">
+                        <h:outputText value="#{ui_labels['users.dateReg']}" styleClass="form-label"/>
+                        <p:inputText readonly="true" value="#{userEdit.user.dateReg}">
+                            <f:convertDateTime pattern="dd.MM.yyyy" timeZone="#{userEdit.timeZone}"/>
+                        </p:inputText>
+                    </div>
+
+                    <div class="p-col-3">
+                        <h:outputText value="#{ui_labels['users.statusDate']}" styleClass="form-label"/>
+                        <p:inputText readonly="true" value="#{userEdit.user.statusDate}">
+                            <f:convertDateTime pattern="dd.MM.yyyy" timeZone="#{userEdit.timeZone}"/>
+                        </p:inputText>
+                    </div>
+			       <div class="p-col-5">
+			       </div>
+                  </div>
+                   
+               </div>           
+            </h:panelGroup>
+        
+               
+                 <ui:remove> 
+            <!-- Прикачени файлове-->
+            <!--  
+            <ibg:compFileUpload listObj="#{userEdit.filesList}"
+				codeObj="#{Constants.CODE_ZNACHENIE_JOURNAL_USER}"
+				idObj="#{userEdit.user.id}"
+				autoSave="true"
+				saveFirst="#{userEdit.user.id == null}"
+				id="userFiles" display="list" />
+				-->
+              </ui:remove> „
+              
+           </div> 	
+           
+		</h:panelGroup>
+	 </h:panelGroup>
+	 
+	    
+       <!--  Достъпи  -->
+	<h:panelGroup id="panelDostapi" layout="block"   rendered="#{userEdit.prOpenAll and userEdit.prAktDirY}">
+		<h:panelGroup rendered="#{userEdit.typePanelData eq 2}">
+	
+	     <!-- Групи-->
+            <div class="p-mt-2">
+                <div class="p-mb-2">
+                    <p:commandLink class="extended-search-toggle expanded" onclick="toggleSection(this, '#groups')" >
+                        <h:outputText value="#{ui_labels['users.groups']}" styleClass="titleSpecEvent"/>
+                        <i class="fas fa-caret-right"></i>
+                    </p:commandLink>
+                </div>
+               
+                <div id="groups" class="p-grid ui-fluid">
+
+                    <div class="p-col-12">
+                        <p:selectManyCheckbox id="userGr" value="#{userEdit.selectedGroupsIDs}" layout="pageDirection" columns="1">
+                            <f:selectItems value="#{userEdit.groupsItemList}"/>
+                        </p:selectManyCheckbox>
+                    </div>
+                </div>
+                <h:outputText value="  "  styleClass="p-col-10" />
+            </div>
+
+            <!-- Права за достъп-->
+            <div>
+                <div class="p-mb-2">
+                    <p:commandLink class="extended-search-toggle expanded" onclick="toggleSection(this, '#аccess')" >
+                       <h:outputText value="#{ui_labels['users.privateAccess']}" styleClass="titleSpecEvent"/>
+                         <i class="fas fa-caret-right"></i>
+                     </p:commandLink>
+                </div>
+            
+                
+                <div id="аccess" class="p-grid ui-fluid">
+                   <h:panelGroup rendered="#{userEdit.classifList != null and userEdit.classifList.size() > 1 }">
+					<p:outputPanel rendered="#{userEdit.showFreeAccessMessage()}" styleClass="p-col-12">
+	                    <span style="color: #ff7f00; font-size: 0.9rem; font-style: italic;">
+	                        В случай, че не бъдат избрани конкретни стойности от класификациите, маркирани с (<mark style="font-weight: bold; color:#ff7f00;">!</mark>), потребителят получава достъп до всички стойности на класификацията.
+	                    </span>
+	                </p:outputPanel>
+
+                    <div class="p-col-4">
+
+                        <p:dataTable id="tableDostap" value="#{userEdit.classifList}" var="classif" rowIndexVar="indvar" emptyMessage="#{ui_labels['general.norows']}"
+                                     rowKey="#{classif.value}" widgetVar="dostapWV" rows="20" paginator="true" style="margin: 0;">
+                                    
+                            <p:column headerText="" width="59">
+                                <p:outputPanel layout="inline" style="#{userEdit.isClassifFreeAccess(classif.value) ? 'margin-right: 0.4rem' : 'margin-right: 0.7rem'}">
+                                	<h:outputText rendered="#{userEdit.isClassifFreeAccess(classif.value)}" value="!" style="color: #ff7f00;font-weight: bold"/>
+                               	</p:outputPanel>
+                                <p:commandButton action="#{userEdit.actionLoadTree()}" update="formUserEdit:treeDostap" icon="fas fa-edit">
+                                    <f:param name="selectedClassifCode" value="#{classif.value}"/>
+                                    <f:param name="selectedClassifIndex" value="#{indvar}"/>
+                                </p:commandButton>
+                            </p:column>
+
+                            <p:column headerText="#{labels['userEdit.izbClassif']}">
+                                <h:outputText value="#{classif.label}"/>
+                            </p:column>
+
+                        </p:dataTable>
+                     </div>
+                     </h:panelGroup>
+                     <h:panelGroup rendered="#{userEdit.classifList ==  null or  userEdit.classifList.size() == 1  or userEdit.classifList.size() == 0}">
+                            <div class="p-col-4">
+                               <h:outputText value="Избор на позиции от класификация '#{userEdit.nameClassifIndDostap}'"/>
+                            </div>
+                     </h:panelGroup>
+
+                    <div class="p-col-8">
+                    	<div style="position: relative; height: 100%; min-height: 350px;">
+	                        <p:scrollPanel mode="native" style="position: absolute; height: 100%; width: 100%;">
+	                            <p:tree id="treeDostap" value="#{userEdit.rootNode}" var="node" selectionMode="checkbox" selection="#{userEdit.selectedNodes}"
+	                                    style="width:100%; border:none" nodeVar="rowNode">
+	                                <p:ajax event="select" listener="#{userEdit.actionNodeClick}"/>
+	                                <p:ajax event="unselect" listener="#{userEdit.actionNodeClick}"/>
+	                                <p:treeNode>
+	                                    <h:outputText value="#{node.tekst}" id="nodeTekst" escape="false"
+											style="#{!rowNode.selectable?'font-style: italic; color:grey':''}"/>
+	                                    <p:tooltip value="#{node.dopInfo}" for="nodeTekst" trackMouse="true" style=" max-width: 500px;"/>
+	                                </p:treeNode>
+	                            </p:tree>
+	                        </p:scrollPanel>
+                        </div>
+                    </div>
+                </div>
+            </div>
+       
+           </h:panelGroup>
+          </h:panelGroup>
+          		<ui:remove>
+                     <!--  Смяна на парола - за ZXC  -->
+                   <h:panelGroup id="panelPassword" layout="block"   rendered="#{userEdit.prOpenAll and userEdit.prAktDirY}">
+                       <h:panelGroup rendered="#{userEdit.typePanelData eq 3}">
+	                    <div class="p-grid grid-normal-margin">
+	                     <div class="p-col-12 p-md-12">
+	                             <p:commandButton value="#{labels['userEdit.noChangePass']}" action="#{userEdit.clearPass}" update="panelPassword"
+	                             icon="fa fa-eraser"   styleClass="btn-clear margin-left ui-button-warning"  />
+                          </div>       
+	                        <div class="p-col-12 p-md-4">
+	                            <h:outputText value="#{labels['userEdit.newPass']}"  styleClass="form-label req"/>
+	                            <p:password value="#{userEdit.passPlain}" id="passPlain" redisplay="true" autocomplete="off">
+	                            	 <p:ajax event="change" listener="#{userEdit.checkPass}" />
+	                            </p:password>
+	                        </div>
+	
+	                        <div class="p-col-12 p-md-8">
+	                            <h:outputText value="#{ui_labels['general.passconfirm']}" styleClass="form-label req"/>
+	                            <p:password value="#{userEdit.passRepeat}" id="passRepeat" autocomplete="off" redisplay="true">
+	                            	 <p:ajax event="change" listener="#{userEdit.checkPassEQ}" />
+	                            </p:password>
+	                                 <h:outputText value="   Въвеждайте стойностите с клавиш TAB накрая" style="color:blue" />
+	                        </div>
+	                             
+	                    </div>
+	             </h:panelGroup>       
+             </h:panelGroup>
+       </ui:remove>
+            
+        </p:panel>
+    </div>
+
+</h:form>
+</html>

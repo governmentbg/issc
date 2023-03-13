@@ -1,0 +1,801 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui" xmlns:jsf="http://xmlns.jcp.org/jsf"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components"
+	template="/template/template.xhtml"
+	xmlns:of="http://omnifaces.org/functions"
+	xmlns:o="http://omnifaces.org/ui">
+
+	<ui:define name="metadata">
+		<f:metadata>
+			<f:viewParam name="idClassif" value="#{versionEdit.classifId}"/>
+			<f:viewParam name="idVersion" value="#{versionEdit.versionId}"/>
+			
+			<f:viewAction action="#{userData.checkPageAccess(108)}" onPostback="false" />
+			
+			<f:importConstants type="com.ib.nsiclassif.system.NSIConstants" />
+		</f:metadata>
+	</ui:define>
+
+	<ui:define name="title">#{navTexts['/pages/versionEdit.xhtml']}</ui:define>
+
+	<ui:define name="viewname">
+		<li><p:commandLink title="#{ui_labels['general.back']}"
+				action="#{navigation.goBack()}"
+				rendered="#{navigation.navPath.size()>1}">
+				<i class="fas fa-caret-left" />
+			</p:commandLink></li>
+		<li>#{navTexts['/pages/versionEdit.xhtml']}</li>
+	</ui:define>
+
+	<ui:define name="content">
+	
+		<style>
+			body .ui-button.ui-button-icon-only .ui-icon {
+			  margin-left: -0.6rem;
+			}
+		
+			.boxDataP {
+				 border-radius: 0px !important;
+				 display: block !important;
+				 padding: 0.5rem !important; 
+			}
+			
+			.tree-table-no-header thead {
+			    display: none;
+			}
+			
+			body .ui-datatable .ui-datatable-data > tr.ui-state-highlight {
+				background: #89A8CE;
+			}
+			body .ui-overlaypanel .ui-overlaypanel-content {
+			  padding: 0.5rem;
+			}
+		</style>
+		<h:form id="versionEditForm">
+
+			<ui:remove>
+				<!-- празна странница, когато няма версия с посоченото ид  -->
+			</ui:remove>
+			<h:panelGroup id="noClassifFound" layout="block">
+				<div jsf:rendered="#{versionEdit.version eq null}" class="card">
+					<h4>Няма резултат!</h4>
+					<p>Не е намерена класификационна версия с id:
+						#{versionEdit.versionId}</p>
+				</div>
+			</h:panelGroup>
+
+			<p:tabView id="tabsVersion" dynamic="true"   rendered="#{versionEdit.version ne null}" activeIndex="#{versionEdit.activeIndex}">
+
+				<p:ajax event="tabChange" listener="#{versionEdit.onTabChange}" update="tabsVersion" partialSubmit="true" />
+				
+				
+				<p:tab title="#{labels['versionEdit.basicData']}" id="tabMainData">
+				
+				<div style="left:calc(100% - 135px); top:-55px; position: relative; width: 150px; ">
+					<p:selectOneMenu id="lang" value="#{versionEdit.lang}" style="width:150px">
+						<f:selectItems value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LANG, now, NSIConstants.CODE_DEFAULT_LANG)}"
+							var="lang" itemLabel="#{lang.tekst}" itemValue="#{lang.code}" />
+						<p:ajax event="change" listener="#{versionEdit.changeLang}" update="dataPanel linkPanel"
+							process="@this" partialSubmit="ture"/>
+					</p:selectOneMenu>
+				</div>
+					
+					<h:panelGroup id="versionMainData" layout="block" style=" top:-25px; position: relative; ">
+
+					<p:toolbar styleClass="margin-bottom" id="toolbrPanel" rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}">
+						<p:toolbarGroup align="left">
+							<div title="#{versionEdit.version.publicated?'Версията е публикувана!':''}">
+								<p:commandButton icon="fas fa-save"
+									value="#{ui_labels['general.save']}" id="saveButton" disabled="#{versionEdit.version.publicated}"
+									action="#{versionEdit.actionSave()}" partialSubmit="true"
+									update="#{versionEdit.version.id ne null?'versionMainData':'tabsVersion'}" />
+							</div>
+							
+							<span class="p-mx-2"> 
+								<span class="fas fa-ellipsis-v SoftGray" />
+							</span>
+							
+							<h:outputText class="p-mr-2" value="Публикувана на сайта: " />	 
+							<p:selectBooleanCheckbox value="#{versionEdit.version.publicated}" >
+					            <p:ajax listener="#{versionEdit.actionPublicate}" process="@this versionEditForm" 
+					            update="#{versionEdit.version.id ne null?'versionMainData':'tabsVersion'}" partialSubmit="true"/>
+					        </p:selectBooleanCheckbox>
+							
+						</p:toolbarGroup>
+						
+						
+						<p:toolbarGroup align="right">
+			
+							<p:linkButton outcome="uploadOpenData" value="Публикувай в opendata"  target="_blank" rendered="#{versionEdit.versionLang.resourceOpenDataKey!='' and versionEdit.versionLang.resourceOpenDataKey!=null}">
+						        <f:param name="idObj" value="#{versionEdit.version.id}"></f:param>
+						        <f:param name="typeObj" value="version"></f:param>
+						        <f:param name="format" value="csv"></f:param>
+						        <f:param name="verLangId" value="#{versionEdit.versionLang.id}"></f:param>
+						        <f:param name="opendata" value="#{versionEdit.versionLang.resourceOpenDataKey}"></f:param>
+								<f:param name="lastOpenDate" value="#{versionEdit.versionLang.openDataLastSent}"></f:param>
+						    </p:linkButton>
+						     
+								
+							<span class="p-mx-2" jsf:rendered="#{versionEdit.versionLang.resourceOpenDataKey!='' and versionEdit.versionLang.resourceOpenDataKey!=null}"> 
+								<span class="fas fa-ellipsis-v SoftGray" />
+							</span>
+
+							<ibg:compObjAudit idObj="#{versionEdit.version.id}"
+								rendered="#{versionEdit.version.id ne null}"
+								codeObj="#{versionEdit.version.codeMainObject}"
+								identInfo="#{versionEdit.version.langMap.get(NSIConstants.CODE_DEFAULT_LANG).ident}" />
+
+							<span class="p-mx-2" jsf:rendered="#{versionEdit.version.id ne null}"> 
+								<span class="fas fa-ellipsis-v SoftGray" />
+							</span>
+
+							<div title="#{versionEdit.version.publicated?'Версията е публикувана!':''}">
+								<p:commandButton icon="fas fa-trash" id="btnDelete"
+									value="#{ui_labels['general.delete']}" partialSubmit="true"
+									process="@this" styleClass="ui-button-danger"  disabled="#{versionEdit.version.publicated}"
+									rendered="#{versionEdit.version.id ne null}" action="#{versionEdit.actionDeleteVersion}">
+									<p:confirm header="#{ui_labels['general.comfirmation']}"
+										message="#{ui_labels['general.confirmationMessage']}"
+										icon="fas fa-exclamation-triangle" />
+								</p:commandButton>
+							</div>
+						</p:toolbarGroup>
+					</p:toolbar>
+					
+
+					<h:panelGroup id="dataPanel" class="p-grid ui-fluid">
+						<div class="p-col-12 p-md-12 p-lg-12 p-xl-12">
+
+							<div class="title-group">
+								<p:commandLink class="extended-search-toggle expanded"
+									onclick="toggleSection(this, '#versionEditForm:tabsVersion:mainData')">
+									<h:outputText value="#{labels['versionEdit.mainData']}" />
+									<i class="fas fa-caret-right"></i>
+								</p:commandLink>
+							</div>
+
+							<div class="p-grid ui-fluid p-align-end" jsf:id="mainData">
+
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-4 p-xl-4  ui-fluid">
+									<h:outputText value="#{labels['versionEdit.ident']}"
+										styleClass="form-label req" />
+									<p:inputText value="#{versionEdit.versionLang.ident}"
+										id="ident" />
+								</div>
+
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-4 p-xl-4  ui-fluid">
+									<h:outputText value="#{labels['versionEdit.versionBefore']}"
+										styleClass="form-label" />
+									<p:selectOneMenu id="idPrevVer"
+										value="#{versionEdit.version.idPrevVer}">
+										<f:selectItem value="#{null}" itemValue="#{null}" />
+										<f:selectItems value="#{versionEdit.versionsInList}" var="var"
+											itemLabel="#{var[1]}" itemValue="#{var[0]}" />
+									</p:selectOneMenu>
+								</div>
+
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-4 p-xl-4  ui-fluid">
+									<h:outputText value="#{labels['versionEdit.versionAfter']}"
+										styleClass="form-label" />
+									<p:selectOneMenu id="IdNextVer"
+										value="#{versionEdit.version.idNextVer}">
+										<f:selectItem value="#{null}" itemValue="#{null}" />
+										<f:selectItems value="#{versionEdit.versionsInList}" var="var"
+											itemLabel="#{var[1]}" itemValue="#{var[0]}" />
+									</p:selectOneMenu>
+								</div>
+
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12  ui-fluid">
+									<h:outputText value="#{labels['versionEdit.name']}"
+										styleClass="form-label req" />
+									<p:inputTextarea id="name" autoResize="false"
+										value="#{versionEdit.versionLang.title}"
+										style="max-width: 100%; min-width: 100%;" maxlength="4000" />
+								</div>
+
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-4 p-xl-4  ui-fluid">
+									<h:outputText value="#{labels['versionEdit.copyright']}"
+										styleClass="form-label req" />
+									<p:selectOneMenu id="copyright"
+										value="#{versionEdit.version.copyright}">
+										<f:selectItem value="#{null}" itemValue="#{null}" />
+										<f:selectItems
+											value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_CLASSIFICATION_AVTORSKO_PRAVO, now, versionEdit.lang)}"
+											var="var" itemLabel="#{var.tekst}" itemValue="#{var.code}" />
+									</p:selectOneMenu>
+								</div>
+
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-4 p-xl-4  ui-fluid">
+									<h:outputText value="#{labels['versionEdit.distribution']}"
+										styleClass="form-label" />
+									<p:selectOneMenu id="razprostranenie"
+										value="#{versionEdit.version.razprostranenie}">
+										<f:selectItem value="#{null}" itemValue="#{null}" />
+										<f:selectItems
+											value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_DANE, now, versionEdit.lang)}"
+											var="var" itemLabel="#{var.tekst}" itemValue="#{var.code}" />
+									</p:selectOneMenu>
+								</div>
+
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-4 p-xl-4  ui-fluid">
+									<h:outputText value="#{labels['versionEdit.status']}"
+										styleClass="form-label req" />
+									<p:selectOneMenu id="status"
+										value="#{versionEdit.version.status}">
+										<f:selectItem value="#{null}" itemValue="#{null}" />
+										<f:selectItems
+											value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_VERSION_STATUS, now, versionEdit.lang)}"
+											var="var" itemLabel="#{var.tekst}" itemValue="#{var.code}" />
+									</p:selectOneMenu>
+								</div>
+
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-4 p-xl-2  ui-fluid">
+									<h:outputText value="#{labels['versionEdit.validationDate']}"
+										styleClass="form-label" />
+									<p:datePicker id="confirmDate" pattern="dd.MM.yyyy" locale="bg"
+										showIcon="true" mask="true"
+										value="#{versionEdit.version.confirmDate}" />
+								</div>
+
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-4 p-xl-2  ui-fluid">
+									<h:outputText value="#{labels['versionEdit.enactment']}"
+										styleClass="form-label" />
+									<p:datePicker id="releaseDate" pattern="dd.MM.yyyy" locale="bg"
+										showIcon="true" mask="true"
+										value="#{versionEdit.version.releaseDate}" />
+								</div>
+								
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-4 p-xl-2  ui-fluid">
+									<h:outputText value="#{labels['versionEdit.surcease']}"
+										styleClass="form-label" />
+									<p:datePicker id="terminationDate" pattern="dd.MM.yyyy"
+										locale="bg" showIcon="true" mask="true"
+										value="#{versionEdit.version.terminationDate}" />
+								</div>
+								
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-4 p-xl-2  ui-fluid">
+									<h:outputText value="API_KEY (OpenData)"
+										styleClass="form-label" />
+									<p:inputText value="#{versionEdit.versionLang.resourceOpenDataKey}"
+										id="openDataKey" />
+								</div>
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-4 p-xl-2  ui-fluid">
+									<h:outputText value="Последно публикуване в (OpenData)"
+										styleClass="form-label" />
+									<p:inputText value="#{versionEdit.versionLang.openDataLastSent}" disabled="true"
+										id="openDataLastSend" >
+										<f:convertDateTime pattern="dd.MM.yyyy" timeZone="#{versionEdit.timeZone}"/>
+										</p:inputText>
+								</div>
+								
+
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12  ui-fluid">
+									<h:outputText value="#{labels['versionEdit.description']}"
+										styleClass="form-label" />
+									<p:inputTextarea id="description" autoResize="false"
+										value="#{versionEdit.versionLang.description}"
+										style="max-width: 100%; min-width: 100%;" />
+								</div>
+
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12  ui-fluid">
+									<h:outputText value="#{labels['versionEdit.comment']}"
+										styleClass="form-label" />
+									<p:inputTextarea id="comment" autoResize="false"
+										value="#{versionEdit.versionLang.comment}"
+										style="max-width: 100%; min-width: 100%;" />
+								</div>
+
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12  ui-fluid">
+									<h:outputText value="#{labels['versionEdit.currentNews']}"
+										styleClass="form-label" />
+									<p:inputTextarea id="news" autoResize="false"
+										value="#{versionEdit.versionLang.news}"
+										style="max-width: 100%; min-width: 100%;" />
+								</div>
+
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12  ui-fluid">
+									<h:outputText value="#{labels['versionEdit.plea']}"
+										styleClass="form-label" />
+									<p:inputTextarea id="legalbase" autoResize="false"
+										value="#{versionEdit.versionLang.legalbase}"
+										style="max-width: 100%; min-width: 100%;" />
+								</div>
+
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12  ui-fluid">
+									<h:outputText value="#{labels['versionEdit.publications']}"
+										styleClass="form-label" />
+									<p:inputTextarea id="publications" autoResize="false"
+										value="#{versionEdit.versionLang.publications}"
+										style="max-width: 100%; min-width: 100%;" />
+								</div>
+
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12  ui-fluid">
+									<h:outputText value="#{labels['versionEdit.areas']}"
+										styleClass="form-label" />
+									<p:inputTextarea id="areas" autoResize="false"
+										value="#{versionEdit.versionLang.areas}"
+										style="max-width: 100%; min-width: 100%;" />
+								</div>
+
+							</div>
+						</div>
+					</h:panelGroup>
+
+					<h:panelGroup id="linkPanel" class="p-grid ui-fluid">
+						<div class="p-col-12 p-md-12 p-lg-12 p-xl-12">
+
+							<div class="title-group">
+								<p:commandLink class="extended-search-toggle expanded"
+									onclick="toggleSection(this, '#versionEditForm:tabsVersion:linkData')">
+									<h:outputText value="#{labels['versionEdit.institution']}" />
+									<i class="fas fa-caret-right"></i>
+								</p:commandLink>
+							</div>
+
+							<div class="p-grid ui-fluid p-align-end" jsf:id="linkData">
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12  ui-fluid">
+									<h:outputText value="#{labels['versionEdit.nameInstitution']}"
+										styleClass="form-label" />
+									<p:inputText value="#{versionEdit.versionLang.pod}" id="pod" />
+								</div>
+
+								<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12  ui-fluid">
+									<h:outputText value="#{labels['versionEdit.link']}"
+										styleClass="form-label" />
+									<p:inputText value="#{versionEdit.versionLang.podUrl}" id="podUrl" />
+								</div>
+							</div>
+						</div>
+					</h:panelGroup>
+					
+					</h:panelGroup>
+				</p:tab>
+				
+				<p:tab title="#{labels['versionEdit.level']}" id="tabLevels" rendered="#{versionEdit.version.id ne null}">
+					<ui:include src="levelsEdit.xhtml" >
+						<ui:param name="isPublicated" value="#{versionEdit.version.publicated}" />
+					</ui:include>
+				</p:tab>
+				
+				
+				
+				<!-- Pozcii LevelByLevel -->
+				<ui:remove>
+				<!--  
+				<p:tab title="#{labels['versionEdit.positions']} - Дърво " id="tabPositions2" rendered="false" > 
+					
+					
+					<h:panelGroup rendered="#{versionEdit.position2Initialized}" id="positionPanel2">
+					
+						<div class="p-grid ui-fluid">
+							<div class="p-col-4" style="overflow:scroll; height:600px;">
+								<p:tree id="testTrees" value="#{versionEdit.rootS}" var="node"
+									selectionMode="checkbox" cache="true" dynamic="true">
+									<p:ajax event="expand" 
+										partialSubmit="true" process="@this"
+										listener="#{versionEdit.onNodeExpand}" />
+									<p:ajax event="select" update="versionEditForm:tabsVersion:detailsSelectedS"
+										listener="#{versionEdit.onNodeSelectV}" />
+									<p:treeNode>
+										<h:outputText value="#{node.code} #{node.deffName}" />
+									</p:treeNode>
+								</p:tree>
+							</div>
+							<div class="p-col-8">
+								<p:panel id="detailsSelectedS" header="selected">
+									<div class="p-grid ui-fluid">
+										<div class="p-col-3">
+											<p:outputLabel form="inCodeS" value="Code"/>
+											<p:inputText id="inCodeS"
+												value="#{versionEdit.selectedNodeV.data.code}" />
+										</div>
+										<div class="p-col-9">
+											<p:outputLabel form="inNameS" value="Name"/>
+											<p:inputText id="inNameS"
+												value="#{versionEdit.selectedNodeV.data.deffName}" />
+										</div>
+									</div>
+								</p:panel>
+							</div>
+						</div>
+					</h:panelGroup>
+				</p:tab>
+				
+				-->
+				</ui:remove>
+				
+				<!-- Pozcii Table LevelByLevel -->
+				<p:tab title="#{labels['versionEdit.positions']}" id="tabPositions3" rendered="#{versionEdit.version.id ne null}">
+				
+					 
+			        
+					<div style="left:calc(100% - 135px); top:-55px; position: relative; width: 150px; ">
+						<p:selectOneMenu value="#{versionEdit.lang}" style="width:150px">
+							<f:selectItems value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LANG, now, NSIConstants.CODE_DEFAULT_LANG)}"
+								var="lang" itemLabel="#{lang.tekst}" itemValue="#{lang.code}" />
+							<p:ajax event="change" listener="#{versionEdit.changeLang}" update="positionPanel3" process="@this" partialSubmit="ture"/>
+						</p:selectOneMenu>
+					</div>
+					
+					<h:panelGroup rendered="#{versionEdit.position3Initialized}" id="positionPanel3" style="top:-40px; position: relative; ">
+						
+						<span>
+							<h5><h:outputText value="#{versionEdit.versionLang.ident}" /></h5>
+						</span>
+						
+						<div class="p-grid">
+							<div class="p-col-4 ui-fluid">
+								<div class="field ">
+									<div class="ui-inputgroup">
+										
+										<p:commandButton id="searchOpt" icon="pi pi-cog" type="button"  title="Настройки на търсенето" styleClass="ui-button-outlined ui-button-secondary"/>
+										
+										<p:inputText value="#{versionEdit.searchText}" id="searchText" onclick="$('#searchOpt').hide();" placeholder="Търсене в позиции"/>
+										
+										<p:commandButton icon="fas fa-search" action="#{versionEdit.actionSearchPosition}" update="searchText dataTablesPos" process="@this searchText fcod fname" partialSubmit="true"
+											title="#{ui_labels['general.search']}"/>
+											
+										<p:commandButton icon="fas fa-fw fa-eraser" title="#{ui_labels['general.clear']}" styleClass="ui-button-warning"
+											 action="#{versionEdit.actionSearchPositionClear}" update="searchText dataTablesPos" process="@this" partialSubmit="true"/>
+										
+									</div>
+									
+									 <p:overlayPanel for="searchOpt" style="width:350px;">
+									 	<div class="p-pb-2">
+									 		<p:selectBooleanCheckbox value="#{versionEdit.optionFindCod}" id="fcod"/> <p:outputLabel value=" Търсене в Код" for="fcod"/>
+	                                	</div>
+	                                	<div>
+											<p:selectBooleanCheckbox value="#{versionEdit.optionFindName}"  id="fname"/><p:outputLabel value=" Търсене в Официално наименование" for="fname"/>
+										</div>
+									 </p:overlayPanel>
+									
+									<ui:remove>
+									<!--  
+									<div id="searchOpt" style="z-index:1001; display:none; position: absolute; margin-top: 2px; background: #ffffff; 
+										box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);  width:300px; min-height:60px;
+										padding:5px;">
+	                                	<p:selectBooleanCheckbox value="#{versionEdit.optionFindCod}" id="fcod"/> <p:outputLabel value=" Търсене в Код" for="fcod"/>
+	                                	<br/>
+										<p:selectBooleanCheckbox value="#{versionEdit.optionFindName}"  id="fname"/><p:outputLabel value=" Търсене в Официално наименование" for="fname"/>
+	                           		</div>
+	                           		-->
+	                           		</ui:remove>
+								</div>
+							</div>
+							
+							<div  class="p-col-6">
+								<p:menuButton   ajax="false"   value="#{labels['export.fullExport']}" styleClass="ui-button-success">
+						            <p:menuitem value="ODS" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFile?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;format=ods">
+						             </p:menuitem>
+						            <p:menuitem value="Excel" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFile?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;format=xlsx">
+						             </p:menuitem>
+						            <p:menuitem value="PDF" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFile?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;format=pdf">
+						             </p:menuitem>
+						            <p:menuitem value="HTML" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFile?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;format=html">
+						             </p:menuitem>
+						            <p:menuitem value="CSV" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFile?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;format=csv">
+						             </p:menuitem>
+						            <p:menuitem value="TXT" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFile?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;format=txt">
+						             </p:menuitem>
+						            <p:menuitem value="SDMX" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFile?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;format=sdmx">
+						             </p:menuitem>
+						            <p:menuitem value="SDMX-JSON" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFile?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;format=sdmx-json">
+						             </p:menuitem>
+						        </p:menuButton>
+								
+							</div>
+						</div>
+						<div class="p-grid">
+							<div class="p-col-4" jsf:id="dataTablesPos">
+								
+								<div class="ui-button-group">
+									<p:commandButton value="Позиции" icon="pi pi-sitemap" styleClass="#{versionEdit.showSearchData?'ui-button-outlined ':''} ui-button-secondary" 
+										action="#{versionEdit.showPositionList}" partialSubmit="true" process="@this" update="dataTablesPos"/>
+									<p:commandButton value="Резултат от търсене" icon="pi pi-list"  styleClass="#{!versionEdit.showSearchData?'ui-button-outlined ':''} ui-button-secondary" 
+											action="#{versionEdit.showSearchPositionList}" partialSubmit="true" process="@this" update="dataTablesPos"/>
+								</div>
+								<div class="ui-toolbar boxDataP" jsf:id="navigationTree" jsf:rendered="#{!versionEdit.showSearchData}">
+									<ui:repeat var="parents" value="#{versionEdit.parentPossitions}" varStatus="myVarStatus">
+										<div id="nav_#{parents.id}">
+											
+											<p:spacer width="#{(myVarStatus.index)*20}" height="30" /> 
+											
+											<p:commandButton icon="pi pi-minus" ajax="true" disabled="false" 
+												 partialSubmit="true" styleClass="rounded-button ui-button-success ui-button-outlined"
+												action="#{versionEdit.actionSelectParent(myVarStatus.index)}" process="@this" 
+												update="versionEditForm:tabsVersion:tblPos versionEditForm:tabsVersion:navigationTree  versionEditForm:tabsVersion:detailsSelectedT">
+											</p:commandButton>
+											 
+											 
+											<h:outputText value="#{parents.code} #{parents.name}"  style="padding-left: 1rem;"/> 
+											
+											 
+											 <ui:remove>
+											 <!--
+											 <p:commandLink 
+											action="#{versionEdit.actionSelectParent(myVarStatus.index)}" process="@this" update="versionEditForm:tabsVersion:tblPos versionEditForm:tabsVersion:navigationTree" >
+												<i class="fa fa-minus" aria-hidden="true"></i>
+												<h:outputText value="#{parents.code} #{parents.name}" />
+											</p:commandLink>
+											 
+											 <p:commandLink  value="#{parents.code} #{of:abbreviate(parents.name, 50)}" title="#{parents.name}" 
+													action="#{versionEdit.actionSelectParent(myVarStatus.index)}" process="@this" update="versionEditForm:tabsVersion:tblPos" />
+													-->
+											</ui:remove>
+											
+											
+										</div>
+									</ui:repeat>
+								 </div>
+								<p:dataTable id="tblPos" value="#{versionEdit.positions}" var="row" widgetVar="tblPos"
+										selectionMode="single" rowKey="#{row.id}" selection="#{versionEdit.selectedItem}"  
+										scrollRows="20" scrollable="true"
+                     					virtualScroll="true" scrollHeight="600" rows="40"
+										rendered="#{!versionEdit.showSearchData}" styleClass="tree-table-no-header">
+									<p:ajax event="rowSelect" update="@form:tabsVersion:detailsSelectedT" partialSubmit="true"/>
+									  
+									<p:column  style="width:45px; height:40px;">
+										<p:commandButton icon="pi pi-plus" ajax="true" disabled="false" 
+												 partialSubmit="true" rendered="#{row.indChild==1}" styleClass="rounded-button ui-button-success ui-button-outlined"
+												action="#{versionEdit.actionGetChildren(row)}" process="@this" update="versionEditForm:tabsVersion:tblPos versionEditForm:tabsVersion:navigationTree versionEditForm:tabsVersion:detailsSelectedT">
+											</p:commandButton>
+									</p:column>
+									<p:column >
+										<h:outputText value="#{row.code}" styleClass="p-mr-4"/>
+										
+										<h:outputText value="#{of:abbreviate(row.name, 50)}" />
+									</p:column>
+								</p:dataTable>
+							
+							
+								<p:dataTable id="tblPosSearch" value="#{versionEdit.positionsSearch}" var="rowSearch" widgetVar="tblPosSearch"
+										selectionMode="single" rowKey="#{rowSearch.id}"   selection="#{versionEdit.selectedItemSearch}" 
+										scrollRows="20" scrollable="true"  styleClass="tree-table-no-header"
+                     					virtualScroll="true" scrollHeight="600" rows="40"
+										rendered="#{versionEdit.showSearchData}">
+										
+										<p:ajax event="rowSelect" update="@form:tabsVersion:detailsSelectedT @form:tabsVersion:dataTablesPos" partialSubmit="true"/>
+										
+										<p:column style="height:40px;">
+											<h:outputText value="#{rowSearch.code}" styleClass="p-mr-4"/>
+											
+											<h:outputText value="#{rowSearch.name}" />
+										</p:column>
+								</p:dataTable>
+							</div>
+							<div class="p-col-8">
+								<p:panel id="detailsSelectedT" widgetVar="detailsSelected" >
+									<div class="p-grid " jsf:rendered="#{versionEdit.selectedPos!=null}">
+										<div class="p-col-12 ">
+											<p:toolbar id="positionControlPanel"  rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}">
+												<p:toolbarGroup align="left" >
+													<p:commandButton value="Запис" action="#{versionEdit.actionSavePos}" process="@widgetVar(detailsSelected)"
+														update="@widgetVar(tblPos) positionControlPanel versionEditForm:tabsVersion:navigationTree" disabled="#{versionEdit.version.publicated}"
+														partialSubmit="true" icon="fas fa-save" styleClass="p-mr-2" />
+													<p:menuButton value="Добави" rendered="#{versionEdit.selectedItem!=null}" disabled="#{versionEdit.version.publicated}">
+									                    <p:menuitem value="Преди" action="#{versionEdit.actionNewPos(NSIConstants.CODE_ZNACHENIE_INSERT_BEFORE)}" 
+									                    	update="@widgetVar(detailsSelected)" 
+									                    	process="@this"
+									                    	icon="pi pi-angle-up"/>
+									                    <p:menuitem value="След" action="#{versionEdit.actionNewPos(NSIConstants.CODE_ZNACHENIE_INSERT_AFTER)}" 
+									                    	update="@widgetVar(detailsSelected)" 
+									                    	process="@this"
+									                    	icon="pi pi-angle-down"/>
+									                    <p:menuitem value="Дете" action="#{versionEdit.actionNewPos(NSIConstants.CODE_ZNACHENIE_INSERT_AS_CHILD)}"
+									                        update="@widgetVar(detailsSelected)" 
+									                    	process="@this"
+									                        icon="pi pi-angle-right"/>
+									                    
+									                </p:menuButton>
+									                
+												</p:toolbarGroup>
+												<p:toolbarGroup align="right">
+													<p:commandButton icon="fas fa-times" id="btnDeletePos" rendered="#{versionEdit.selectedItem!=null}"
+														value="#{ui_labels['general.delete']}" partialSubmit="true"  process="@this"
+														update="@widgetVar(tblPos) @widgetVar(detailsSelected) versionEditForm:tabsVersion:navigationTree" disabled="#{versionEdit.version.publicated}"
+														action="#{versionEdit.actionDeletePos}" styleClass="ui-button-danger p-ml-2">
+														<p:confirm header="#{ui_labels['general.comfirmation']}"
+															message="#{beanMessages['general.confirmDeleteMsg']}"
+															icon="fas fa-exclamation-triangle" />
+													</p:commandButton>
+												</p:toolbarGroup>
+											</p:toolbar>
+										</div>
+										<div class="p-col-6 ui-fluid">
+											<h:outputText value="#{versionEdit.schemePosAttrLabels[(1).intValue()]}" styleClass="form-label req"/>
+											<p:inputText id="inCodeT" value="#{versionEdit.selectedPos.code}" />
+										</div>
+										<div class="p-col-3 ui-fluid">
+											<h:outputText value="#{versionEdit.schemePosAttrLabels[(4).intValue()]}" styleClass="form-label req"/>
+											<p:selectOneMenu value="#{versionEdit.selectedPos.codeType}" >
+												<f:selectItems value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_POSITION_CODE_TYPE, now, versionEdit.lang)}"
+													var="item" itemLabel="#{item.tekst}" itemValue="#{item.code}" />
+												
+											</p:selectOneMenu>
+										</div>
+									
+										<div class="p-col-6 ui-fluid" jsf:rendered="#{versionEdit.schemePosAttr[(2).intValue()]}">
+											<h:outputText value="#{versionEdit.schemePosAttrLabels[(2).intValue()]}" />
+											<p:inputText id="inFullCodeT"
+												value="#{versionEdit.selectedPos.codeFull}" />
+										</div>
+										<div class="p-col-6 ui-fluid" jsf:rendered="#{versionEdit.schemePosAttr[(3).intValue()]}">
+											<h:outputText value="#{versionEdit.schemePosAttrLabels[(3).intValue()]}" />
+											<p:inputText id="codeSeparate"
+												value="#{versionEdit.selectedPos.codeSeparate}" />
+										</div>
+										<div class="p-col-12 ui-fluid" >
+											<h:outputText value="#{versionEdit.schemePosAttrLabels[(11).intValue()]}" styleClass="form-label req" />
+											<p:inputText id="inNameT"
+												value="#{versionEdit.selectedPos.langMap[(versionEdit.lang).intValue()].offitialTitile}" />
+										</div>
+										<div class="p-col-12 ui-fluid" jsf:rendered="#{versionEdit.schemePosAttr[(12).intValue()]}">
+											<h:outputText value="#{versionEdit.schemePosAttrLabels[(12).intValue()]}" />
+											<p:inputText id="inNameST"
+												value="#{versionEdit.selectedPos.langMap[(versionEdit.lang).intValue()].shortTitle}" />
+										</div>
+										<div class="p-col-12 ui-fluid" jsf:rendered="#{versionEdit.schemePosAttr[(13).intValue()]}">
+											<h:outputText value="#{versionEdit.schemePosAttrLabels[(13).intValue()]}" />
+											<p:inputTextarea id="inNameLT"  rows="2"
+												value="#{versionEdit.selectedPos.langMap[(versionEdit.lang).intValue()].longTitle}" />
+										</div>
+										<div class="p-col-12 ui-fluid" jsf:rendered="#{versionEdit.schemePosAttr[(14).intValue()]}">
+											<h:outputText value="#{versionEdit.schemePosAttrLabels[(14).intValue()]}" />
+											<p:inputTextarea id="alternativeNames" rows="2"
+												value="#{versionEdit.selectedPos.langMap[(versionEdit.lang).intValue()].alternativeNames}" />
+										</div>
+										<div class="p-col-6 ui-fluid" jsf:rendered="#{versionEdit.schemePosAttr[(7).intValue()]}">
+											<h:outputText value="#{versionEdit.schemePosAttrLabels[(7).intValue()]}" />
+											<p:pickList id="nacionalna" value="#{versionEdit.nacionalnaList}" var="nacionalna" itemLabel="#{nacionalna.tekst}" itemValue="#{nacionalna}" 
+												escape="false" escapeValue="false" converter="pickListSCConverter">
+                    						
+                    						</p:pickList>
+										</div>
+										<div class="p-col-6 ui-fluid" jsf:rendered="#{versionEdit.schemePosAttr[(8).intValue()]}">
+											<h:outputText value="#{versionEdit.schemePosAttrLabels[(8).intValue()]}" />
+											<p:pickList id="mejdunarodna" value="#{versionEdit.mejdunarodnaList}" var="mejdunarodna" itemLabel="#{mejdunarodna.tekst}" itemValue="#{mejdunarodna}"
+												 escape="false" escapeValue="false"  converter="pickListSCConverter"> 
+												
+											</p:pickList>
+										</div>
+										
+										<div class="p-col-12 ui-fluid" jsf:rendered="#{versionEdit.schemePosAttr[(16).intValue()]}">
+											<h:outputText value="#{versionEdit.schemePosAttrLabels[(16).intValue()]}" />
+											<p:inputTextarea rows="2" value="#{versionEdit.selectedPos.langMap[(versionEdit.lang).intValue()].includes}" />
+										</div>
+										<div class="p-col-12 ui-fluid" jsf:rendered="#{versionEdit.schemePosAttr[(17).intValue()]}">
+											<h:outputText value="#{versionEdit.schemePosAttrLabels[(17).intValue()]}" />
+											<p:inputTextarea rows="2" value="#{versionEdit.selectedPos.langMap[(versionEdit.lang).intValue()].alsoIncludes}" />
+										</div>
+										<div class="p-col-12 ui-fluid" jsf:rendered="#{versionEdit.schemePosAttr[(18).intValue()]}">
+											<h:outputText value="#{versionEdit.schemePosAttrLabels[(18).intValue()]}" />
+											<p:inputTextarea rows="2" value="#{versionEdit.selectedPos.langMap[(versionEdit.lang).intValue()].excludes}" />
+										</div>
+										<div class="p-col-12 ui-fluid" jsf:rendered="#{versionEdit.schemePosAttr[(19).intValue()]}">
+											<h:outputText value="#{versionEdit.schemePosAttrLabels[(19).intValue()]}" />
+											<p:inputTextarea rows="2" value="#{versionEdit.selectedPos.langMap[(versionEdit.lang).intValue()].rules}" />
+										</div>
+										<div class="p-col-12 ui-fluid" jsf:rendered="#{versionEdit.schemePosAttr[(15).intValue()]}">
+											<h:outputText value="#{versionEdit.schemePosAttrLabels[(15).intValue()]}" />
+											<p:inputTextarea rows="2" value="#{versionEdit.selectedPos.langMap[(versionEdit.lang).intValue()].comment}" />
+										</div>
+										<div class="p-col-12 ui-fluid" jsf:rendered="#{versionEdit.schemePosAttr[(21).intValue()]}">
+											<h:outputText value="#{versionEdit.schemePosAttrLabels[(21).intValue()]}" />
+											<p:inputTextarea rows="2" value="#{versionEdit.selectedPos.langMap[(versionEdit.lang).intValue()].statPokazatel}" />
+										</div>
+										<div class="p-col-12 ui-fluid" jsf:rendered="#{versionEdit.schemePosAttr[(20).intValue()]}">
+											<h:outputText value="#{versionEdit.schemePosAttrLabels[(20).intValue()]}" />
+											<p:inputTextarea rows="2" value="#{versionEdit.selectedPos.langMap[(versionEdit.lang).intValue()].prepratka}" />
+										</div>
+									</div>
+								</p:panel>
+							</div>
+						</div>
+					</h:panelGroup>
+				</p:tab>
+
+				<p:tab title="#{labels['versionEdit.users']}" id="tabUsers" rendered="#{versionEdit.version.id ne null}">
+					<div style="left:calc(100% - 135px); top:-55px; position: relative; width: 150px">
+						<p:selectOneMenu id="langUsers" value="#{versionEdit.lang}" style="width:150px">
+							<f:selectItems value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LANG, now, NSIConstants.CODE_DEFAULT_LANG)}"
+								var="lang" itemLabel="#{lang.tekst}" itemValue="#{lang.code}" />
+							<p:ajax event="change" listener="#{versionEdit.changeLang}" update="compusers" process="@this" partialSubmit="ture"/>
+						</p:selectOneMenu>
+					</div>
+					<div jsf:id="compusers" style=" top:-25px; position: relative; ">
+						<ibg:compОbjectUsers isButtonDisabled="#{versionEdit.version.publicated}" codeObject="#{NSIConstants.CODE_ZNACHENIE_JOURNAL_STAT_VERSION}" idObject="#{versionEdit.version.id}" lang="#{versionEdit.lang}"/>
+					</div>
+				</p:tab>
+
+				<p:tab title="#{labels['versionEdit.docs']}" id="tabDocs" rendered="#{versionEdit.version.id ne null}">					
+					<div style="left:calc(100% - 135px); top:-55px; position: relative; width: 150px">
+						<p:selectOneMenu id="langDocs" value="#{versionEdit.lang}" style="width:150px">
+							<f:selectItems value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LANG, now, NSIConstants.CODE_DEFAULT_LANG)}"
+								var="lang" itemLabel="#{lang.tekst}" itemValue="#{lang.code}" />
+							<p:ajax event="change" listener="#{versionEdit.changeLang}" update="compdocs" process="@this" partialSubmit="ture"/>
+						</p:selectOneMenu>
+					</div>
+					<div jsf:id="compdocs" style=" top:-25px; position: relative; ">
+						<ibg:compObjectDocs isButtonDisabled="#{versionEdit.version.publicated}" idObject="#{versionEdit.version.id}" codeObject="#{NSIConstants.CODE_ZNACHENIE_JOURNAL_STAT_VERSION}" lang="#{versionEdit.lang}" readonly="#{versionEdit.version.publicated ? true: false}"/>
+					</div>
+				</p:tab>
+				
+				<!-- Таб Кореспондиращи таблици -->				
+				<p:tab title="#{labels['classificEdit.correspondList']}" id="tabCorrespTabForVer" rendered="#{versionEdit.version.id ne null}">
+
+					<h:panelGroup id="panelCorrespTab" layout="block">						
+							
+						<div class="title-group">
+							<p:commandLink class="extended-search-toggle expanded" onclick="toggleSection(this, '#versionEditForm:tabsVersion:correspTabl')">
+								<h:outputText value="#{labels['versionEdit.correspTables']} #{versionEdit.versionLang.ident}" />
+								<i class="fas fa-caret-right"></i>
+							</p:commandLink>
+
+							<p:commandButton icon="fas fa-plus" action="#{versionEdit.redirectToCorespTable(null)}" ajax="false" value="#{labels['classificEdit.newCorrespond']}" styleClass="ui-button-success" 
+							 rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}"/>
+						</div>
+
+						<div jsf:id="correspTabl">
+							
+							<p:dataTable id="tblCorrespTabl" var="row" value="#{versionEdit.corespTablesList}" lazy="true"
+								rowIndexVar="idx" emptyMessage="#{ui_labels['general.norows']}" rows="10" sortMode="single" reflow="true"
+								paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {Exporters}"
+								rowsPerPageTemplate="5,10,15,20,25" paginatorPosition="bottom" paginatorAlwaysVisible="false" paginator="true">
+
+								<p:column width="5" exportable="false" style="text-align: center;" headerText="#{ui_labels['general.No-symbol']}">
+									<h:outputText value="#{idx + 1}" />
+								</p:column>
+
+								<p:column width="80">
+									<p:splitButton action="#{versionEdit.redirectToCorespTable(row[0])}" ajax="false" icon="fas fa-edit" title="#{ui_labels['general.edit']}"
+										 rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}">
+							            <p:menuitem action="#{versionEdit.actionCreateReverseTable(row[0])}" ajax="false" icon="fas fa-retweet" value="#{labels['corespTable.reversTable']}" />								             								           
+							        </p:splitButton>
+							        
+							        <p:commandButton icon="fas fa-eye" styleClass="p-mr-3" title=" #{ui_labels['general.view']}" ajax="false"
+											action="#{versionEdit.redirectToCorespTable(row[0])}" rendered="#{!request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}">
+									</p:commandButton>
+								</p:column>
+
+								<p:column headerText="#{labels['classificEdit.identCorrespond']}">
+									<h:outputText value="#{row[1]}" />
+								</p:column>
+
+								<p:column  headerText="#{labels['classificEdit.nameCorrespond']}">
+									<h:outputText value="#{row[2]}" />
+								</p:column>
+
+								<p:column width="30" exportable="false"  rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}">
+									<p:commandButton icon="fas fa-trash" action="#{versionEdit.actionDeleteCorrTable(row[0])}" ajax="true" styleClass="ui-button-danger" 
+												title="#{ui_labels['general.delete']}" update="versionEditForm:tabsVersion:tblCorrespTabl" partialSubmit="true" process="versionEditForm:tabsVersion:tblCorrespTabl @this">
+											<p:confirm header="#{ui_labels['general.comfirmation']}" message="#{ui_labels['general.confirmationMessage']}" icon="fas fa-exclamation-triangle" />
+										</p:commandButton>
+								</p:column>
+							</p:dataTable>
+						</div>											
+					
+					</h:panelGroup>
+				
+				</p:tab>
+
+				<p:tab title="#{ui_labels['general.import']}" id="tabImport" rendered="#{versionEdit.version.id ne null and  request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}">
+					<ui:include src="importVersii.xhtml" >
+						<ui:param name="disableButtons" value="#{versionEdit.version.publicated}" />
+					</ui:include>
+				</p:tab>	
+
+				<p:tab title="#{labels['export.chooseExport']}" id="tabExport" rendered="#{versionEdit.version.id ne null and  request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}">
+				<ui:include src="exportVersii.xhtml" >
+						<ui:param name="disableButtons" value="#{versionEdit.version.publicated}" />
+					</ui:include>
+				</p:tab>
+
+
+			</p:tabView>
+		</h:form>
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,274 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui" xmlns:jsf="http://xmlns.jcp.org/jsf"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components"
+	template="/template/template.xhtml" >
+	
+	<!-- xmlns:pt="http://xmlns.jcp.org/jsf/passthrough" -->
+	
+
+	<ui:define name="metadata">
+		<f:metadata>
+			<f:viewAction action="#{userData.checkPageAccess(108)}" onPostback="false" />
+			<f:importConstants type="com.ib.nsiclassif.system.NSIConstants" />
+			<f:importConstants type="com.ib.indexui.system.Constants" />
+		</f:metadata>
+	</ui:define>
+
+	<ui:define name="title">#{navTexts['/pages/classificationsList.xhtml']}</ui:define>
+
+	<ui:define name="viewname">
+		<li>#{navTexts['/pages/classificationsList.xhtml']}</li>
+	</ui:define>
+
+	<ui:define name="content">
+
+		<style>
+ul:not(:last-child) {
+	border-bottom: 1px solid rgba(145, 153, 169, 0.3);
+}
+
+.padding-buttons {
+  text-align: right;
+}
+
+@media only screen and (min-width: 767px) {
+	.padding-buttons {
+		padding-top: 18px;
+	}
+}
+</style>
+
+		<h:form id="classificationsListForm">
+			<div class="container #{guestPreferences.containerPosition}">
+
+				<h:panelGroup id="panelFilter">
+					<div class="card">
+
+						<div class="p-grid">
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-6 p-xl-3 ui-fluid">
+								<h:outputText value="#{labels['classificList.ident']}"
+									styleClass="form-label" />
+								<p:inputText id="classifIdent"
+									value="#{classifsList.classifSearch.ident}" />
+							</div>
+
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-6 p-xl-5 ui-fluid">
+								<h:outputText value="#{labels['classificList.name']}"
+									styleClass="form-label" />
+								<p:inputText id="classifName"
+									value="#{classifsList.classifSearch.nameClassif}" />
+							</div>
+
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-6 p-xl-3 ui-fluid">
+								<h:outputText value="#{labels['classificationsList.family']}"
+									styleClass="form-label" />
+								<p:selectOneMenu id="family"
+									value="#{classifsList.classifSearch.family}" filter="true"
+									filterMatchMode="startsWith">
+									<f:selectItem value="#{null}" itemValue="#{null}" />
+									<f:selectItems
+										value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_CLASSIFICATION_FAMILY, now, classifsList.currentLang)}"
+										var="fam" itemLabel="#{fam.tekst}" itemValue="#{fam.code}" />
+								</p:selectOneMenu>
+							</div>
+
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-6 p-xl-1 ui-fluid">
+								<div class="padding-buttons">
+									<p:commandButton icon="fas fa-fw fa-search"
+										title="#{ui_labels['general.search']}" id="btnSearch"
+										update="panelDataTable tblClassif" partialSubmit="true"
+										process="@this panelFilter "
+										actionListener="#{classifsList.actionSearchClassifs}"
+										styleClass="p-mr-3" />
+
+									<p:commandButton icon="fas fa-fw fa-eraser"
+										title="#{ui_labels['general.clear']}" id="btnClear"
+										update="panelFilter panelDataTable" partialSubmit="true"
+										process="@this panelFilter panelDataTable tblClassif"
+										action="#{classifsList.actionClear()}"
+										styleClass="ui-button-warning" />
+								</div>
+							</div>
+						</div>
+
+						<ui:remove>
+						<!--  махнато от екрана по нареждане на КК 29,07
+						<div class="p-grid ui-fluid p-align-end">
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-6 p-xl-6 ui-fluid">
+								<h:outputText value="#{labels['classificList.family']}"
+									styleClass="form-label" />
+								<ibg:selectOneModalA id="family"
+									codeClassif="#{NSIConstants.CODE_CLASSIF_CLASSIFICATION_FAMILY}"
+									minQueryLength="2"
+									selectedCode="#{classifsList.classifSearch.family}"
+									styleAutoComp="width:99%;" saveStateTree="true"
+									isSelectNode="false" withBtnClear="true" compType="4" />
+							</div>
+						</div>
+						-->
+						</ui:remove>
+						
+						
+					</div>
+				</h:panelGroup>
+			</div>
+
+			<h:panelGroup id="panelDataTable" layout="block"
+				styleClass="margin-top">
+
+				<h:panelGroup layout="block" styleClass="card">
+
+					<div class="p-grid p-nogutter">
+
+						<div class="p-col-6 table-toolbar">
+							<p:commandButton icon="fas fa-folder-plus"
+								value="#{ui_labels['classif.newClassif']}" id="btnNew"
+								partialSubmit="true" action="#{classifsList.actionGotoNew}"
+								ajax="false" styleClass="ui-button-success  p-mr-2"
+								rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}">
+							</p:commandButton>
+
+							<span class="p-mr-2"
+								jsf:rendered="#{classifsList.classificationsList.rowCount > 0}">
+								<span class="fas fa-ellipsis-v" />
+							</span>
+
+							<h:outputText
+								value="#{ui_labels['general.reportResult']} #{classifsList.classificationsList.rowCount}"
+								rendered="#{classifsList.classificationsList.rowCount > 0}"
+								styleClass="form-label" />
+						</div>
+
+						<div class="p-col-6 lang" style="text-align: right;"
+							jsf:rendered="#{classifsList.classificationsList.rowCount > 0}">
+							<p:selectOneMenu id="lang" value="#{classifsList.lang}">
+								<f:selectItems
+									value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LANG, now, Constants.CODE_DEFAULT_LANG)}"
+									var="lang" itemLabel="#{lang.tekst}" itemValue="#{lang.code}" />
+								<p:ajax event="change"
+									listener="#{classifsList.changeLang()}"
+									update="panelFilter tblClassif" process="@this panelFilter" />
+							</p:selectOneMenu>
+						</div>
+					</div>
+
+					<!-- добавя tooltip към обект, който не притежава такъв <p:tooltip globalSelector=".ui-row-toggler" /> -->
+					<p:dataTable id="tblClassif" var="classif" lazy="true"
+						value="#{classifsList.classificationsList}" rowIndexVar="idx"
+						sortMode="single" reflow="true"
+						emptyMessage="#{ui_labels['general.norows']}"
+						paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {Exporters}"
+						rows="30" rowsPerPageTemplate="20,30,50"
+						paginatorPosition="bottom" paginatorAlwaysVisible="false"
+						paginator="true" rowExpandMode="single">
+
+						<p:ajax event="rowToggle"
+							listener="#{classifsList.onRowToggle(classif[0])}" />
+
+						<p:column width="20" exportable="false"
+							style="text-align: center;"
+							headerText="#{ui_labels['general.No-symbol']}">
+							<h:outputText value="#{idx + 1}" />
+						</p:column>
+
+						<p:column width="20" exportable="false">
+							<p:rowToggler id="toggler" />	<!-- pt:data-tooltip="#{labels['classificEdit.classVerList']}" -->															
+						</p:column>
+
+						<p:column width="30">
+							<p:commandButton icon="fas #{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)?'fa-edit':'fa-eye'}" ajax="false" 
+								title=" #{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)?ui_labels['general.edit']:ui_labels['general.view']}" partialSubmit="true"
+								action="#{classifsList.actionGoto(classif[0])}">
+							</p:commandButton>
+						</p:column>
+
+						<p:column width="80"  rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}">
+							<p:splitButton action="#{classifsList.redirectToVersions(classif[0])}"  ajax="false" icon="fas fa-code-branch"  title="#{labels['classificEdit.newVer']}" 
+								styleClass="ui-button-success" >
+					            <p:menuitem value="#{labels['versionEdit.copy']}" icon="fas fa-copy" ajax="false" action="#{classifsList.redirectToCopyVersion(classif[0])}">
+					             </p:menuitem>
+					           
+					        </p:splitButton>							
+							
+						</p:column>
+
+						<p:column headerText="#{labels['classificList.ident']}"
+							width="150" sortBy="#{classif.ident}" >
+							<h:outputText value="#{classif[1]}" escape="false" />
+						</p:column>
+
+						<p:column headerText="#{labels['classificList.name']}" sortBy="#{classif.namec}">
+							<h:outputText value="#{classif[2]}" escape="false" />
+						</p:column>
+						
+						
+						<ui:remove>
+						<!--  махнато от екрана по нареждане на КК 29,07
+						<p:column headerText="#{labels['classificList.family']}"
+							width="200">
+							<h:outputText
+								value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_CLASSIFICATION_FAMILY, classif[3], classifsList.lang, null)}" />
+						</p:column>
+						-->
+						</ui:remove>
+						
+						<!-- Върнато на 26.10.22г. без подсемейства -->
+						<p:column headerText="#{labels['classificationsList.family']}" sortBy="#{classif.FAMILY}">
+							<h:outputText
+								value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_CLASSIFICATION_FAMILY, classif[3], classifsList.lang, null)}" />
+						</p:column>
+						
+						
+						<p:rowExpansion id="expand" styleClass="expandedRow">
+							<h:panelGroup rendered="#{classifsList.versionsList.size() eq 0}">
+								<h:outputText value="#{ui_labels['general.norows']}" />
+							</h:panelGroup>
+
+							<h:panelGroup rendered="#{classifsList.versionsList.size() > 0}">
+								<ui:repeat value="#{classifsList.versionsList}" var="version">
+									<ul
+										style="list-style-type: none; overflow: hidden; margin: 0px; padding: 0px;">
+										<li>
+											<div class="p-grid list-item row"
+												style="align-items: center; padding-top: 8px; padding-bottom: 4px;">
+
+												<div style="display: inline-flex; align-items: center; padding-left: 6%;">
+
+													<p:commandButton icon="fas #{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)?'fa-edit':'fa-eye'}" styleClass="p-mr-3"
+														title=" #{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)?ui_labels['general.edit']:ui_labels['general.view']}" ajax="false"
+														action="#{classifsList.redirectToVersions(classif[0])}">
+														<f:param name="idObj" value="#{version[0]}" />
+													</p:commandButton>
+
+													
+												</div>
+
+												<div class="ident" style="width: 18%; padding-left: 1%;">
+													<h:outputText value="#{version[1]}" escape="false" />
+												</div>
+
+												<div class="name" style="padding-left: 1%;">
+													<h:outputText value="#{version[2]}" escape="false" />
+												</div>
+
+											</div>
+										</li>
+									</ul>
+
+								</ui:repeat>
+							</h:panelGroup>
+
+						</p:rowExpansion>
+
+					</p:dataTable>
+				</h:panelGroup>
+			</h:panelGroup>
+
+		</h:form>
+	</ui:define>
+
+</ui:composition>

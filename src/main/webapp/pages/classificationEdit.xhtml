@@ -1,0 +1,445 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui" xmlns:jsf="http://xmlns.jcp.org/jsf"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components"
+	template="/template/template.xhtml">
+
+	<ui:define name="metadata">
+		<f:metadata>
+			<f:viewAction action="#{userData.checkPageAccess(108)}" onPostback="false" />
+			<f:importConstants type="com.ib.nsiclassif.system.NSIConstants" />
+		</f:metadata>
+	</ui:define>
+
+	<ui:define name="title">#{navTexts['/pages/classificationEdit.xhtml']}</ui:define>
+
+	<ui:define name="viewname">
+		<li><p:commandLink title="#{ui_labels['general.back']}"
+				action="#{navigation.goBack()}"
+				rendered="#{navigation.navPath.size()>1}">
+				<i class="fas fa-caret-left" />
+			</p:commandLink></li>
+		<li>#{navTexts['/pages/classificationEdit.xhtml']}</li>
+	</ui:define>
+
+	<ui:define name="content">
+		<h:form id="classificationEditForm">
+
+			<ui:remove>
+				<!-- празна странница, когато няма класификация с посоченото ид  -->
+			</ui:remove>
+			<h:panelGroup id="noClassifFound" layout="block">
+				<div jsf:rendered="#{classifEdit.classif eq null}" class="card">
+					<h4>Няма резултат!</h4>
+					<p>Не е намерена класификация с id: #{classifEdit.classifId}</p>
+				</div>
+			</h:panelGroup>
+
+			<p:tabView id="tabsClassif" dynamic="true" 
+				rendered="#{classifEdit.classif ne null}">
+
+				<p:ajax event="tabChange" listener="#{classifEdit.onTabChange}"
+					update="tabsClassif" partialSubmit="true" />
+
+				<ui:remove>
+					<!-- таб основни данни  -->
+				</ui:remove>
+				<p:tab title="#{labels['classificEdit.basicData']}" id="tabMainData">
+					
+					<div style="left:calc(100% - 135px); top:-55px; position: relative; width: 150px">
+						<p:selectOneMenu id="lang" value="#{classifEdit.lang}"  style="width:150px">
+							<f:selectItems value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LANG, now, NSIConstants.CODE_DEFAULT_LANG)}"
+								var="lang" itemLabel="#{lang.tekst}" itemValue="#{lang.code}" />
+							<p:ajax event="change" listener="#{classifEdit.changeLang()}" update="dataPanel"
+								process="lang dataPanel" />
+						</p:selectOneMenu>
+					</div>
+					<h:panelGroup id="classificationMainData" layout="block" style=" top:-25px; position: relative; ">
+						<p:toolbar styleClass="margin-bottom" id="toolbrPanel" rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}">
+
+							<p:toolbarGroup align="left">
+								<div title="#{classifEdit.classif.publicated?'Класификацията е публикувана!':''}">
+									<p:commandButton icon="fas fa-save"
+										value="#{ui_labels['general.save']}" disabled="#{classifEdit.classif.publicated}"
+										action="#{classifEdit.actionSave()}" partialSubmit="true"
+										update="#{classifEdit.classif.id ne null?'dataPanel':'tabsClassif'}" />
+								</div>
+								
+								<span class="p-mx-2"> <span class="fas fa-ellipsis-v SoftGray" /></span>		
+						
+								<h:outputText class="p-mr-2" value="Публикувана на сайта: " /> 
+								<p:selectBooleanCheckbox value="#{classifEdit.classif.publicated}" >
+						            <p:ajax listener="#{classifEdit.actionPublicate}" process="@this classificationEditForm" update="classificationEditForm" partialSubmit="true"/>
+						       </p:selectBooleanCheckbox>
+									 
+							</p:toolbarGroup>
+
+							<p:toolbarGroup align="right">
+
+								<ibg:compObjAudit idObj="#{classifEdit.classif.id}"
+									rendered="#{classifEdit.classif.id ne null}"
+									codeObj="#{classifEdit.classif.codeMainObject}"
+									identInfo="#{classifEdit.classif.langMap.get(NSIConstants.CODE_DEFAULT_LANG).ident}" />
+
+								<span class="p-mx-2"
+									jsf:rendered="#{classifEdit.classif.id ne null}"> <span
+									class="fas fa-ellipsis-v SoftGray" />
+								</span>
+
+								<ui:remove>
+									<!-- изтриване ще има ли?  -->
+								</ui:remove>
+								<div title="#{classifEdit.classif.publicated?'Класификацията е публикувана!':''}">
+									<p:commandButton icon="fas fa-trash" id="btnDelete"
+										value="#{ui_labels['general.delete']}" partialSubmit="true"
+										process="@this" styleClass="ui-button-danger" disabled="#{classifEdit.classif.publicated}"
+										rendered="#{classifEdit.classif.id ne null}" action="#{classifEdit.actionDeleteClassification}">
+										<p:confirm header="#{ui_labels['general.comfirmation']}"
+											message="#{ui_labels['general.confirmationMessage']}"
+											icon="fas fa-exclamation-triangle" />
+									</p:commandButton>
+								</div>
+							</p:toolbarGroup>
+						</p:toolbar>
+
+						<h:panelGroup id="dataPanel" class="p-grid ui-fluid">
+							<div class="p-col-12 p-md-12 p-lg-12 p-xl-12">
+
+								<div class="title-group">
+									<p:commandLink class="extended-search-toggle expanded"
+										onclick="toggleSection(this, '#classificationEditForm:tabsClassif:mainData')">
+										<h:outputText value="#{labels['classificEdit.basicData']}" />
+										<i class="fas fa-caret-right"></i>
+									</p:commandLink>
+								</div>
+
+								<div class="p-grid ui-fluid p-align-end" jsf:id="mainData">
+									<div class="p-col-12 p-sm-12 p-md-12 p-lg-3 p-xl-3  ui-fluid">
+										<h:outputText value="#{labels['classificEdit.ident']}"
+											styleClass="form-label req" />
+										<p:inputText value="#{classifEdit.classifLang.ident}"
+											id="ident" />
+									</div>
+<ui:remove>
+<!--  махнато от екрана по нареждане на КК 29,07
+									<div class="p-col-12 p-sm-12 p-md-12 p-lg-4 p-xl-4  ui-fluid">
+										<h:outputText value="#{labels['classificEdit.family']}"
+											styleClass="form-label" />
+										<ibg:selectOneModalA id="family"
+											codeClassif="#{NSIConstants.CODE_CLASSIF_CLASSIFICATION_FAMILY}"
+											minQueryLength="2"
+											selectedCode="#{classifEdit.classif.family}"
+											styleAutoComp="width:99%;" saveStateTree="true"
+											isSelectNode="false" withBtnClear="true" compType="4" />
+									</div>
+-->									
+</ui:remove>
+
+									<div class="p-col-12 p-sm-12 p-md-12 p-lg-3 p-xl-3  ui-fluid">
+										<h:outputText value="#{labels['classificEdit.unit']}"
+											styleClass="form-label req" />
+										<p:selectOneMenu id="unit" autoWidth="false"
+											value="#{classifEdit.classif.classUnit}">
+											<f:selectItem value="#{null}" itemValue="#{null}" />
+											<f:selectItems
+												value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_CLASSIFICATION_UNIT, now, classifEdit.lang)}"
+												var="unit" itemLabel="#{unit.tekst}"
+												itemValue="#{unit.code}" />
+										</p:selectOneMenu>
+
+									</div>
+
+									<div class="p-col-12 p-sm-12 p-md-12 p-lg-3 p-xl-3  ui-fluid">
+										<h:outputText value="#{labels['classificEdit.type']}"
+											styleClass="form-label req" />
+										<p:selectOneMenu id="type" autoWidth="false"
+											value="#{classifEdit.classif.classType}" >
+											<f:selectItem value="#{null}" itemValue="#{null}" />
+											<f:selectItems
+												value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_CLASSIFICATION_TYPE, now, classifEdit.lang)}"
+												var="type" itemLabel="#{type.tekst}"
+												itemValue="#{type.code}" />
+										</p:selectOneMenu>
+									</div>
+									
+									<!-- Върнато на 26.10.22. Подсемействата се премахват и остават само семействата -->
+									<div class="p-col-12 p-sm-12 p-md-12 p-lg-3 p-xl-3  ui-fluid">
+										<h:outputText value="#{labels['classificationsList.family']}"
+											styleClass="form-label" />										
+										<p:selectOneMenu id="family"
+											value="#{classifEdit.classif.family}" filter="true"
+											filterMatchMode="startsWith">
+											<f:selectItem value="#{null}" itemValue="#{null}" />
+											<f:selectItems
+												value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_CLASSIFICATION_FAMILY, now, classifEdit.currentLang)}"
+												var="fam" itemLabel="#{fam.tekst}" itemValue="#{fam.code}" />
+										</p:selectOneMenu>
+									</div>
+
+									<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12  ui-fluid">
+										<h:outputText value="#{labels['classificEdit.name']}"
+											styleClass="form-label req" />
+										<p:inputTextarea id="name" autoResize="false"
+											value="#{classifEdit.classifLang.nameClassif}"
+											style="max-width: 100%; min-width: 100%;" maxlength="4000" />
+									</div>
+
+									<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12  ui-fluid">
+										<h:outputText value="#{labels['classificEdit.opisanie']}"
+											styleClass="form-label" />
+										<p:inputTextarea id="desc" autoResize="false"
+											value="#{classifEdit.classifLang.description}"
+											style="max-width: 100%; min-width: 100%;" />
+									</div>
+
+									<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12  ui-fluid">
+										<h:outputText value="#{labels['classificEdit.comment']}"
+											styleClass="form-label" />
+										<p:inputTextarea id="comment" autoResize="false"
+											value="#{classifEdit.classifLang.comment}"
+											style="max-width: 100%; min-width: 100%;" />
+									</div>
+
+									<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12  ui-fluid">
+										<h:outputText value="#{labels['classificEdit.currentNews']}"
+											styleClass="form-label" />
+										<p:inputTextarea id="news" autoResize="false"
+											value="#{classifEdit.classifLang.news}"
+											style="max-width: 100%; min-width: 100%;" />
+									</div>
+
+									<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12  ui-fluid">
+										<h:outputText
+											value="#{labels['classificEdit.fieldOfApplication']}"
+											styleClass="form-label" />
+										<p:inputTextarea id="priloj" autoResize="false"
+											value="#{classifEdit.classifLang.area}"
+											style="max-width: 100%; min-width: 100%;" />
+									</div>
+								</div>
+							</div>
+						</h:panelGroup>
+
+						<h:panelGroup id="attrPanel" class="p-grid ui-fluid">
+							<div class="p-col-12 p-md-12 p-lg-12 p-xl-12">
+
+								<div class="title-group">
+									<p:commandLink class="extended-search-toggle expanded"
+										onclick="toggleSection(this, '#classificationEditForm:tabsClassif:attrData')">
+										<h:outputText value="#{labels['classificEdit.posAttr']}" />
+										<i class="fas fa-caret-right"></i>
+									</p:commandLink>
+								</div>
+
+								<div class="p-grid ui-fluid p-align-end" jsf:id="attrData">
+									<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12">
+										<p:selectManyCheckbox id="selAttr" layout="responsive"
+											columns="3" value="#{classifEdit.selectedAttr}">
+											<f:selectItems value="#{classifEdit.positionsClassif}" />
+										</p:selectManyCheckbox>
+									</div>
+								</div>
+							</div>
+						</h:panelGroup>
+					</h:panelGroup>
+				</p:tab>
+
+				<ui:remove>
+					<!-- таб класификационни версии  -->
+				</ui:remove>
+				<p:tab title="#{labels['classificEdit.classVerList']}"
+					id="tabClassifVersions"
+					rendered="#{classifEdit.classif.id ne null}">
+
+					<h:panelGroup id="versionsPanel" layout="block">
+
+						<h:panelGroup id="tablePanel">
+							<div class="title-group">
+								<p:commandLink class="extended-search-toggle expanded"
+									onclick="toggleSection(this, '#classificationEditForm:tabsClassif:versionPanel')">
+									<h:outputText
+										value="#{labels['classificEdit.versions']} #{classifEdit.classifLang.ident}" />
+									<i class="fas fa-caret-right"></i>
+								</p:commandLink>
+
+								<p:commandButton icon="fas fa-plus" ajax="false"
+									value="#{labels['classificEdit.newVer']}"
+									action="#{classifEdit.redirectToVersions(classifEdit.classif.id)}"
+									styleClass="ui-button-success" 
+									rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}"/>
+									
+								<span class="p-mx-2"> 
+									<span class="fas fa-ellipsis-v SoftGray" />
+								</span>
+									
+								<p:commandButton icon="fas fa-copy" ajax="false"
+									value="#{labels['versionEdit.copy']}"
+									action="#{classifEdit.redirectToCopyVersion}"
+									styleClass="ui-button-success" 
+									rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}"/>										
+							</div>
+
+							<div jsf:id="versionPanel">
+								<p:dataTable id="tblVersionsList" var="row"
+									value="#{classifEdit.versionsList}" rowIndexVar="idx"
+									emptyMessage="#{ui_labels['general.norows']}" rows="15"
+									sortMode="single" reflow="true"
+									paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {Exporters}"
+									rowsPerPageTemplate="5,10,15,20,25" paginatorPosition="bottom"
+									paginatorAlwaysVisible="false" paginator="true">
+
+
+									<p:column width="30" exportable="false"
+										style="text-align: center;"
+										headerText="#{ui_labels['general.No-symbol']}">
+										<h:outputText value="#{idx + 1}" />
+									</p:column>
+
+									<p:column width="30" exportable="false">
+										<p:commandButton  action="#{classifEdit.redirectToVersions(classifEdit.classif.id)}"
+											styleClass="btn-new p-mr-3"  ajax="false"
+											icon="fas #{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)?'fa-edit':'fa-eye'}"
+											title=" #{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)?ui_labels['general.edit']:ui_labels['general.view']}">
+											<f:param name="idObj" value="#{row[0]}" />
+										</p:commandButton>
+									</p:column>
+
+									<p:column width="250"
+										headerText="#{labels['classificEdit.identVer']}">
+										<h:outputText value="#{row[1]}" />
+									</p:column>
+
+									<p:column width="*"
+										headerText="#{labels['classificEdit.nameVer']}">
+										<h:outputText value="#{row[2]}" />
+									</p:column>
+
+									<p:column width="30" exportable="false">
+										<p:commandButton icon="fas fa-trash" action="#{classifEdit.actionDeleteVersion(row[0])}" ajax="true"
+											styleClass="ui-button-danger" update="tblVersionsList" process="@this"
+											title="#{ui_labels['general.delete']}" disabled="#{classifEdit.classif.publicated}"
+											rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}">
+											<p:confirm header="#{ui_labels['general.comfirmation']}"
+												message="#{ui_labels['general.confirmationMessage']}"
+												icon="fas fa-exclamation-triangle" />
+										</p:commandButton>
+									</p:column>
+								</p:dataTable>
+							</div>
+						</h:panelGroup>
+					</h:panelGroup>
+				</p:tab>
+
+				<ui:remove>
+					<!-- таб кореспондиращи таблици  -->
+				</ui:remove>
+				<p:tab title="#{labels['classificEdit.correspondList']}"
+					id="tabCorrespTables" rendered="#{classifEdit.classif.id ne null}">
+
+					<h:panelGroup id="correspTablesPanel" layout="block">
+
+						<h:panelGroup id="corresptablePanel">
+							<div class="title-group">
+								<p:commandLink class="extended-search-toggle expanded" onclick="toggleSection(this, '#classificationEditForm:tabsClassif:tblCorrespTables')">
+									<h:outputText value="#{labels['classificEdit.correspTables']} #{classifEdit.classifLang.ident}" />
+									<i class="fas fa-caret-right"></i>
+								</p:commandLink>
+
+								<p:commandButton icon="fas fa-plus" action="#{classifEdit.redirectToCorespTable(null)}" ajax="false" value="#{labels['classificEdit.newCorrespond']}" styleClass="ui-button-success" 
+								 rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}"/>
+							</div>
+
+							<div jsf:id="tblCorrespTables">
+								<p:dataTable id="tblCorrespTablesList" var="row" value="#{classifEdit.corespTablesList}" lazy="true"
+									rowIndexVar="idx" emptyMessage="#{ui_labels['general.norows']}" rows="10" sortMode="single" reflow="true"
+									paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {Exporters}"
+									rowsPerPageTemplate="5,10,15,20,25" paginatorPosition="bottom" paginatorAlwaysVisible="false" paginator="true">
+
+									<p:column width="30" exportable="false" style="text-align: center;" headerText="#{ui_labels['general.No-symbol']}">
+										<h:outputText value="#{idx + 1}" />
+									</p:column>
+									
+									<p:column width="80">
+										<p:splitButton action="#{classifEdit.redirectToCorespTable(row[0])}" ajax="false" icon="fas fa-edit" title="#{ui_labels['general.edit']}" styleClass="btn-new"
+											rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}">
+								            <p:menuitem action="#{classifEdit.actionCreateReverseTable(row[0])}" ajax="false" icon="fas fa-retweet" value="#{labels['corespTable.reversTable']}" styleClass="btn-new"/>								             								           
+							       	    </p:splitButton>
+							       	    
+							       	    <p:commandButton icon="fas fa-eye" styleClass="p-mr-3" title="#{ui_labels['general.view']}" ajax="false"
+												action="#{classifEdit.redirectToCorespTable(row[0])}" rendered="#{!request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}">
+										</p:commandButton>
+									</p:column>
+
+
+									<p:column width="*" headerText="#{labels['classificEdit.identCorrespond']}">
+										<h:outputText value="#{row[1]}" />
+									</p:column>
+
+									<p:column  width="*"  headerText="#{labels['classificEdit.nameCorrespond']}">
+										<h:outputText value="#{row[2]}" />
+									</p:column>
+
+									<p:column width="30" exportable="false"  rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}">
+										<p:commandButton icon="fas fa-trash" action="#{classifEdit.actionDeleteCorrTable(row[0])}" ajax="true" styleClass="ui-button-danger"
+												disabled="#{classifEdit.classif.publicated}" 
+												title="#{ui_labels['general.delete']}" update="classificationEditForm:tabsClassif:tblCorrespTablesList" partialSubmit="true" process="classificationEditForm:tabsClassif:tblCorrespTablesList @this">
+											<p:confirm header="#{ui_labels['general.comfirmation']}" message="#{ui_labels['general.confirmationMessage']}" icon="fas fa-exclamation-triangle" />
+										</p:commandButton>
+									</p:column>
+								</p:dataTable>
+							</div>
+						</h:panelGroup>
+					</h:panelGroup>
+
+
+
+				</p:tab>
+
+				<ui:remove>
+					<!-- таб потребители  -->
+				</ui:remove>
+				<p:tab title="#{labels['general.users']}" id="tabUsers"
+					rendered="#{classifEdit.classif.id ne null}">
+					<div style="left:calc(100% - 135px); top:-55px; position: relative; width: 150px">
+						<p:selectOneMenu id="langUsers" value="#{classifEdit.lang}" style="width:150px">
+							<f:selectItems value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LANG, now, NSIConstants.CODE_DEFAULT_LANG)}"
+								var="lang" itemLabel="#{lang.tekst}" itemValue="#{lang.code}" />
+							<p:ajax event="change" listener="#{classifEdit.changeLang()}" update="compusers" process="@this" partialSubmit="ture"/>
+						</p:selectOneMenu>
+					</div>
+					<div jsf:id="compusers" style=" top:-25px; position: relative; ">
+						<ibg:compОbjectUsers isButtonDisabled="#{classifEdit.classif.publicated}" codeObject="#{NSIConstants.CODE_ZNACHENIE_JOURNAL_STAT_VERSION}" idObject="#{classifEdit.classifId}" lang="#{classifEdit.lang}"/>
+					</div>
+				</p:tab>
+
+				<ui:remove>
+					<!-- таб документи  -->
+				</ui:remove>
+				<p:tab title="#{labels['general.docs']}" id="tabDocs"
+					rendered="#{classifEdit.classif.id ne null}">
+						
+						<div style="left:calc(100% - 135px); top:-55px; position: relative; width: 150px">
+							<p:selectOneMenu id="langDocs" value="#{classifEdit.lang}" style="width:150px">
+								<f:selectItems value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LANG, now, NSIConstants.CODE_DEFAULT_LANG)}"
+									var="lang" itemLabel="#{lang.tekst}" itemValue="#{lang.code}" />
+								<p:ajax event="change" listener="#{classifEdit.changeLang()}" update="compdocs" process="@this" partialSubmit="ture"/>
+							</p:selectOneMenu>
+						</div>
+					<div jsf:id="compdocs" style=" top:-25px; position: relative; ">
+						
+						<ibg:compObjectDocs idObject="#{classifEdit.classif.id}" isButtonDisabled="#{classifEdit.classif.publicated}"
+							codeObject="#{NSIConstants.CODE_ZNACHENIE_JOURNAL_STAT_CLASSIF}"
+							 lang="#{classifEdit.lang}" readonly="#{classifEdit.classif.publicated ? true: false}"/>
+					</div>
+
+				</p:tab>
+
+			</p:tabView>
+
+		</h:form>
+
+	</ui:define>
+</ui:composition>

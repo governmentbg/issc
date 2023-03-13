@@ -1,0 +1,142 @@
+<ui:composition 
+	xmlns="http://www.w3.org/1999/xhtml" 
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:jsf="http://xmlns.jcp.org/jsf"
+    xmlns:h="http://java.sun.com/jsf/html" 
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui" 
+    xmlns:pa="http://primefaces.org/mirage" 
+    xmlns:o="http://omnifaces.org/ui">
+    
+	<h:form id="topbarForm">
+	
+	<style type="text/css">
+    
+	    .global-search-dropdown.ui-autocomplete-panel .ui-autocomplete-table td {
+	    	border: none;
+	    	padding: 8px 10px;
+	    }
+	    
+	    .global-search-dropdown .ui-widget-content {
+	    	border: none;
+	    }
+	</style>
+	
+	
+	    <div class="layout-topbar">
+	        <div class="layout-topbar-wrapper">
+	            <div class="layout-topbar-left">
+	                <div class="layout-topbar-logo-wrapper">
+	                    <a href="classificationsList.xhtml" class="layout-topbar-logo">
+	                        <p:graphicImage id="logoTopbar" name="nsi_logo_vector.png" library="images" />
+	                        <span class="app-name">#{labels['general.systemName']}</span>
+	                    </a>
+	                </div>
+	
+	                <a href="#" class="sidebar-menu-button">
+	                    <i class="fas fa-bars"></i>
+	                </a>
+	
+	                <a href="#" class="topbar-menu-mobile-button">
+	                    <i class="fas fa-ellipsis-v"></i>
+	                </a>
+	                
+	                <ui:remove>
+	                <!--  Скрито по искане на К. Каменов -->
+	                <!-- This is just for developmen. Work only in development mode!!! -->
+	                <h:panelGrid columns="2" rendered="#{initParam['javax.faces.PROJECT_STAGE']=='development'}" id="pogPanel">
+				    <h:outputLabel value="log: ctrl+alt+l|h"/>
+					     <p:lifecycle />
+					     	<p:log id="log" rendered="#{environment.showPFLog}"/>
+							<p:hotkey bind="alt+ctrl+l"   action="#{environment.setShowPFLog(true)}" update="pogPanel" oncomplete="PrimeFaces.logger.show()" />
+							<p:hotkey bind="alt+ctrl+h"  action="#{environment.setShowPFLog(false)}" update="pogPanel" oncomplete="PrimeFaces.logger.hide()"/>
+							
+						
+					</h:panelGrid>
+					</ui:remove>
+					
+	            </div>
+	            <div class="layout-topbar-right">
+	                
+	                <ul class="layout-topbar-actions">
+	                
+	                	<li class="topbar-item">
+	                        <a href="#{resource['docs:UserManual_admin.docx']}" download="#{labels['instructions.adminFilename']}" title="#{labels['instructions.admin']}">
+                            	<i class="far fa-file-alt"></i>
+							</a>
+	                    </li>
+	                    
+	                    <li class="topbar-item">
+	                    	<a href="#{resource['docs:UserManual_statistic.docx']}" download="#{labels['instructions.statFilename']}" title="#{labels['instructions.stat']}">
+                    			<i class="far fa-file-alt"></i>
+							</a>
+	                    </li>
+	              
+	                    <li class="topbar-item profile-item">
+	                        <a href="#">
+	                            <span class="profile-image-wrapper">
+	                               <i class="fas fa-user-circle" style="font-size:32px"></i>
+	                            </span>
+	                            <span class="profile-info-wrapper">
+	                                <h3>#{userData.liceNames}  </h3>
+	                            </span>
+	                        </a>
+	                        <ul class="profile-item-submenu">
+	                            <li class="profile-submenu-header">
+	                                <div class="performance">
+	                                    
+	                                </div>
+	                                <div class="profile">
+	                                     <i class="fas fa-user-circle" style="font-size:36px"></i>
+	                                    <h1> #{userData.liceNames}  </h1>
+	                                </div>
+	                            </li>
+	                            
+	                            <li id="layout-config-button" class="layout-submenu-item layout-config-button-custom">
+	                                <i class="fas fa-palette icon icon-1"></i>
+	                                <div class="menu-text">
+	                                    <p>#{labels['userOptions.styletitle']}</p>
+	                                    <span>#{labels['userOptions.styleSubTitle']}</span>
+	                                </div>
+	                                <i class="fas fa-angle-right"></i>
+	                            </li>
+	                            
+	                            <ui:remove>
+	                            <li class="layout-submenu-item" onclick="PF('dlg-change-pass').show()">
+	                                <i class="fas fa-unlock-alt icon icon-2"></i>
+	                                <div class="menu-text">
+	                                    <p>#{ui_labels['general.changePass']}</p>
+	                                </div>
+	                                <i class="fas fa-angle-right"></i>
+	                            </li>
+	                            </ui:remove>
+	                            
+	                            <li class="layout-submenu-item" id="access-trigger">
+	                                <i class="fas fa-eye icon icon-2"></i>
+	                                <div class="menu-text">
+	                                    <p>#{labels['userOptions.accessibility']}</p>
+		                                <span>#{labels['userOptions.accessibilityText']}</span>
+	                                </div>
+	                                <i class="fas fa-angle-right"></i>
+	                            </li>
+	                            
+	                            <li class="layout-submenu-footer">
+	                                <button class="signout-button" jsf:action="#{login.actionLogout()}" jsf:ajax="false" jsf:immediate="true">#{ui_labels['general.exit']}</button>
+	                            </li>
+	                        </ul>
+	                    </li>	 
+	                </ul>
+	            </div>
+	        </div>
+	    </div>
+	</h:form>
+    
+
+   
+ 
+ 	<ui:remove>
+	<o:socket channel="kgMainMessages" onmessage="myOnMessageMain" user="#{userData.userAccess}" onopen="setConnectedKG" onclose="setDisconnected"/>
+	</ui:remove>
+
+<p:growl widgetVar="growlWV" for="kgGrowl"/>
+</ui:composition>

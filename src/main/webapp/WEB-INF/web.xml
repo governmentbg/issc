@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd" version="4.0">
+  <display-name>Archetype Created Web Application</display-name>
+  <context-param>
+		<param-name>javax.faces.PROJECT_STAGE</param-name>
+		<param-value>${prop.projectStage}</param-value>
+	</context-param>
+	<context-param>
+		<param-name>javax.faces.STATE_SAVING_METHOD</param-name>
+		<param-value>server</param-value>
+	</context-param>
+	<context-param>
+		<param-name>primefaces.THEME</param-name>
+		<param-value>${prop.theme}</param-value>
+	</context-param>
+	<context-param>
+		<param-name>primefaces.FONT_AWESOME</param-name>
+		<param-value>true</param-value>
+	</context-param>
+	<!-- Това е за да сетнем дефолтната зона. След което не е нужно да правим зони във всеки бийн (или басе)
+	Ползва се: <f:convertDateTime pattern="dd.MM.yyyy" type="date"/> -->
+	<context-param>
+	    <param-name>javax.faces.DATETIMECONVERTER_DEFAULT_TIMEZONE_IS_SYSTEM_TIMEZONE</param-name>
+	    <param-value>true</param-value>
+	</context-param>
+	<!-- Experimental -->
+	<!-- С това , не е нужно да се пише App\alabala.xhtml
+	Достатучно е App\alabala -->	
+	<context-param>
+	    <param-name>org.omnifaces.FACES_VIEWS_SCAN_PATHS</param-name>
+	    <param-value>/*.xhtml/*</param-value>
+	</context-param>
+	<servlet>
+		<servlet-name>FacesServlet</servlet-name>
+		<servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>FacesServlet</servlet-name>
+		<url-pattern>*.xhtml</url-pattern>
+	</servlet-mapping>
+	<session-config>
+		<session-timeout>30</session-timeout>
+	</session-config>
+	<welcome-file-list>
+		<welcome-file>${prop.welcomePage}</welcome-file>
+	</welcome-file-list>
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Secured resources</web-resource-name>
+			<url-pattern>/pages/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>**</role-name>
+		</auth-constraint>
+	</security-constraint>
+	<error-page>
+      <error-code>404</error-code>
+        <location>/${prop.pageNotFound}</location>
+    </error-page>
+    <listener> 
+	  <listener-class>com.ib.nsiclassif.process.RemoveFilesProcess</listener-class>
+	 </listener> 
+</web-app>

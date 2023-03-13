@@ -1,0 +1,232 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:c="http://java.sun.com/jstl/core">
+      
+<f:metadata>
+
+    <f:viewAction action="#{userData.checkPageAccess(null)}" onPostback="false"/>
+     
+</f:metadata>
+
+<p:tooltip/>
+
+<h:form id="formUserList">
+	
+	<div class="page-title-wrapper-search">
+        <div class="container">
+        	<div class="filter-wrapper">
+	        	<div class="filter-toggle">
+	                  <div class="filter-title">
+	                      <span>#{navTexts['/pages/userList.xhtml']}</span>
+	                  </div>
+	                  <div onclick="toggleSection(this, '#filter');" class="toggler-icon expanded">
+	                      <i class="toggle fa fa-minus"></i>
+	                  </div>
+	            </div>
+            </div>
+        </div>
+	</div>
+	
+	
+    <div class="page-title-wrapper">
+        <div class="container">
+
+            <p:outputPanel id="panelFilter" styleClass="card">
+            
+                <div class="filter-wrapper" id="filter">
+        
+                        <!--First row-->
+                        <div class="p-grid">
+
+                            <div class="p-col-4 p-md-4 ui-fluid">
+                                <h:outputText value="#{ui_labels['users.username']}" styleClass="form-label"/>
+                                <div class="ui-inputgroup ">
+                                    <p:inputText value="#{userList.params.username}" id="username"/>
+                                    <p:focus id="focusUsername" for="username" />	
+                                    <p:selectBooleanButton value="#{userList.params.usernameEQ}" title="#{ui_labels['users.usernameEQ']}"
+                                                           onLabel="#{ui_labels['general.yes']}" offLabel="#{ui_labels['general.no']}"
+                                                           onIcon="ui-icon-check" offIcon="ui-icon-close" styleClass="inputgroup-button"/>
+                                </div>
+                            </div>
+
+                            <div class="p-col-4 p-md-4 ui-fluid">
+                                <h:outputText value="#{ui_labels['users.names']}" styleClass="form-label"/>
+                                <p:inputText value="#{userList.params.names}"/>
+                            </div>
+                            
+                             <c:if test="${userList.renderArgType}">
+                                <div class="p-col-4 p-md-4 ui-fluid">
+                                    <h:outputText value="#{labels['userEdit.bisnessRol']}" styleClass="form-label"/>
+                                    <p:selectOneMenu id="tip" value="#{userList.params.type}">
+                                        <f:selectItem value="#{null}" itemValue="#{null}"/>
+                                        <f:selectItems value="#{userList.typeItemList}"/>
+                                    </p:selectOneMenu>
+                                </div>
+                              </c:if>
+                              <div class="p-col-4 p-md-4 ui-fluid">
+                                <h:outputText value="#{ui_labels['users.status']}" styleClass="form-label"/>
+                                <p:selectOneMenu id="stat" value="#{userList.params.status}">
+                                    <f:selectItem value="#{null}" itemValue="#{null}"/>
+                                    <f:selectItems value="#{userList.statusItemList}"/>
+                                </p:selectOneMenu>
+                            </div>
+
+                            <c:if test="${userList.renderArgGroup}">
+                                <div class="p-col-4 p-md-4 ui-fluid">
+                                    <h:outputText value="#{ui_labels['users.group']}" styleClass="form-label"/>
+                                    <p:selectOneMenu id="gr" value="#{userList.params.groupId}">
+                                        <f:selectItem value="#{null}" itemValue="#{null}"/>
+                                        <f:selectItems value="#{userList.groupsItemList}"/>
+                                    </p:selectOneMenu>
+                                </div>
+                            </c:if>
+                              <c:if test="${userList.renderArgGroup}">
+                                    <div class="p-col-1" >  
+                                     <h:outputLabel value="#{labels['userList.blockP']}"  styleClass="form-label"/>
+				                       <p:selectBooleanButton value="#{userList.blockPotreb}"   title="#{labels['userList.blockOnly']}"
+				                               onLabel="#{ui_labels['general.yes']}" offLabel="#{ui_labels['general.no']}"
+				                               onIcon="ui-icon-check" offIcon="ui-icon-close" styleClass="inputgroup-button"  >
+				                                 <p:ajax event="change" listener="#{userList.actionChangePrBlock()}"  update="@this"/>
+				                        </p:selectBooleanButton>   
+				                      </div>
+                              </c:if>
+                            
+ 
+                             <ui:remove>	<!--  
+                             <c:if test="${userList.extendedArgs}">
+                            	<ui:include src="/include/extendedUserListArgs.xhtml"/>
+                            </c:if>
+                           -->   </ui:remove>
+                           
+                            <div class="p-col-12 filter-buttons">
+                                <div class="left">
+                                    <p:commandButton id="btnSearch" action="#{userList.actionSearch()}" value="#{ui_labels['general.search']}" icon="fa fa-search" 
+                                    				 styleClass="btn-search p-mr-3" update="resultPanel" process="panelFilter"/>
+                                    <p:defaultCommand target="btnSearch"/>				 
+									
+									<p:commandButton action="#{userList.actionReset()}" icon="fa fa-eraser" value="#{ui_labels['general.clear']}" 
+													 styleClass="btn-clear margin-left ui-button-warning" update="formUserList"/>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                
+            </p:outputPanel>
+        </div>
+    </div>
+
+    <div class="content-wrapper margin-top">
+        <p:outputPanel id="resultPanel" styleClass="card">
+        
+        	<div>
+        		<p:commandButton id="btnNewPotreb" action="#{userList.goToDefinition(null)}" value="#{ui_labels['users.new']}" ajax="false" icon="fa fa-plus" styleClass="btn-new ui-button-success" rendered="false"/>
+        		
+        		<h:panelGroup rendered="#{userList.resultList != null}">
+	        		<span class="fa fa-ellipsis-v p-mx-2" />
+					<h:outputText value="Бр. резултати: #{userList.resultList.rowCount}" styleClass="form-label"/>
+        		</h:panelGroup>
+        	</div>
+                            
+            <p:dataTable id="tbl" var="row" value="#{userList.resultList}" lazy="true" rows="10" tableStyle="table-layout: auto" rendered="#{userList.resultList != null}"
+                         rowIndexVar="idx" sortMode="single" rowsPerPageTemplate="10,15,20,25,30"
+                         paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {Exporters} "
+                         paginator="true" paginatorPosition="bottom"
+                         emptyMessage="#{ui_labels['general.norows']}">
+                         
+                <f:facet name="{Exporters}"   >
+						
+						<div style="float: left" >
+						 :
+							<h:commandLink id="excel">
+								<h:graphicImage library="images" name="excel2.png" />
+								<p:dataExporter type="xls" target="tbl" fileName="userListXls" postProcessor="#{userList.postProcessXLS}"/>
+							</h:commandLink>
+
+							<h:commandLink id="pdf">
+								<h:graphicImage library="images" name="pdf.png" />
+						 	  	<p:dataExporter type="pdf"   target="tbl" fileName="userListPdf" encoding="windows-1251"
+			        					preProcessor="#{userList.preProcessPDF}" options="#{userList.pdfOptions()}"/>
+							</h:commandLink>
+
+							<h:commandLink id="csv">
+								<h:graphicImage library="images" name="csv.png" />
+								<p:dataExporter type="csv" target="tbl" fileName="userListCsv" encoding="CP1251" />
+							</h:commandLink>
+						  
+						</div>
+					 
+					</f:facet>
+
+                <p:column width="25">
+                    <f:facet name="header">
+                        <h:outputText value="#{ui_labels['general.No-symbol']}"/>
+                    </f:facet>
+                    <h:outputText value="#{idx + 1}"/>
+                </p:column>
+
+                <p:column width="31" exportable="false">
+                    <f:facet name="header"/>
+                    <p:commandButton action="#{userList.goToDefinition(row[0])}"  ajax="false"  icon="fa fa-fw fa-edit" styleClass="btn-new"  />
+               
+                </p:column>
+
+                <!-- Потребителско име -->
+                <p:column sortBy="#{row.username}" width="170">
+                    <f:facet name="header">
+                        <h:outputText value="#{ui_labels['users.username']}"/>
+                    </f:facet>
+                    <h:outputText value="#{row[1]}"/>
+                </p:column>
+
+                <!-- Имена -->
+                <p:column sortBy="#{row.names}">
+                    <f:facet name="header">
+                        <h:outputText value="#{ui_labels['users.names']}"/>
+                    </f:facet>
+                    <h:outputText value="#{row[2]}"/>
+                </p:column>
+
+                <!-- Роля за потребител -->
+                <p:column sortBy="#{row.user_type}" rendered="#{userList.renderColType}">
+                    <f:facet name="header">
+                        <h:outputText value="#{labels['userEdit.bisnessRol']}"/>
+                    </f:facet>
+                    <h:outputText value="#{systemData.decodeItem (Constants.CODE_CLASSIF_BUSINESS_ROLE, row[3], userList.currentLang, userList.currentDate)}"/>
+                </p:column>
+
+                <!--   Дата регистрация -->
+                <p:column sortBy="#{row.date_reg}" rendered="#{userList.renderColDateReg}">
+                    <f:facet name="header">
+                        <h:outputText value="#{ui_labels['users.dateReg']}"/>
+                    </f:facet>
+                    <h:outputText value="#{row[5]}">
+                        <f:convertDateTime pattern="dd.MM.yyyy" timeZone="#{userList.timeZone}"/>
+                    </h:outputText>
+                </p:column>
+
+               <ui:remove>  <!--  
+                <c:if test="${userList.extendedCols}">
+                    <ui:include src="/include/extendedUserListCols.xhtml"/>
+                </c:if>
+               -->      </ui:remove>
+               
+               <!-- Статус -->
+                <p:column sortBy="#{row.status}">
+                    <f:facet name="header">
+                        <h:outputText value="#{ui_labels['users.status']}"/>
+                    </f:facet>
+                    <h:outputText value="#{systemData.decodeItem (Constants.CODE_CLASSIF_STATUS_POTREB, row[4], userList.currentLang, userList.currentDate)}"/>
+                </p:column>
+
+            </p:dataTable>
+            
+        </p:outputPanel>
+    </div>
+
+</h:form>
+</html>

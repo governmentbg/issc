@@ -1,0 +1,181 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:jsf="http://xmlns.jcp.org/jsf">
+	
+	   <style type="text/css"> 
+
+		  .picklist-wide .ui-picklist-list {
+		    width: 320px;
+		}
+		
+    	</style>
+	
+  	<h:panelGroup id="ImportPanel" layout="block">
+  
+   
+
+		<h:panelGroup id="tablePanel1">
+		
+			<div class="title-group">
+				
+				<p:commandLink class="extended-search-toggle expanded"
+					onclick="toggleSection(this, '#versionEditForm:tabsVersion:tblImportsPanel')">
+					<h:outputText value="#{labels['importVersion.importVersion']} #{importVersii.mainBean.versionLang.ident}" />
+					<i class="fas fa-caret-right"></i>
+				</p:commandLink>
+			
+			</div>
+			<div jsf:id="tblImportsPanel">
+		 
+			        <p:growl   showDetail="true" escape="false"  >
+			            <p:autoUpdate/>
+			        </p:growl>
+			        <div class="p-col-12">
+             			<h:outputText value="Импорт на файлове с разширения: xls, xlsx, csv, html, pdf, ods, txt " styleClass="form-label"/>
+  		            </div>
+			        <div class="p-col-12">
+            			<h:outputText value="Избора на атрибути трябва точно да съответства на броя колони и реда им!!! " styleClass="form-label"/>
+  		            </div>
+            		<div class="p-col-12 ">	
+ 			    		<h:outputText value="Избор на атрибути за импорт:" styleClass="form-label req" />
+				        <p:pickList id="attributes" value="#{importVersii.attributes}" var="attributes" itemLabel="#{attributes}" itemValue="#{attributes}" transferOnCheckboxClick="true"
+				                     showSourceControls="false" showTargetControls="false" 
+				                     styleClass="picklist-wide">
+							<p:ajax event="transfer" listener="#{importVersii.onTransfer}" update="attributes"/>
+				 		</p:pickList>
+   		            </div>
+<ui:remove>	            
+				        <p:selectCheckboxMenu id="menu" value="#{importVersii.selectedItems}" label="Вид и ред на атрибутите във файла" style="min-width: 15rem"
+				               multiple="true" filter="true"  filterMatchMode="startsWith">
+			                <f:selectItems value="#{importVersii.versiis}" />
+				            <p:ajax event="change" update="selectedItemText,tabl " listener="#{importVersii.actionSelect}"/>
+ 				        </p:selectCheckboxMenu>
+				        <h:outputText id="selectedItemText" value="#{importVersii.selectedItems}" rendered="false"/>
+</ui:remove>			 	       
+		 	        <div class="p-col-4 p-md-4 ui-fluid">
+		 	            
+			    		<h:outputText value="Разделител:" />
+	
+						<h:inputText id="razdelitel" value="#{importVersii.razdelitel}" maxlength="2" size="3" style="min-width: 15rem" >
+				            <p:ajax event="change"   update="razdelitel " />
+						</h:inputText>
+					</div>
+<ui:remove>					<div class="p-grid">
+							<div class="p-col-12 p-md-6 p-lg-3">A</div>
+							<div class="p-col-12 p-md-6 p-lg-3">B</div>
+							<div class="p-col-12 p-md-6 p-lg-3">C</div>
+							<div class="p-col-12 p-md-6 p-lg-3">D</div>
+					</div>
+	</ui:remove>		
+					<div class="p-col-12 p-md-12 ui-fluid">
+				 		<p:fileUpload listener="#{importVersii.handleFileUpload}" mode="advanced" dragDropSupport="false"
+	                      update="tabl butoni attributes"   allowTypes="/(\.|\/)(txt|xls|xlsx|htm|html|csv|xml|pdf|json|docx|ods|odf)$/"
+	                      validateContentType="true"  label="Избери файл" cancelButtonTitle="Откажи" 
+	                     onupload="return confirm('Сигурен ли си?')" uploadLabel="Импорт" cancelLabel="Oтменете" 
+	                     onclick="PF('pbAjax').start();PF('startButton2').disable()"  ajax="true" 
+		                         widgetVar="startButton2"  
+	                     
+	                     />
+		
+					</div>
+					<div class="p-col-12 p-md-6 p-lg-3" jsf:id="butoni">
+						<p:commandButton icon="fas fa-save" action="#{importVersii.actionSave}" rendered="#{importVersii.errMe==null}"
+						      value="Запис" styleClass="p-mr-2"
+						      onclick="PF('pbAjax').start();PF('startButton3').disable()"  ajax="true" 
+		                         widgetVar="startButton3"  update="tabl butoni pdf"
+						      />
+						 <p:commandButton icon="fas fa-save" action="#{importVersii.actionVerification}"
+					      	value="Проверка" styleClass="p-mr-2"
+					      	 update="tabl butoni pdf"
+						        >
+						 </p:commandButton>
+						      	
+						  <br /><br />      
+				        <p:progressBar widgetVar="pbAjax" ajax="true" value="#{importVersii.progress}" id="pBar"
+				                       labelTemplate="{value}%" styleClass="p-mt-3" global="false" interval="500">
+				        </p:progressBar>
+						      
+		                <p:commandButton id="pdf" value="Печат на PDF" styleClass="mr-2 mb-2" rendered="#{importVersii.errMe!=null}">
+		  					<p:dataExporter type="pdf"  target="tabl" fileName="VersiPdf" encoding="windows-1251"
+								preProcessor="#{importVersii.preProcessPDF}" options="#{importVersii.pdfOptions()}" />						
+		                </p:commandButton>
+				        <div class="p-col-12">
+			                <p:selectOneRadio value="#{importVersii.insertType}" rendered="#{importVersii.errMe!=null}">
+			                    <f:selectItem itemLabel="Всички редове " itemValue="0"/>
+			                    <f:selectItem itemLabel="Само редовете с грешки" itemValue="1"/>
+			                    <p:ajax update="tabl " event="change" listener="#{importVersii.changeType}"/>
+			                </p:selectOneRadio>
+			            </div>
+		                
+					</div>
+					<div class="p-col-12 ">
+						<p:dataTable id="tabl" var="red" value="#{importVersii.importedRow}" 
+							emptyMessage="Празен файл" rowIndexVar="rkv" 
+							paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {Exporters}"
+							rows="10"  paginatorPosition="bottom"
+							paginatorAlwaysVisible="false" paginator="true"  >
+								
+							<p:column headerText="#{ui_labels['general.No-symbol']}" width="20">
+		                        <h:outputText value="#{rkv + 1}"/>
+		                    </p:column>
+			
+						    <p:column headerText="#{importVersii.selectedVersii[0]}"  width="10%" rendered="#{importVersii.selectedVersii[0] != null}">
+				                <h:outputText value="#{red[0]}" />
+				            </p:column>
+				
+				            <p:column headerText="#{importVersii.selectedVersii[1]}" rendered="#{importVersii.selectedVersii[1] != null}">
+				                <h:outputText value="#{red[1]}" />
+				            </p:column>
+					        <p:column headerText="#{importVersii.selectedVersii[2]}" rendered="#{importVersii.selectedVersii[2] != null}">
+				                <h:outputText value="#{red[2]}" />
+				            </p:column>
+					        <p:column headerText="#{importVersii.selectedVersii[3]}" rendered="#{importVersii.selectedVersii[3] != null}">
+				                <h:outputText value="#{red[3]}" />
+				            </p:column>
+					        <p:column headerText="#{importVersii.selectedVersii[4]}" rendered="#{importVersii.selectedVersii[4] != null}">
+				                <h:outputText value="#{red[4]}" />
+				            </p:column>
+					        <p:column headerText="#{importVersii.selectedVersii[5]}" rendered="#{importVersii.selectedVersii[5] != null}">
+				                <h:outputText value="#{red[5]}" />
+				            </p:column>
+					        <p:column headerText="#{importVersii.selectedVersii[6]}" rendered="#{importVersii.selectedVersii[6] != null}">
+				                <h:outputText value="#{red[6]}" />
+				            </p:column>
+				            <p:column headerText="#{importVersii.selectedVersii[7]}" rendered="#{importVersii.selectedVersii[7] != null}">
+				                <h:outputText value="#{red[7]}" />
+				            </p:column>
+				            <p:column headerText="#{importVersii.selectedVersii[8]}" rendered="#{importVersii.selectedVersii[8] != null}">
+				                <h:outputText value="#{red[8]}" />
+				            </p:column>
+					        <p:column headerText="#{importVersii.selectedVersii[9]}" rendered="#{importVersii.selectedVersii[9] != null}">
+				                <h:outputText value="#{red[9]}" />
+				            </p:column>
+				            <p:column headerText="#{importVersii.selectedVersii[10]}" rendered="#{importVersii.selectedVersii[10] != null}">
+				                <h:outputText value="#{red[10]}" />
+				            </p:column>
+				            <p:column headerText="#{importVersii.selectedVersii[11]}" rendered="#{importVersii.selectedVersii[11] != null}">
+				                <h:outputText value="#{red[11]}" />
+				            </p:column>
+				            <p:column headerText="#{importVersii.selectedVersii[12]}" rendered="#{importVersii.selectedVersii[12] != null}">
+				                <h:outputText value="#{red[12]}" />
+				            </p:column>
+				            <p:column headerText="#{importVersii.selectedVersii[13]}" rendered="#{importVersii.selectedVersii[13] != null}">
+				                <h:outputText value="#{red[13]}" />
+				            </p:column>
+				            <p:column headerText="#{importVersii.selectedVersii[14]}" rendered="#{importVersii.selectedVersii[14] != null}">
+				                <h:outputText value="#{red[14]}" />
+				            </p:column>
+				
+						
+						</p:dataTable>
+					</div>
+			</div>
+		</h:panelGroup>
+ 	
+	</h:panelGroup>
+	
+	
+</ui:composition>

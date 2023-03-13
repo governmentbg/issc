@@ -1,0 +1,100 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui" 
+	xmlns:jsf="http://xmlns.jcp.org/jsf"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components"
+	template="/templateSite/template.xhtml"
+	xmlns:c="http://java.sun.com/jstl/core">
+
+	<ui:define name="title">#{navTexts['/versionsListView.xhtml']}</ui:define>
+
+	<ui:define name="viewname">
+		<li>#{navTexts['/versionsListView.xhtml']}</li>
+	</ui:define>
+
+	<ui:define name="metadata">
+
+		<f:metadata>
+			<f:importConstants type="com.ib.nsiclassif.system.NSIConstants" />
+			<f:viewParam name="idObj" />
+			<f:viewParam name="lang" />
+			<f:viewParam name="locale" />
+		</f:metadata>
+
+	</ui:define>
+	
+	<ui:define name="panelInfo">
+		<h:outputText value="#{versionsListView.panelInfo}" />
+	</ui:define>
+
+	<ui:define name="content">
+	
+		<h:form id="formVersionsListView">
+
+				<div class="card">
+
+					<p:commandButton id="langButton" type="button" icon="fas fa-solid fa-globe" style="float: right; z-index: 1;"
+						value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_LANG, (param['lang']!=null?param['lang']:'1'), 1, null)}" />
+
+					<p:menu overlay="true" trigger="langButton" my="left top" at="left bottom">
+						<c:forEach items="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LANG, now, 1)}" var="lang">
+							<p:menuitem value="#{lang.tekst}" immediate="true" ajax="false" icon="fas fa-solid fa-flag"
+								outcome="#{view.viewId}?faces-redirect=true&amp;includeViewParams=true&amp;lang=#{lang.code}">
+							</p:menuitem>
+						</c:forEach>
+					</p:menu>
+
+					<p:tabMenu activeIndex="1">
+						<p:menuitem value="#{labels['classificationView.basicData']}" icon="fas fa-info"
+							outcome="classification?faces-redirect=true&amp;idObj=#{param['idObj']}&amp;lang=#{param['lang']}&amp;locale=#{param['locale']}">
+						</p:menuitem>
+						
+						<p:menuitem value="#{labels['classificEdit.versions']}" icon="fas fa-code-branch"
+							outcome="versionsList?faces-redirect=true&amp;idObj=#{param['idObj']}&amp;lang=#{param['lang']}&amp;locale=#{param['locale']}">
+						</p:menuitem>
+						
+						<p:menuitem value="#{labels['documentsListView.title']}" icon="fas fa-fw fa-files-o"
+							outcome="documentsList?faces-redirect=true&amp;idObj=#{param['idObj']}&amp;lang=#{param['lang']}&amp;locale=#{param['locale']}&amp;codeObj=#{NSIConstants.CODE_ZNACHENIE_JOURNAL_STAT_CLASSIF}">
+						</p:menuitem>
+					</p:tabMenu>
+
+					<h:panelGroup id="dataPanel" style="padding:0.5rem;">
+
+						<div class="p-grid ui-fluid p-align-end">
+
+							<p:dataTable id="tblVersionsList" var="row" value="#{versionsListView.versionsList}" rowIndexVar="idx"
+								emptyMessage="#{ui_labels['general.norows']}" sortMode="single" reflow="true">
+
+								<p:column width="5" exportable="false" headerText="#{ui_labels['general.No-symbol']}">
+									<h:outputText value="#{idx + 1}" />
+								</p:column>
+
+								<p:column width="10" exportable="false">
+									<h:link outcome="version.xhtml?faces-redirect=true&amp;idObj=#{row[0]}&amp;lang=#{param['lang']}&amp;locale=#{param['locale']}" title="#{ui_labels['general.view']}" >
+										<i class="fas fa-eye" style="vertical-align: middle; font-size: 20px"></i>										
+									</h:link>
+								</p:column>
+
+								<p:column width="150" headerText="#{labels['classificEdit.identVer']}">
+									<h:outputText value="#{row[1]}" />
+								</p:column>
+
+								<p:column width="400" headerText="#{labels['classificEdit.nameVer']}" >
+									<h:outputText value="#{row[2]}" />
+								</p:column>
+
+							</p:dataTable>
+
+						</div>
+
+					</h:panelGroup>
+
+				</div>
+
+		</h:form>
+
+	</ui:define>
+
+</ui:composition>

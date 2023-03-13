@@ -1,0 +1,70 @@
+<ui:composition 
+	xmlns="http://www.w3.org/1999/xhtml" 
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:jsf="http://xmlns.jcp.org/jsf"
+    xmlns:h="http://java.sun.com/jsf/html" 
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui" 
+    xmlns:pa="http://primefaces.org/mirage" 
+    xmlns:o="http://omnifaces.org/ui">
+    
+	<h:form id="topbarForm">
+	
+	<style type="text/css">
+    
+	    .global-search-dropdown.ui-autocomplete-panel .ui-autocomplete-table td {
+	    	border: none;
+	    	padding: 8px 10px;
+	    }
+	    
+	    .global-search-dropdown .ui-widget-content {
+	    	border: none;
+	    }
+	</style>
+	
+	
+	    <div class="layout-topbar">
+	        <div class="layout-topbar-wrapper">
+	            <div class="layout-topbar-left">
+	                <div class="layout-topbar-logo-wrapper">
+	                    <a href="classificationsList" class="layout-topbar-logo">
+	                        <p:graphicImage id="logoTopbar" name="images/logo_NSI.png" library="mirage-layout" />
+	                        <span class="app-name">#{labels['general.systemName']}</span>
+	                    </a>
+	                </div>
+	
+	                <a href="#" class="sidebar-menu-button">
+	                    <i class="fas fa-bars"></i>
+	                </a>
+	
+	                <a href="#" class="topbar-menu-mobile-button">
+	                    <i class="fas fa-ellipsis-v"></i>
+	                </a>
+	               
+	            </div>
+	            <div class="layout-topbar-right">
+	                
+	                <ul class="layout-topbar-actions">
+	              		<h:link outcome="#{view.viewId}" includeViewParams="true"  value="BG">
+			            	<f:param name="locale" value="bg"/>
+			            </h:link>==
+			            <h:link outcome="#{view.viewId}" includeViewParams="true"  value="EN">
+			            	<f:param name="locale" value="en"/>
+			            </h:link>
+	                    <li class="topbar-item profile-item">#{view.viewId}
+	                    
+	                      <p:commandLink action="versionView?faces-redirect=true&amp;includeViewParams=true"  actionListener="#{environment.setLanguage('bg')}"  ajax="false" immediate="true">БГ</p:commandLink>
+	            			<span class="separator">|</span>
+						  <p:commandLink action="versionView?faces-redirect=true&amp;includeViewParams=true" actionListener="#{environment.setLanguage('en')}"  ajax="false" immediate="true">EN</p:commandLink>
+	                        
+	                    </li>	 
+	                </ul>
+	            </div>
+	        </div>
+	    </div>
+	</h:form>
+    
+
+   
+
+</ui:composition>

@@ -1,0 +1,308 @@
+/* Add your customizations of layout here */
+
+/* Customization for the mobile topbar */
+@media (max-width: $mobileBreakpoint) {
+    .layout-wrapper {
+
+        .layout-topbar {
+            .layout-topbar-wrapper {
+                .layout-topbar-right {
+                    height: 75px;
+
+                    .layout-topbar-actions {
+                        height: 100%;
+                        @include flex-justify-center();
+
+                        .profile-item {
+                            display: flex;
+                        }
+                    }
+                }
+            }
+        }
+
+        &.layout-topbar-mobile-active {
+            .layout-rightpanel {
+                top: 150px;
+                height: calc(100% - 150px);
+            }
+            .layout-sidebar {
+                top: 150px;
+                
+                .layout-menu-container {
+                    height: calc(100% - 150px);
+                }
+            }
+        }
+    }
+}
+
+/* Smaller table padding */
+body {
+    .ui-datatable {
+        .ui-datatable-data {
+            > tr {
+                td {
+                    padding: 4px 10px;
+                }
+            }
+        }
+        thead {
+            th {
+                padding: 6px 10px;
+            }
+        }
+    }
+}
+
+/* Topbar in viewTemplate */
+.layout-wrapper.view-template {
+    
+    .layout-main {
+        margin-left: 0;
+    }
+
+    .layout-topbar {
+        width: 100%;
+        -webkit-box-shadow: 0 3px 5px 0 rgba(0, 0, 0, 0.1);
+        -moz-box-shadow: 0 3px 5px 0 rgba(0, 0, 0, 0.1);
+        box-shadow: 0 3px 5px 0 rgba(0, 0, 0, 0.1);
+
+        .layout-topbar-wrapper {
+            padding: 0 2em;
+            height: 75px;
+            flex-direction: row;
+            -webkit-box-orient: horizontal;
+            -webkit-box-shadow: 0 3px 5px 0 rgba(33, 35, 39, 0.15);
+            -moz-box-shadow: 0 3px 5px 0 rgba(33, 35, 39, 0.15);
+            box-shadow: 0 3px 5px 0 rgba(33, 35, 39, 0.15);
+
+            .layout-topbar-right {
+                display: block;
+                height: 75px;
+
+                .layout-topbar-actions {
+                    border-bottom: none;
+                }
+            }
+
+            .layout-topbar-left {
+                box-shadow: none;
+                padding: 0;
+
+                .layout-topbar-logo {
+                    display: -webkit-box;
+                    display: -ms-flexbox;
+                    display: flex;
+                    -webkit-box-align: center;
+                    -ms-flex-align: center;
+                    align-items: center;
+                }
+            }
+
+            .sidebar-menu-button, .topbar-menu-mobile-button {
+                display: none;
+            }
+        }
+
+        .layout-topbar-logo-wrapper {
+            .layout-topbar-logo {
+                img {
+                    height: 45px;
+                    width: 45px;
+                }
+                .app-name {
+                    font-size: 22.5px;
+                    color: $textColor;
+                    margin: 0 10px;
+                }
+            }
+        }
+    }
+}
+
+@media (min-width: 992px) {
+    .layout-wrapper.view-template .layout-main {
+        padding-top: 75px;
+    }
+}
+
+.login-body {
+    .login-content {
+		.night-switch {
+            .ui-button {
+                .fas,
+                .far {
+                    width: 32px;
+                    height: 32px;
+                    font-size: 32px;
+                    position: absolute;
+                    left: 50%;
+                    top: 50%;
+                    margin-top: -16px;
+                    margin-left: -16px;
+                }
+            }
+        }
+
+        .login-panel {
+            .login-panel-content {
+                .logo {
+                    img {
+                        width: 200px;
+                        margin-bottom: 1.5em;
+
+                        &.white {
+                            display: none;
+                        }
+                        &.dark {
+                            display: block;
+                        }
+                    }
+                }
+
+                h1 {
+                    font-size: 24px;
+                }
+            }
+        }
+    }
+}
+
+.login-body.layout-dark {
+    .login-content {
+        .login-panel {
+            .login-panel-content {
+                .logo {
+                    img {
+                        &.white {
+                            display: block;
+                        }
+                        &.dark {
+                            display: none;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media (min-width: 992px) {
+    .layout-wrapper.layout-horizontal {
+        .layout-topbar {
+            .layout-topbar-logo-wrapper {
+                .layout-topbar-logo {
+                    img {
+                        width: auto;
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 991px) {
+    .layout-wrapper {
+        .layout-topbar {
+            .layout-topbar-wrapper {
+                .layout-topbar-left {
+                    .layout-topbar-logo-wrapper {
+                        .layout-topbar-logo {
+                            img {
+                                width: auto;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+.layout-wrapper-static {
+    .layout-sidebar {
+        .sidebar-logo {
+            flex-flow: initial;
+            flex-wrap: wrap;
+        }
+    }
+}
+
+.layout-sidebar {
+    &.layout-sidebar-active {
+        .sidebar-logo {
+            flex-flow: initial;
+            flex-wrap: wrap;
+        }
+    }
+
+    .sidebar-logo {
+        height: 80px;
+        margin-top: 10px;
+
+        .app-name {
+            font-size: 18px;
+        }
+
+        img {
+            width: initial;
+        }
+    }
+}
+
+.ui-inputgroup.inputgroup-bordered {
+    & > .ui-inputnumber:not(:last-child) > .ui-inputtext,
+    & > .ui-selectonemenu:not(:last-child),
+    & > .ui-inputtext:not(:last-child) {
+        border-right: 1px solid #cccccc; 
+    }
+}
+
+.layout-footer {
+    .logo-text {
+        img {
+            width: auto;
+            height: 65px;
+        }
+    }
+}
+
+.layout-config {
+    width: $configMenuWidth;
+    transform: translate3d($configMenuWidth, 0px, 0px);
+
+    .layout-config-content {
+        .layout-themes {
+            > div {
+                padding: 0.5em;
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 1024px) {
+    .layout-config {
+        transform: translate3d($configMenuWidth, 0px, 0px);
+
+        &.layout-config-active {
+            transform: translate3d(0px, 0px, 0px);
+        }
+
+        .layout-config-close {
+            right: 29px;
+        }
+    }
+}
+
+.layout-breadcrumb {
+    .breadcrumb {
+        .route-bar-breadcrumb {
+            li {
+                i {
+                    font-size: 2em;
+                }
+            }
+        }
+    }
+}

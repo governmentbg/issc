@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:mytags="http://www.krasig.org/jedi"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components"
+	xmlns:of="http://omnifaces.org/functions"
+	xmlns:c="http://java.sun.com/jstl/core">
+
+<h:head>askjhds
+  	<ui:define name="metadata">
+		<f:metadata>
+			<f:importConstants type="com.ib.nsiclassif.system.NSIConstants" />
+		</f:metadata>
+	</ui:define>
+	<style>
+
+</style>
+</h:head>
+<body>
+	<p:separator />
+	alabala
+	<div class="p-grid ui-fluid">
+		<div class="p-col-2">
+			<p:outputLabel styleClass="form-label" for="huy" value="Alabala" />
+			<p:outputLabel styleClass="form-label" value="Alabala" />
+			<p:inputText value="aaa" id="huy" />
+
+		</div>
+		<div class="p-col-10">
+			<p:outputLabel styleClass="form-label" for="huy2" value="Baba meca" />
+			<p:inputText value="bbb" id="huy2" />
+			<p:inputText value="aaa" id="huy3" />
+		</div>
+		<div class="p-col-12 box">3</div>
+	</div>
+	<p:separator />
+
+	<h:form id="testForm">
+		<p:messages id="messages" showDetail="true" showSummary="true" />
+
+		<div class="p-grid ">
+			<div class="p-col-5">
+				<p:dataTable id="tblPos" value="#{testTree.positions}" var="row" widgetVar="tblPos"
+					selectionMode="single" rowKey="#{row.id}"
+					selection="#{testTree.selecteItem}" stickyHeader="true"
+					scrollRows="20" scrollable="true" virtualScroll="true"
+					scrollHeight="800" rows="40">
+					<p:ajax event="rowSelect" update="@form:detailsSelectedT" />
+					<c:if test="#{not empty testTree.parentPossitions}">
+						<f:facet name="header" rendered="fasle">
+
+							<ui:repeat var="parents" value="#{testTree.parentPossitions}"
+								varStatus="myVarStatus">
+								<div>
+
+									<p:spacer width="#{(parents.levelNumber-1)*20}" height="25" />
+									<p:commandLink
+										value="#{parents.code} #{of:abbreviate(parents.deffName, 50)}"
+										title="#{parents.deffName}"
+										action="#{testTree.actionSelectParent(myVarStatus.index)}"
+										process="@this" update="testForm:tblPos" />
+								</div>
+							</ui:repeat>
+
+						</f:facet>
+					</c:if>
+					<p:column width="30">
+						<p:commandButton icon="pi pi-angle-double-right" ajax="true"
+							disabled="false" partialSubmit="true"
+							rendered="#{row.indChild==1}"
+							action="#{testTree.actionGetChildren(row)}" process="@this"
+							update="tblPos">
+						</p:commandButton>
+					</p:column>
+					<p:column width="80">
+						#{row.code}
+					</p:column>
+					<p:column>
+						#{of:abbreviate(row.deffName, 50)}
+						</p:column>
+				</p:dataTable>
+			</div>
+			<div class="p-col-7">
+				<p:panel id="detailsSelectedT" widgetVar="detailsSelected">
+					
+
+					<div class="p-grid ">
+						<div class="p-col-12 ">
+							<p:toolbar rendered="#{testTree.selecteItem!=null}" >
+								<p:toolbarGroup align="left" >
+									<p:commandButton value="Запис" action="#{testTree.actionSave}" process="@widgetVar(detailsSelected)"
+										update="@widgetVar(tblPos)"
+										partialSubmit="true" icon="fas fa-save" styleClass="p-mr-2" />
+									
+									
+									<p:menuButton value="Добави">
+					                    <p:menuitem value="Преди" action="#{testTree.actionNewPos(NSIConstants.CODE_ZNACHENIE_INSERT_BEFORE)}" 
+					                    	update="@widgetVar(detailsSelected)" 
+					                    	process="@this"
+					                    	icon="pi pi-angle-up"/>
+					                    <p:menuitem value="След" action="#{testTree.actionNewPos(NSIConstants.CODE_ZNACHENIE_INSERT_AFTER)}" 
+					                    	update="@widgetVar(detailsSelected)" 
+					                    	process="@this"
+					                    	icon="pi pi-angle-down"/>
+					                    <p:menuitem value="Дете" action="#{testTree.actionNewPos(NSIConstants.CODE_ZNACHENIE_INSERT_AS_CHILD)}" ajax="false" icon="pi pi-angle-right"/>
+					                    
+					                </p:menuButton>
+					                
+								</p:toolbarGroup>
+								<p:toolbarGroup align="right">
+									<p:commandButton icon="fas fa-times" id="btnDelete"
+										
+										value="#{ui_labels['general.delete']}"
+										partialSubmit="true"
+										action="#{testTree.actionDeletePos()}"
+										styleClass="ui-button-danger p-ml-2">
+										<p:confirm header="#{ui_labels['general.comfirmation']}"
+											message="#{beanMessages['general.confirmDeleteMsg']}"
+											icon="fas fa-exclamation-triangle" />
+									</p:commandButton>
+								</p:toolbarGroup>
+							</p:toolbar>
+						</div>
+						<div class="p-col-3 ui-fluid">
+							<p:outputLabel form="inCodeT" value="Code" />
+							<p:inputText id="inCodeT" value="#{testTree.selectedPos.code}" />
+						</div>
+						<div class="p-col-9 ui-fluid">
+							<p:outputLabel form="inFullCodeT" value="Name" />
+							<p:inputText id="inFullCodeT"
+								value="#{testTree.selectedPos.codeFull}" />
+						</div>
+						<div class="p-col-12 ui-fluid">
+							<p:outputLabel form="inNameT" value="Name" />
+							<p:inputText id="inNameT"
+								value="#{testTree.selectedPos.langMap[(1).intValue()].offitialTitile}" />
+						</div>
+						<div class="p-col-12 ui-fluid">
+							<p:outputLabel form="inSomeShist" value="Some Shist" />
+							<p:inputTextarea id="inSomeShist" rows="5"
+								value="aa" />
+						</div>
+					</div>
+				</p:panel>
+			</div>
+		</div>
+
+		<ui:remove>
+			<div class="p-grid ui-fluid">
+				<div class="p-col-4">
+					<p:tree id="testTree" value="#{testTree.root}" var="node"
+						nodeVar="myNodeVar" selectionMode="single" cache="true"
+						dynamic="true" datakey="myDataKey">
+						<p:ajax event="expand" partialSubmit="true" process="@this"
+							listener="#{testTree.onNodeExpand}" />
+						<p:ajax event="select" update=":testForm:detailsSelected"
+							listener="#{testTree.onNodeSelect}" />
+						<p:treeNode id="tNode">
+							<h:outputText
+								value="#{node.code} (#{node.id}) = #{myNodeVar.rowKey} + #{data-rowkey}" />
+						</p:treeNode>
+					</p:tree>
+				</div>
+				<div class="p-col-8">
+					<p:panel id="detailsSelected" header="selected">
+						<p:commandButton action="#{testTree.test()}" process="@this"
+							update="@none" />
+						<div class="p-grid ui-fluid">
+							<div class="p-col-3">
+								<p:outputLabel form="inCodeS" value="Code" />
+								<p:inputText id="inCodeS" value="#{testTree.selected.data.code}" />
+							</div>
+							<div class="p-col-9">
+								<p:outputLabel form="inNameS" value="Name" />
+								<p:inputText id="inNameS"
+									value="#{testTree.selected.data.deffName}" />
+							</div>
+						</div>
+					</p:panel>
+				</div>
+			</div>
+		</ui:remove>
+		<div class="p-grid ui-fluid">
+			<div class="p-col-4" style="overflow: scroll; height: 600px;">
+				<p:tree id="testTreeV" value="#{testTree.rootV}" var="node"
+					selectionMode="single" cache="true" dynamic="true">
+					<p:ajax event="select" update=":testForm:detailsSelectedV"
+						listener="#{testTree.onNodeSelectV}" />
+					<p:treeNode id="treeNodV">
+
+						<h:outputText
+							value="[#{node.code}] &nbsp;&nbsp;   #{node.deffName}" />
+					</p:treeNode>
+				</p:tree>
+			</div>
+			<div class="p-col-8">
+				<p:panel id="detailsSelectedV" header="selected" rendered="false">
+					<div class="p-grid ui-fluid">
+						<div class="p-col-3">
+							<p:outputLabel form="inCode" value="Code" />
+							<p:inputText id="inCode"
+								value="#{testTree.selectedNodeV.data.code}" />
+						</div>
+						<div class="p-col-9">
+							<p:outputLabel form="inName" value="Name" />
+							<p:inputText id="inName"
+								value="#{testTree.selectedNodeV.data.deffName}" />
+						</div>
+					</div>
+				</p:panel>
+			</div>
+		</div>
+
+	</h:form>
+
+	<h:outputStylesheet name="css/primeicons.css" library="mirage-layout" />
+	<h:outputStylesheet name="css/primeflex.min.css"
+		library="mirage-layout" />
+
+	<h:outputStylesheet name="css/all.css" library="font-awesome" />
+	<h:outputStylesheet name="css/nsiclassif.css" />
+
+</body>
+</html>

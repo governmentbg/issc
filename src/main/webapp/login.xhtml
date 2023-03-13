@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" 
+	  xmlns:h="http://java.sun.com/jsf/html" 
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui">
+	<f:view locale="bg"/>
+    <h:head>
+        <f:facet name="first">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+            <meta name="apple-mobile-web-app-capable" content="yes" />
+            <link rel="icon" href="#{resource['images:nsi_logo_vector.png']}" />
+        </f:facet>
+        <title>#{labels['general.systemName']}</title>
+        <h:outputScript name="js/layout.js" library="mirage-layout" />
+
+        <script type="text/javascript">
+            //<![CDATA[
+            function changeMode() {
+                var body = $('.login-body');
+
+                if (body) {
+                    if (body.hasClass('layout-dark')) {
+                        body.removeClass('layout-dark').addClass('layout-light');
+                    } else {
+                        body.removeClass('layout-light').addClass('layout-dark');
+                    }
+                }
+            }
+            //]]>
+        </script>
+    </h:head>
+
+    <h:body styleClass="login-body layout-light">
+
+        <div class="login-content" style="background-image: none !important;">
+            <div class="night-switch">
+                <h:form>
+                    <p:button href="#" styleClass="dark-switch" icon="far fa-sun" onclick="changeMode(); return false;" />
+					<p:button href="#" styleClass="light-switch" icon="far fa-moon"  onclick="changeMode(); return false;" />
+                </h:form>
+            </div>
+            <div class="login-panel">
+                <div class="login-panel-content">
+                    <div class="logo">
+                        <p:graphicImage name="nsi_logo_vector.png" library="images" />
+                    </div>
+                    <h1>#{labels['general.systemName']}</h1>
+                     <div jsf:rendered="#{login.showChangePass}"><h1 style="font-size:20px">(#{labels['nsi.changePass']})</h1></div>
+                    <h:form styleClass="forms">
+                    
+                    	<div jsf:rendered="#{!login.showChangePass}">
+                   			
+                   			<p:focus for="username"/>
+                   			
+	                        <div class="login-input-wrapper">
+	                            <p:outputLabel for="username" value="#{ui_labels['general.user']}" />
+	                            <p:inputText id="username" placeholder="Type your username..." value="#{login.username}"/>
+	                           
+	                            <i class="fas fa-user" />
+	                        </div>
+	
+	                        <div class="login-input-wrapper">
+	                            <p:outputLabel for="password" value="#{ui_labels['general.password']}" />
+	                            <p:password id="password" placeholder="Type your password" feedback="false" value="#{login.password}" autocomplete="false"/>
+	                            <i class="fas fa-lock" />
+	                        </div>
+	
+	                        
+	
+	                        <div class="buttons">
+	                            <p:commandButton value="#{labels['nsi.login']}" action="#{login.actionLogin}" ajax="false"/>
+	                            <p:commandButton value="#{labels['nsi.loginEAuto']}" action="rest/eauth/login-saml"   ajax="false" onclick="samlLoginNew(event,'rest/eauth/login-saml')" />
+	                            
+	                           
+		                            <!-- <a  id="samlLogin" href='rest/eauth/login-saml'  onclick="samlLogin(event)" title="Препоръчваме използването на уеб браузърите Google Chrome или Internet Exploer">
+										#{labels['docu.loginEAuto']}
+									</a>  -->
+	                        </div>
+                        </div> 
+                        
+                        <p:messages />
+                        
+                        
+                        <div jsf:rendered="#{login.showChangePass}"> 
+							
+						
+							<div class="login-input-wrapper">
+								<p:outputLabel value="#{ui_labels['general.oldPass']}" />
+								<p:password value="#{login.oldPassword}" id="oldPassword" />
+								<i class="fas fa-lock" />
+							</div>
+							<div class="login-input-wrapper">
+								<p:outputLabel value="#{ui_labels['general.newPass']}" />
+								<p:password value="#{login.newPassword1}" id="newPassword1" />
+								<i class="fas fa-lock" />
+							</div>
+							<div class="login-input-wrapper">
+								<p:outputLabel value="#{ui_labels['general.confirmPass']}" />
+								<p:password value="#{login.newPassword2}" id="newPassword2" />
+								<i class="fas fa-lock" />
+							</div>
+							
+							<div class="buttons">
+								<p:commandButton ajax="false" value="#{ui_labels['general.change']}" action="#{login.actionChangePassword()}" />
+							</div>
+						</div>	
+						
+                    </h:form>
+                </div>
+            </div>
+
+            
+        </div>
+
+        <h:outputStylesheet name="css/layout-green-dark.css" library="mirage-layout" />
+        <h:outputStylesheet name="css/all.css" library="font-awesome" />
+		
+		<h:outputScript library="js" name="scripts.js"/>
+    </h:body>
+
+</html>

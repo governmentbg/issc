@@ -1,0 +1,59 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:jsf="http://xmlns.jcp.org/jsf"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+
+	<!-- FOOTER -->
+	<footer>
+		<div class="p-grid footer-links">
+			<div class="p-col-6 p-md-4">
+				<h4>#{labels['sidebar.contacts']}</h4>
+				
+				<div jsf:rendered="#{empty(param['locale']) or param['locale'] == 'bg'}">
+					<div>Национален статистически институт</div>
+					<div>ул. "П. Волов" № 2</div>
+					<div>София 1038, България</div>
+					<div>Контактен център:</div>
+					<div>*2021, (02) 9857 111</div>
+					<div>E-mail: Info@nsi.bg</div>
+				</div>
+					
+				<div jsf:rendered="#{!empty(param['locale']) and param['locale'] != 'bg'}">
+					<div>National Statistical Institute</div>
+					<div>P. Volov Str.2</div>
+					<div>1038 Sofia, Bulgaria</div>
+					<div>Phone: (+359 2) 9857 111</div>
+					<div>E-mail: Info@nsi.bg</div>
+				</div>
+				
+			</div>
+			<div class="p-col-6 p-md-4">
+				<h4>#{labels['footer.help']}</h4>
+				<ul>
+					<li><a href="publExtList?faces-redirect=true&amp;sect=#{NSIConstants.CODE_ZNACHENIE_SECT_HELP}&amp;locale=#{!empty(param['locale'])?param['locale']:'bg'}&amp;lang=#{!empty(param['lang'])?param['lang']:1}" class="contactsItem">#{labels['footer.userGuide']}</a></li>
+				</ul>
+			</div>
+			<div class="p-col-12 p-md-4">
+				<h4>#{labels['footer.liability']}</h4>
+				<ul>
+					<li><a href="publExtList?faces-redirect=true&amp;sect=#{NSIConstants.CODE_ZNACHENIE_SECT_TERMS_USE}&amp;locale=#{!empty(param['locale'])?param['locale']:'bg'}&amp;lang=#{!empty(param['lang'])?param['lang']:1}" class="contactsItem">#{labels['footer.conditions']}</a></li>
+					<li><a href="publExtList?faces-redirect=true&amp;sect=#{NSIConstants.CODE_ZNACHENIE_SECT_PRIVACY_POLICY}&amp;locale=#{!empty(param['locale'])?param['locale']:'bg'}&amp;lang=#{!empty(param['lang'])?param['lang']:1}" class="contactsItem">#{labels['footer.policy']}</a></li>
+					<li><a href="publExtList?faces-redirect=true&amp;sect=#{NSIConstants.CODE_ZNACHENIE_SECT_DECLARATION_ACCESSIBILITY}&amp;locale=#{!empty(param['locale'])?param['locale']:'bg'}&amp;lang=#{!empty(param['lang'])?param['lang']:1}" class="contactsItem">#{labels['footer.accesStatement']}</a></li>   
+					<li><a href="publExtList?faces-redirect=true&amp;sect=#{NSIConstants.CODE_ZNACHENIE_SECT_COOKIES}&amp;locale=#{!empty(param['locale'])?param['locale']:'bg'}&amp;lang=#{!empty(param['lang'])?param['lang']:1}" class="contactsItem">#{labels['footer.cookies']}</a></li>
+					<li><a href="publExtList?faces-redirect=true&amp;sect=#{NSIConstants.CODE_ZNACHENIE_SECT_LICENSE}&amp;locale=#{!empty(param['locale'])?param['locale']:'bg'}&amp;lang=#{!empty(param['lang'])?param['lang']:1}" class="contactsItem">#{labels['footer.license']}</a></li>
+				</ul>
+			</div>
+		</div>
+		
+		<!--  <p:divider />
+		
+		<div class="footer-social-bar">
+				<a href="https://www.facebook.com/nsibg" class="facebook" title="Виж Facebook профил"><i class="pi pi-facebook" style="font-size: 1.5em"></i></a>
+				<a href="https://www.youtube.com/user/bgnsi" class="youtube" title="Виж Youtube профил"><i class="pi pi-youtube" style="font-size: 1.5em"></i> </a>
+		</div> -->
+	</footer>
+
+</ui:composition>

@@ -1,0 +1,437 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui" xmlns:jsf="http://xmlns.jcp.org/jsf"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components"
+	template="/templateSite/template.xhtml"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:c="http://java.sun.com/jstl/core">
+
+	<ui:define name="title">#{navTexts['/position.xhtml']}</ui:define>
+
+	<ui:define name="viewname">
+		<li>#{navTexts['/position.xhtml']}</li>
+	</ui:define>
+
+	<ui:define name="metadata">
+		<f:metadata>
+			<f:importConstants type="com.ib.nsiclassif.system.NSIConstants" />
+			<f:viewParam name="lang" />
+			<f:viewParam name="idObj"/>
+			<f:viewParam name="locale"  />
+			<f:viewParam name="parent" />
+			<f:viewParam name="search_text"/>
+			<f:viewParam name="page"/>
+			<f:viewParam name="levels_page"/>
+			<f:viewParam name="search_text_pos" value="#{position.searchText}"/>
+		</f:metadata>
+	</ui:define>
+	
+	<ui:define name="head">
+		<style>
+			.boxDataHead {
+			  background-color: #e9ebf0	;
+			  text-align: center;
+			  padding-top: 1rem;
+			  padding-bottom: 1rem;
+			  font-weight: bold;
+			  font-size: 1.2em;
+			  /* border-radius: 4px; */
+			  /* box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12); */
+			}
+			.boxDataP {
+			  background-color: #f5f6f7	;
+			  text-align: left;
+			  padding-top: 1rem;
+			  padding-bottom: 1rem;
+			  padding-left: 1rem;
+			  padding-right: 1rem;
+			  /* border-radius: 4px; */
+			  /* box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12); */
+			}
+			.boxDataPosLabel {
+			  background-color: #e9ebf0	;
+			  text-align: left;
+			  padding-top: 0.5rem;
+			  padding-bottom: 0.5rem;
+			  padding-left: 1rem;
+			  padding-right: 1rem;
+			  /* border-radius: 4px; */
+			  /* box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12); */
+			}
+			.p-nogutterCustom {
+			  margin-right: 0;
+			  margin-left: 0;
+			  margin-top: 0; }
+			
+			.p-nogutterCustom > .p-col,
+			.p-nogutterCustom > [class*="p-col-"] {
+			  padding:2px; }
+			  
+			  
+			body .ui-datatable .ui-datatable-data > tr > td{padding: 4px 10px;}  
+			
+			.noHeader.ui-datatable table thead tr {
+			    display: none;
+			}
+			
+			.selectedTr{background:#e9ebf0 !important;}
+		</style>
+		
+		<script>
+			var displayMod = false;
+			var resizeId;
+			
+			$(document).ready(changeResolution);
+			$(window).on('resize', function() { //alert(window.innerWidth);
+			    clearTimeout(resizeId);
+			    resizeId = setTimeout(changeResolution, 100);
+				
+			});
+	
+			function changeResolution(){ var pos = #{param['position']}+'';
+				if(window.innerWidth &lt;= 1199){
+					if(!displayMod){
+					//	alert("za smqna "+window.innerWidth);
+						displayMod = true
+	
+						if(typeof pos !== 'undefined' &amp;&amp; pos){
+							//alert(pos);
+							document.getElementById('panel_position').style.display = "none";
+							document.getElementById('panel_detail_pos').style.display = "block";
+	
+							
+						} else {
+							document.getElementById('panel_detail_pos').style.display = "none";
+						}
+	
+	
+						document.getElementById('nav_'+pos).style.display = "block";
+					}
+				} else {
+					if(displayMod){ //alert("za smqna "+window.innerWidth);
+						displayMod = false;
+						if(typeof pos !== 'undefined' &amp;&amp; pos){
+							document.getElementById('panel_position').style.display = "block";
+						}
+						document.getElementById('panel_detail_pos').style.display = "block";
+					}
+					
+					document.getElementById('nav_'+pos).style.display = "none";
+				}
+			}
+		</script>
+	</ui:define>
+	
+	<ui:define name="panelInfo">
+		<h:outputText value="#{position.panelInfo}" />
+	</ui:define>
+	
+	<ui:define name="content">
+
+		<h:form id="position">
+
+				<div class="card">
+
+					<p:commandButton id="langButton" type="button" icon="fas fa-solid fa-globe" style="float: right; z-index: 1;"
+						value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_LANG, (param['lang']!=null?param['lang']:'1'), 1, null)}" />
+
+					<p:menu overlay="true" trigger="langButton" my="left top" at="left bottom" id="menuLangClass">
+						<c:forEach items="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LANG, now, 1)}" var="lang" >
+							<p:menuitem value="#{lang.tekst}" immediate="true" ajax="false" icon="fas fa-solid fa-flag"
+								outcome="#{view.viewId}?faces-redirect=true&amp;includeViewParams=true&amp;lang=#{lang.code}&amp;changeLang=1&amp;position=#{position.positionId}">
+							</p:menuitem>
+						</c:forEach>
+					</p:menu>
+
+					<p:tabMenu activeIndex="1">
+						<p:menuitem value="#{labels['versionView.mainData']}"
+							includeViewParams="true" icon="fas fa-info"
+							outcome="version.xhtml?faces-redirect=true&amp;idObj=#{position.idVersion}&amp;lang=#{position.lang}">
+						</p:menuitem>
+						
+						<p:menuitem value="#{labels['versionView.position']}" includeViewParams="true" icon="fas fa-code-branch"
+							outcome="position.xhtml?faces-redirect=true">
+						</p:menuitem>
+						
+						<p:menuitem value="#{labels['classificEdit.correspondList']}"
+							includeViewParams="true" icon="fas fa fa-table"
+							outcome="correspTableList?faces-redirect=true&amp;idObj=#{position.idVersion}&amp;lang=#{position.lang}">
+						</p:menuitem>					
+						
+						<p:menuitem value="#{labels['documentsListView.title']}" includeViewParams="true" icon="fas fa-fw fa-files-o"
+							outcome="documentsList?faces-redirect=true&amp;idObj=#{position.idVersion}&amp;lang=#{position.lang}&amp;codeObj=#{NSIConstants.CODE_ZNACHENIE_JOURNAL_STAT_VERSION}">
+						</p:menuitem>
+						
+						
+					</p:tabMenu>
+
+			
+
+						<div class="p-grid p-nogutterCustom ui-fluid"  style="padding-top:1rem;">
+							<div class="p-col-12 ">
+								<div class="ui-inputgroup">
+									<ui:remove>
+										<!-- 
+											<p:inputText value="#{position.searchString}" id="searchImput"  style="width:200px;" />
+											<p:linkButton outcome="position" icon="fa fa-search" title="#{ui_labels['general.search']}"  includeViewParams="true">
+							                	<f:viewParam  name="search_text11" value="#{position.searchString}"/>
+							                </p:linkButton>
+						                 -->
+					                </ui:remove>
+	                                 <!--  <p:spacer width="20px"></p:spacer> -->
+	                                 
+									 <p:menuButton   ajax="false"   value="#{labels['export.fullExport']}" styleClass="ui-button-success" >
+									 <p:menuitem value="ODS" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFiles?idObj=#{position.idVersion}&amp;typeObj=version&amp;pos=positions&amp;format=ods">
+							             </p:menuitem>
+							            <p:menuitem value="Excel" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFiles?idObj=#{position.idVersion}&amp;typeObj=version&amp;pos=positions&amp;format=xlsx">
+							             </p:menuitem>
+							            <p:menuitem value="PDF" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFiles?idObj=#{position.idVersion}&amp;typeObj=version&amp;pos=positions&amp;format=pdf">
+							             </p:menuitem>
+							            <p:menuitem value="HTML" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFiles?idObj=#{position.idVersion}&amp;typeObj=version&amp;pos=positions&amp;format=html">
+							             </p:menuitem>
+							            <p:menuitem value="CSV" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFiles?idObj=#{position.idVersion}&amp;typeObj=version&amp;pos=positions&amp;format=csv">
+							             </p:menuitem>
+							            <p:menuitem value="TXT" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFiles?idObj=#{position.idVersion}&amp;typeObj=version&amp;pos=positions&amp;format=txt">
+							             </p:menuitem>
+							            <p:menuitem value="SDMX" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFiles?idObj=#{position.idVersion}&amp;typeObj=version&amp;pos=positions&amp;format=sdmx">
+							             </p:menuitem>
+							            <p:menuitem value="SDMX-JSON" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFiles?idObj=#{position.idVersion}&amp;typeObj=version&amp;pos=positions&amp;format=sdmx-json">
+							             </p:menuitem>
+							          
+							            
+							        </p:menuButton>
+								</div>
+							</div>
+							
+							<div class="p-col-12 p-xl-7">
+							
+								<div class="ui-inputgroup">
+									
+									<p:commandButton id="searchOpt" icon="pi pi-cog" type="button"  title="Настройки на търсенето" styleClass="ui-button-outlined ui-button-secondary"/>
+									
+									<p:inputText value="#{position.searchText}" id="searchText" onclick="$('#searchOpt').hide();" placeholder="Търсене в позиции"/>
+									
+									<p:commandButton icon="fas fa-search" action="position?faces-redirect=true&amp;includeViewParams=true" ajax="false"
+										title="#{ui_labels['general.search']}"/>
+										
+									<p:commandButton icon="fas fa-fw fa-eraser" title="#{ui_labels['general.clear']}" styleClass="ui-button-warning"
+										 action="position?faces-redirect=true&amp;includeViewParams=true" ajax="false"/>
+									
+									
+								</div>
+								
+								 <p:overlayPanel for="searchOpt" style="width:350px;">
+								 	<div class="p-pb-2">
+								 		<p:selectBooleanCheckbox value="#{position.optionFindCod}" id="fcod"/> <p:outputLabel value=" Търсене в Код" for="fcod"/>
+                                	</div>
+                                	<div>
+										<p:selectBooleanCheckbox value="#{position.optionFindName}"  id="fname"/><p:outputLabel value=" Търсене в Официално наименование" for="fname"/>
+									</div>
+								 </p:overlayPanel>
+							</div>
+							
+							<c:if test="#{not empty position.parentPossitions}">
+							<div class="p-col-12 ">
+								<div class="boxDataP">
+									<ui:repeat var="parents" value="#{position.parentPossitions}" varStatus="myVarStatus">
+										<div id="nav_#{parents.id}" style="#{param['position']!=null and (myVarStatus.index+1)==position.parentPossitions.size()?'display:none':''}">
+											
+											<p:spacer width="#{(myVarStatus.index)*20}" height="25" /> 
+											<ui:remove>
+											<!-- 
+											<p:commandLink 
+											action="#{position.actionSelectParent(myVarStatus.index)}" process="@this" update="position:tblPosition" >
+												<i class="fa fa-minus" aria-hidden="true"></i>
+												<h:outputText value="#{parents.code} #{parents.name}" />
+											</p:commandLink>
+											 -->
+											</ui:remove>
+											<p:link outcome="position" includeViewParams="true" style="padding-right:10px">
+												<i class="fa fa-minus" aria-hidden="true"></i>
+												<f:param name="parent" value="#{parents.idParent}"/>
+												<f:param name="page" value="#{position.mapPages[parents.idParent.intValue()]}" />
+											</p:link>
+											<h:outputText value="#{parents.code} #{parents.name} #{parents.idParent} " />
+										</div>
+									</ui:repeat>
+								 </div>
+							</div>
+							</c:if>
+							
+							<div class="p-col-12 p-xl-7" id="panel_position">
+								
+								<p:dataTable id="tblPosition" value="#{position.positionsTable}" var="row" widgetVar="tblPos"
+									rowKey="#{row.id}"  styleClass="noHeader" rowStyleClass="#{param['position']==row.id?'selectedTr':''}"
+									 >
+									
+									
+									<p:column style="width:32px;text-align: center " >
+										<ui:remove>
+										<!-- 
+										<p:commandLink  ajax="true" disabled="false" 
+												 partialSubmit="true" rendered="#{row.indChild==1}"
+												action="#{position.actionGetChildren(row)}" process="@this" update="position:tblPosition"> 
+												<i class="fa fa-plus" aria-hidden="true"></i>
+										</p:commandLink>
+										 -->
+										</ui:remove>
+										
+										<p:link outcome="position" includeViewParams="true"  rendered="#{row.indChild==1}">
+											<i class="fa fa-plus" aria-hidden="true"></i>
+											<f:param name="parent" value="#{row.id}"/>
+											<f:param name="page" value="1" />
+											<f:param name="levels_page" value="#{position.levelsPage}"/>
+										</p:link>
+									</p:column>
+									<p:column style="width:52px;text-align: center">
+										<ui:remove>
+										<!-- 
+						                <p:commandButton update="position:detailsSelectedS" styleClass="ui-button-flat"
+						                                 oncomplete="PF('detailPosition').show()"
+						                                 icon="pi pi-search" title="View" partialSubmit="true" process="@this" rendered="false">
+						                    <f:setPropertyActionListener value="#{row}"  target="#{position.selectedNode}"/>
+						                </p:commandButton>
+						                 -->
+										</ui:remove>
+						                <ui:remove>
+										<!-- 
+						                <p:linkButton outcome="detail" icon="pi pi-search" title="View" styleClass="ui-button-flat" includeViewParams="true">
+						                	<f:param name="position" value="#{row.id}"/>
+						                </p:linkButton>
+						                 -->
+										</ui:remove>
+										
+										<p:linkButton outcome="position" icon="fas fa-eye" title="View" styleClass="ui-button-flat" includeViewParams="true">
+						                	<f:param name="position" value="#{row.id}"/>
+						                </p:linkButton>
+						            </p:column>
+									<p:column >
+										<h:outputText value="#{row.code}" styleClass="p-mr-4"/>
+										
+										<h:outputText value="#{row.name}" />
+									</p:column>
+								</p:dataTable>
+								
+								<div class="p-grid p-nogutter" jsf:rendered="#{position.resultSize>position.rows}">
+									<div class="p-col-6">
+										#{position.pageInfo}
+									</div>
+									<div class="p-col-6" style="text-align:right">
+										<p:link outcome="position" includeViewParams="true" disabled="#{position.page &lt; 2}">
+											<i class="fas fa-angle-left" aria-hidden="true"></i> Предишна..
+											<f:param value="#{position.page-1}" name="page"/>
+										</p:link>
+										|
+										<p:link outcome="position" includeViewParams="true"  disabled="#{position.page >= position.maxPage}">
+											Следваща.. <i class="fas fa-angle-right" aria-hidden="true"></i>
+											<f:param value="#{position.page+1}" name="page"/>
+										</p:link>
+									</div>
+								</div>
+						    </div>
+						   
+							<div class="p-col-12 p-xl-5" id="panel_detail_pos">
+							
+								<div class="p-grid p-nogutterCustom ui-fluid" jsf:id="detailsSelectedS">
+										
+										<div class="p-col-12">
+											<div class="boxDataHead"><h:outputText value="#{labels['position.metadata']}"/></div>
+											
+										</div>
+									
+										<div class="p-col-12  #{!position.schemePosAttr[(2).intValue()] and !position.schemePosAttr[(3).intValue()]?'p-lg-12':'p-lg-4'}">
+											<div class="boxDataPosLabel"><h:outputText value="#{labels['position.code']}" styleClass="form-label "/></div>
+											<div class="boxDataP"><h:outputText value="#{position.selectedNode.code}" /> </div>
+										</div>
+										
+									
+										<div class="p-col-12 p-lg-4 " jsf:rendered="#{position.schemePosAttr[(2).intValue()]}">
+											<div class="boxDataPosLabel"><h:outputText value="#{labels['position.fullCode']}"  styleClass="form-label"/></div>
+											<div class="boxDataP"><h:outputText id="inFullCodeT" value="#{position.selectedNode.codeFull}" /></div>
+										</div>
+										
+										<div class="p-col-12 p-lg-4" jsf:rendered="#{position.schemePosAttr[(3).intValue()]}">
+											<div class="boxDataPosLabel"><h:outputText value="#{labels['position.codeSeparators']}"  styleClass="form-label"/></div>
+											<div class="boxDataP"><h:outputText id="codeSeparate" value="#{position.selectedNode.codeSeparate}" /></div>
+										</div>
+										
+										<div class="p-col-12" >
+											<div class="boxDataPosLabel"><h:outputText value="#{labels['position.offiName']}" styleClass="form-label" /></div>
+											<div class="boxDataP"><h:outputText id="inNameT" value="#{position.selectedNode.langMap[(position.lang).intValue()].offitialTitile}" escape="false"/></div>
+										</div>
+										<div class="p-col-12" jsf:rendered="#{position.schemePosAttr[(12).intValue()]}">
+											<div class="boxDataPosLabel"><h:outputText value="#{labels['position.shortTitle']}"  styleClass="form-label"/></div>
+											<div class="boxDataP"><h:outputText id="inNameST" value="#{position.selectedNode.langMap[(position.lang).intValue()].shortTitle}" escape="false"/></div>
+										</div>
+										<div class="p-col-12" jsf:rendered="#{position.schemePosAttr[(13).intValue()]}">
+											<div class="boxDataPosLabel"><h:outputText value="#{labels['position.longTitle']}"  styleClass="form-label" /></div>
+											<div class="boxDataP"><h:outputText id="inNameLT" 
+												value="#{position.selectedNode.langMap[(position.lang).intValue()].longTitle}" escape="false"/></div>
+										</div>
+										<div class="p-col-12" jsf:rendered="#{position.schemePosAttr[(14).intValue()]}">
+											<div class="boxDataPosLabel"><h:outputText value="#{labels['position.alternativeNames']}"  styleClass="form-label"/></div>
+											<div class="boxDataP"><h:outputText id="alternativeNames"
+												value="#{position.selectedNode.langMap[(position.lang).intValue()].alternativeNames}" escape="false"/></div>
+										</div>
+										<div class="p-col-12 p-lg-6" jsf:rendered="#{position.schemePosAttr[(7).intValue()]}">
+											<div class="boxDataPosLabel"><h:outputText value="#{labels['position.unitbg']}"  styleClass="form-label"/></div>
+											<div class="boxDataP">
+												<h:outputText value="#{position.unitNac}" escape="false"/>
+											</div>
+										</div>
+										<div class="p-col-12 p-lg-6" jsf:rendered="#{position.schemePosAttr[(8).intValue()]}">
+											<div class="boxDataPosLabel"><h:outputText value="#{labels['position.unit']}"  styleClass="form-label"/></div>
+											<div class="boxDataP">
+												<h:outputText value="#{position.unitEU}" escape="false"/>
+											</div>
+										</div>
+										
+										<div class="p-col-12" jsf:rendered="#{position.schemePosAttr[(16).intValue()]}">
+											<div class="boxDataPosLabel"><h:outputText value="#{labels['position.includes']}"  styleClass="form-label"/></div>
+											<div class="boxDataP"><h:outputText value="#{position.selectedNode.langMap[(position.lang).intValue()].includes}" escape="false"/></div>
+										</div>
+										<div class="p-col-12" jsf:rendered="#{position.schemePosAttr[(17).intValue()]}">
+											<div class="boxDataPosLabel"><h:outputText value="#{labels['position.alsoIncludes']}"  styleClass="form-label"/></div>
+											<div class="boxDataP"><h:outputText value="#{position.selectedNode.langMap[(position.lang).intValue()].alsoIncludes}" escape="false"/></div>
+										</div>
+										<div class="p-col-12" jsf:rendered="#{position.schemePosAttr[(18).intValue()]}">
+											<div class="boxDataPosLabel"><h:outputText value="#{labels['position.excludes']}"  styleClass="form-label"/></div>
+											<div class="boxDataP"><h:outputText value="#{position.selectedNode.langMap[(position.lang).intValue()].excludes}" escape="false"/></div>
+										</div>
+										<div class="p-col-12" jsf:rendered="#{position.schemePosAttr[(19).intValue()]}">
+											<div class="boxDataPosLabel"><h:outputText value="#{labels['position.rules']}"  styleClass="form-label"/></div>
+											<div class="boxDataP"><h:outputText value="#{position.selectedNode.langMap[(position.lang).intValue()].rules}" escape="false"/></div>
+										</div>
+										<div class="p-col-12" jsf:rendered="#{position.schemePosAttr[(15).intValue()]}">
+											<div class="boxDataPosLabel"><h:outputText value="#{labels['position.comment']}"  styleClass="form-label"/></div>
+											<div class="boxDataP"><h:outputText value="#{position.selectedNode.langMap[(position.lang).intValue()].comment}" escape="false" /></div>
+										</div>
+										<div class="p-col-12" jsf:rendered="#{position.schemePosAttr[(21).intValue()]}">
+											<div class="boxDataPosLabel"><h:outputText value="#{labels['position.statPokazatel']}"  styleClass="form-label"/></div>
+											<div class="boxDataP"><h:outputText value="#{position.selectedNode.langMap[(position.lang).intValue()].statPokazatel}" /></div>
+										</div>
+										<div class="p-col-12" jsf:rendered="#{position.schemePosAttr[(20).intValue()]}">
+											<div class="boxDataPosLabel"><h:outputText value="#{labels['position.prepratka']}"  styleClass="form-label"/></div>
+											<div class="boxDataP"><h:outputText value="#{position.selectedNode.langMap[(position.lang).intValue()].prepratka}" /></div>
+										</div>
+									</div>
+							
+							
+							
+							
+							</div>
+						</div>
+						
+						
+						
+					
+				
+				</div>
+			
+		</h:form>
+	
+	</ui:define>
+
+</ui:composition>

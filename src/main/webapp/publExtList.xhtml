@@ -1,0 +1,304 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:jsf="http://xmlns.jcp.org/jsf"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components"
+	template="/templateSite/template.xhtml">
+
+	<ui:define name="title">#{systemData.decodeItem(NSIConstants.CODE_SYSCLASS_SECT_PUBL, publExtList.codeSection, publExtList.lang, now)}</ui:define>
+
+	<ui:define name="panelInfo">
+		<h:form id="searchForm">
+
+			<h:outputText
+				value="#{systemData.decodeItem(NSIConstants.CODE_SYSCLASS_SECT_PUBL, publExtList.codeSection, publExtList.lang, now)}"
+				styleClass="section-title" />
+
+			<h:panelGroup id="panelFilter" styleClass="searchFilter"
+				layout="block">
+
+				<div class="p-grid ui-fluid p-align-end">
+					<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12 ui-fluid">
+						<div class="ui-inputgroup">
+
+							<p:inputText id="idTitle2" value="#{publExtList.titleF}"
+								placeholder="#{labels['section.title']}" />
+
+							<p:commandButton title="#{ui_labels['general.search']}"
+								id="btnSearch" icon="fa fa-search"
+								action="#{publExtList.actionFind()}" update="formExtList" />
+
+							<p:commandButton title="#{ui_labels['general.clear']}"
+								id="btnClear" partialSubmit="true" icon="fa fa-times"
+								styleClass="ui-button-warning"
+								action="#{publExtList.actionClear()}" update="formExtList"
+								ajax="false" />
+						</div>
+					</div>
+
+					<div class="p-col-12 p-sm-12 p-md-12 p-lg-12  ui-fluid">
+						<div class="link-group toggle">
+							<p:commandLink onclick="toggle();">
+								<h:outputText value="#{labels['general.extend']}" />
+								<i class="fas fa-caret-right arrow"></i>
+							</p:commandLink>
+						</div>
+
+						<div class="fields">
+							<div class="p-grid ui-fluid p-align-end">
+								<div class="p-col-12 p-sm-12 p-md-3 p-lg-3  ui-fluid">
+									<p:selectOneMenu id="idPer" value="#{publExtList.period}">
+										<f:selectItem itemLabel="-- #{labels['section.period']} --"
+											itemValue="#{null}" />
+										<f:selectItems
+											value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_PERIOD_NOFUTURE, publExtList.currentDate, publExtList.lang)}"
+											var="clPer" itemLabel="#{clPer.tekst}"
+											itemValue="#{clPer.code}" />
+										<p:ajax event="change"
+											update="searchForm:idPer searchForm:dateOt searchForm:dateDo"
+											listener="#{publExtList.changePeriod()}" />
+									</p:selectOneMenu>
+								</div>
+
+								<div class="p-col-12 p-sm-12 p-md-3 p-lg-3  ui-fluid">
+									<p:datePicker id="dateOt" pattern="dd.MM.yyyy" mask="true"
+										showIcon="true" timeZone="#{publExtList.timeZone}" locale="bg"
+										value="#{publExtList.dateFrom}"
+										label="#{labels['section.dateFrom']}"
+										placeholder="#{labels['section.dateFrom']}">
+										<p:ajax event="dateSelect"
+											listener="#{publExtList.checkDates(1)}"
+											update="searchForm:idPer searchForm:dateOt searchForm:dateDo" />
+										<p:ajax event="change" listener="#{publExtList.checkDates(1)}"
+											update="searchForm:idPer searchForm:dateOt searchForm:dateDo" />
+									</p:datePicker>
+								</div>
+
+								<div class="p-col-12 p-sm-12 p-md-3 p-lg-3  ui-fluid">
+									<p:datePicker id="dateDo" pattern="dd.MM.yyyy" mask="true"
+										showIcon="true" timeZone="#{publExtList.timeZone}" locale="bg"
+										value="#{publExtList.dateTo}"
+										label="#{labels['section.dateTo']}"
+										placeholder="#{labels['section.dateTo']}">
+										<p:ajax event="dateSelect"
+											listener="#{publExtList.checkDates(2)}"
+											update="searchForm:idPer searchForm:dateOt searchForm:dateDo" />
+										<p:ajax event="change" listener="#{publExtList.checkDates(2)}"
+											update="searchForm:idPer searchForm:dateOt searchForm:dateDo" />
+									</p:datePicker>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</h:panelGroup>
+		</h:form>
+	</ui:define>
+
+	<f:metadata>
+		<f:viewAction action="#{publExtControler.controlPublData}" />
+		<f:viewParam name="lang" />
+		<f:viewParam name="locale" />
+		<f:viewParam name="sect" />
+	</f:metadata>
+
+	<ui:define name="content">
+		<h:form id="formExtList">
+
+			<div class="card">
+				<div class="p-grid p-nogutter"
+					jsf:rendered="#{publExtList.pubListT.rowCount > 0}">
+					<h:outputText value="#{labels['general.reportResult']}: " />
+					<h:outputText value="#{publExtList.pubListT.rowCount}" />
+				</div>
+
+				<div class="p-grid p-nogutter"
+					jsf:rendered="#{publExtList.pubListT.rowCount eq 0}">
+					<h:outputText value="#{labels['general.norows']}" />
+				</div>
+
+
+				<p:dataView var="row" value="#{publExtList.pubListT}" id="tableGrid"
+					rows="10" paginator="true" paginatorPosition="bottom"
+					rowsPerPageTemplate="10,15,20,25" lazy="true"
+					rendered="#{publExtList.pubListT.rowCount > 0}"
+					paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+					gridIcon="pi pi-th-large" listIcon="pi pi-bars" flex="true">
+
+					<f:facet name="header">
+						<p:selectOneMenu id="idSort" value="#{publExtList.sortCol}"
+							rendered="#{publExtList.pubListT.rowCount > 0}"
+							style="float: right; margin-left: 5px;">
+							<f:selectItem itemLabel="-- #{labels['section.sortRep']} --"
+								itemValue="#{null}" />
+							<f:selectItem itemLabel="#{labels['section.title']}"
+								itemValue="A1" />
+							<f:selectItem itemLabel="#{labels['section.dateFrom']}"
+								itemValue="A4" />
+							<p:ajax event="itemSelect" update="tableGrid"
+								listener="#{publExtList.sortReport()}" />
+						</p:selectOneMenu>
+					</f:facet>
+
+					<p:dataViewListItem>
+						<div class="product-list-item">
+							<p:graphicImage value="#{publExtList.createImageCont(row[3],50)}"
+								stream="false" alt="no image" rendered="#{row[3] ne null}" />
+
+							<div class="product-list-detail">
+
+								<!--  Inform material and Images withOut Link-->
+								<ui:remove>
+									<div
+										jsf:rendered="#{row[6] != NSIConstants.CODE_ZNACHENIE_TYPE_PUBL_VIDEO and (row[7] == null and row[7] == '' and null eq row[5] and '' eq row[5]) }">
+										<a
+											href="publExtData?faces-redirect=true&amp;idPubl=#{row[0]}&amp;sect=#{publExtList.codeSection}"
+											class="publication-title"> <p:ajax event="click"
+												listener="#{publExtList.changePage()}" /> <h:outputText
+												value="#{row[1]}" escape="false" />
+										</a>
+									</div>
+								</ui:remove>
+
+								<div
+									jsf:rendered="#{row[6] ne NSIConstants.CODE_ZNACHENIE_TYPE_PUBL_VIDEO or null eq row[5] or '' eq row[5]}">
+									<a
+										href="publExtData?faces-redirect=true&amp;idPubl=#{row[0]}&amp;locale=#{publExtList.locale}&amp;sect=#{publExtList.codeSection}"
+										class="publication-title"> <p:ajax event="click"
+											listener="#{publExtList.changePage()}" /> <h:outputText
+											value="#{row[1]}" escape="false" />
+									</a>
+								</div>
+
+								<!--  Video with Link row[5] -->
+								<div
+									jsf:rendered="#{(null ne row[5] and '' ne row[5] ) and row[6] eq NSIConstants.CODE_ZNACHENIE_TYPE_PUBL_VIDEO}">
+									<a href="#{row[5]}" class="publication-title" target="blank">
+										<p:ajax event="click" listener="#{publExtList.changePage()}" />
+										<h:outputText value="#{row[1]}" escape="false" />
+									</a>
+								</div>
+
+								<!--  Inform material and Images with Link  	-->
+								<ui:remove>
+									<div
+										jsf:rendered="#{(null ne row[7] and row[6] ne NSIConstants.CODE_ZNACHENIE_TYPE_PUBL_VIDEO)}">
+										<a href="#{row[7]}=#{row[0]}" class="publication-title"> <p:ajax
+												event="click" listener="#{publExtList.changePage()}" /> <h:outputText
+												value="#{row[1]}" escape="false" />
+										</a>
+									</div>
+								</ui:remove>
+
+
+								<div class="product-name">
+									<h:outputText value="#{row[2]}" escape="false"
+										rendered="#{null ne row[2]}" />
+								</div>
+
+								<div class="product-description">
+									<i class="pi pi-calendar product-category-icon"></i>
+									<h:outputText value="#{labels['section.dateFrom']}: " />
+									<h:outputText value="#{row[4]}" rendered="#{row[4] ne null}">
+										<f:convertDateTime type="date" pattern="dd.MM.yyyy"
+											timeZone="" />
+									</h:outputText>
+								</div>
+							</div>
+						</div>
+					</p:dataViewListItem>
+
+					<p:dataViewGridItem>
+						<div class="product-grid-item card border-1">
+							<div class="product-grid-item-content">
+								<p:graphicImage
+									value="#{publExtList.createImageCont(row[3],50)}"
+									stream="false" alt="no image" width="100%"
+									rendered="#{row[3] ne null}"
+									class="publication-image fittable-image" />
+
+								<div class="product-list-detail">
+
+									<!--  Inform material and Images withOut Link-->
+									<ui:remove>
+										<div
+											jsf:rendered="#{row[6] != NSIConstants.CODE_ZNACHENIE_TYPE_PUBL_VIDEO and (row[7] == null and row[7] == '' and null eq row[5] and '' eq row[5]) }">
+											<a
+												href="publExtData?faces-redirect=true&amp;idPubl=#{row[0]}&amp;sect=#{publExtList.codeSection}"
+												class="publication-title"> <p:ajax event="click"
+													listener="#{publExtList.changePage()}" /> <h:outputText
+													value="#{row[1]}" escape="false" />
+											</a>
+										</div>
+									</ui:remove>
+
+									<div
+										jsf:rendered="#{row[6] ne NSIConstants.CODE_ZNACHENIE_TYPE_PUBL_VIDEO or null eq row[5] or '' eq row[5]}">
+										<a
+											href="publExtData?faces-redirect=true&amp;idPubl=#{row[0]}&amp;locale=#{publExtList.locale}&amp;sect=#{publExtList.codeSection}"
+											class="publication-title"> <p:ajax event="click"
+												listener="#{publExtList.changePage()}" /> <h:outputText
+												value="#{row[1]}" escape="false" />
+										</a>
+									</div>
+
+									<!--  Video with Link row[5] -->
+									<div
+										jsf:rendered="#{(null ne row[5] and '' ne row[5] ) and row[6] eq NSIConstants.CODE_ZNACHENIE_TYPE_PUBL_VIDEO}">
+										<a href="#{row[5]}" class="publication-title" target="blank">
+											<p:ajax event="click" listener="#{publExtList.changePage()}" />
+											<h:outputText value="#{row[1]}" escape="false" />
+										</a>
+									</div>
+
+									<!--  Inform material and Images with Link  	-->
+									<ui:remove>
+										<div
+											jsf:rendered="#{(null ne row[7] and row[6] ne NSIConstants.CODE_ZNACHENIE_TYPE_PUBL_VIDEO)}">
+											<a href="#{row[7]}=#{row[0]}" class="publication-title">
+												<p:ajax event="click" listener="#{publExtList.changePage()}" />
+												<h:outputText value="#{row[1]}" escape="false" />
+											</a>
+										</div>
+									</ui:remove>
+
+
+									<div class="product-name">
+										<h:outputText value="#{row[2]}" escape="false"
+											rendered="#{null ne row[2]}" />
+									</div>
+
+									<div class="product-description">
+										<i class="pi pi-calendar product-category-icon"></i>
+										<h:outputText value="#{labels['section.dateFrom']}: " />
+										<h:outputText value="#{row[4]}" rendered="#{row[4] ne null}">
+											<f:convertDateTime type="date" pattern="dd.MM.yyyy"
+												timeZone="" />
+										</h:outputText>
+									</div>
+								</div>
+
+							</div>
+
+						</div>
+					</p:dataViewGridItem>
+
+				</p:dataView>
+			</div>
+
+		</h:form>
+
+		<script>
+			function toggle() {
+				$(".searchFilter .fields").slideToggle();
+				$(".searchFilter .toggle .arrow").toggleClass("rotated");
+			}
+
+		</script>
+	</ui:define>
+</ui:composition>

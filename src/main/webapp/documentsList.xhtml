@@ -1,0 +1,203 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui" 
+	xmlns:jsf="http://xmlns.jcp.org/jsf"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components"
+	template="/templateSite/template.xhtml"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:c="http://java.sun.com/jstl/core">
+
+	<ui:define name="title">#{navTexts['/documentsListView.xhtml']}</ui:define>
+
+	<ui:define name="viewname">
+		<li>#{navTexts['/documentsListView.xhtml']}</li>
+	</ui:define>
+
+	<ui:define name="panelInfo">
+		<h:outputText value="#{documentsListView.panelInfo}" />
+	</ui:define>
+	
+	<ui:define name="content">
+
+		<f:metadata>
+			<f:importConstants type="com.ib.nsiclassif.system.NSIConstants" />
+			<f:viewParam name="idObj"/>			
+			<f:viewParam name="lang" />
+			<f:viewParam name="codeObj" />
+			<f:viewParam name="locale" />
+		</f:metadata>
+		
+		<style>
+		
+			.ui-dialog.docView-dialog .ui-dialog-titlebar {
+			   border-bottom: 1px solid #ced4da;				
+			}
+		
+		</style>
+		
+		<h:form id="formDocsListView">
+
+				<div class="card">
+					
+					<p:commandButton id="langButton" type="button" icon="fas fa-solid fa-globe" style="float: right; z-index: 1;"
+						value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_LANG, (param['lang']!=null?param['lang']:'1'), 1, null)}" />
+
+					<p:menu overlay="true" trigger="langButton" my="left top" at="left bottom">
+						<c:forEach items="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LANG, now, 1)}" var="lang">
+							<p:menuitem value="#{lang.tekst}" immediate="true" ajax="false"
+								icon="fas fa-solid fa-flag"
+								outcome="#{view.viewId}?faces-redirect=true&amp;includeViewParams=true&amp;lang=#{lang.code}">
+							</p:menuitem>
+						</c:forEach>
+					</p:menu>					
+
+					<p:tabMenu activeIndex="3">
+						<p:menuitem value="#{labels['classificationView.basicData']}" icon="fas fa-info" rendered="#{documentsListView.codeObject eq NSIConstants.CODE_ZNACHENIE_JOURNAL_STAT_CLASSIF}"
+							outcome="classification?faces-redirect=true&amp;idObj=#{param['idObj']}&amp;lang=#{param['lang']}&amp;locale=#{param['locale']}&amp;codeObj=#{NSIConstants.CODE_ZNACHENIE_JOURNAL_STAT_CLASSIF}">
+						</p:menuitem>
+
+						<p:menuitem value="#{labels['classificEdit.versions']}" icon="fas fa-code-branch" rendered="#{documentsListView.codeObject eq NSIConstants.CODE_ZNACHENIE_JOURNAL_STAT_CLASSIF}"
+							outcome="versionsList?faces-redirect=true&amp;idObj=#{param['idObj']}&amp;lang=#{param['lang']}&amp;locale=#{param['locale']}&amp;codeObj=#{NSIConstants.CODE_ZNACHENIE_JOURNAL_STAT_CLASSIF}">
+						</p:menuitem>
+						
+						<p:menuitem value="#{labels['versionView.mainData']}"  icon="fas fa-info"  rendered="#{documentsListView.codeObject eq NSIConstants.CODE_ZNACHENIE_JOURNAL_STAT_VERSION}"
+							outcome="version.xhtml?faces-redirect=true&amp;idObj=#{param['idObj']}&amp;lang=#{param['lang']}&amp;locale=#{param['locale']}&amp;codeObj=#{NSIConstants.CODE_ZNACHENIE_JOURNAL_STAT_VERSION}">
+						</p:menuitem>
+						
+						<p:menuitem value="#{labels['versionView.position']}"  icon="fas fa-code-branch" rendered="#{documentsListView.codeObject eq NSIConstants.CODE_ZNACHENIE_JOURNAL_STAT_VERSION}"
+							outcome="position?faces-redirect=true&amp;idObj=#{param['idObj']}&amp;lang=#{param['lang']}&amp;locale=#{param['locale']}&amp;codeObj=#{NSIConstants.CODE_ZNACHENIE_JOURNAL_STAT_VERSION}">
+						</p:menuitem>
+
+						<p:menuitem value="#{labels['classificEdit.correspondList']}"  icon="fas fa fa-table"  rendered="#{documentsListView.codeObject eq NSIConstants.CODE_ZNACHENIE_JOURNAL_STAT_VERSION}"
+							outcome="correspTableList?faces-redirect=true&amp;idObj=#{param['idObj']}&amp;lang=#{param['lang']}&amp;locale=#{param['locale']}&amp;codeObj=#{NSIConstants.CODE_ZNACHENIE_JOURNAL_STAT_VERSION}">
+						</p:menuitem>	
+						
+						<p:menuitem value="#{labels['documentsListView.title']}"  icon="fas fa-fw fa-files-o"
+							outcome="documentsList?faces-redirect=true&amp;idObj=#{param['idObj']}&amp;lang=#{param['lang']}&amp;locale=#{param['locale']}&amp;codeObj=#{documentsListView.codeObject}">
+						</p:menuitem>
+					</p:tabMenu>
+
+					<h:panelGroup id="dataPanel" style="padding:0.5rem;">
+
+						<div class="p-grid ui-fluid p-align-end">
+
+							<p:dataTable id="docsList" var="row" rowIndexVar="rkv" value="#{documentsListView.docsList}" rowKey="#{row[0]}" 
+								emptyMessage="#{labels['documentsListView.norowsDoc']}" >
+						
+								 <p:headerRow groupBy="#{row[0]}">				        	
+						            
+						            <p:column width="150">
+						            	<h:outputText value="#{labels['documentsListView.doc']}: " />
+						                <h:outputText value="#{row[1]}" />
+										<h:outputText value=" / #{row[2]}" rendered="#{row[2] ne null}">
+											<f:convertDateTime pattern="dd.MM.yyyy" type="date"/>
+										</h:outputText>										 
+						            </p:column>
+						            
+						            <p:column width="500">
+						            	<h:outputText value="#{labels['compObjectDocs.anot']}: " />
+						            	<h:outputText value="#{row[5]} " />
+						  				
+						  				<p:commandButton id="btnViewDoc" icon="fas fa-eye" styleClass="ui-button-raised" action="#{documentsListView.actionViewDocData(row[0])}"  
+							                update="formDocsListView:panelDoc" partialSubmit="true" process="formDocsListView:panelDoc @this" title="#{labels['documentsList.docData']}"/>								           							
+						            </p:column>
+						            
+						            <p:column width="150">
+						            	<h:outputText value="#{labels['compObjectDocs.type']}: " />
+										<h:outputText value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_DOC_TYPE, row[3], documentsListView.lang, now)}" />
+									</p:column>									
+									
+						        </p:headerRow>
+						        	
+								<p:column colspan="3" rendered="#{documentsListView.filesListInDoc[row[0]].size() > 0}">
+								
+									<h:outputText value="#{labels['general.files']}: " styleClass="form-label p-ml-3"/>
+									<p:repeat value="#{documentsListView.filesListInDoc[row[0]]}" var="file" >																		
+									<p:commandLink ajax="false" action="#{documentsListView.download(file)}" id="btnDownload">
+											<h:outputText value="#{file.filename}" />
+											<h:outputText value="; " rendered="#{documentsListView.filesListInDoc[row[0]].size() > 1}"/>
+											<f:param name="idObj" value="#{documentsListView.idObject}" />
+											<f:param name="lang" value="#{documentsListView.lang}" />
+				  							<f:param name="codeObj" value="#{documentsListView.codeObject}" />
+										</p:commandLink>
+									</p:repeat>		
+		
+								</p:column>
+	
+							</p:dataTable>			
+
+						</div>
+
+					</h:panelGroup>
+
+				</div>
+				
+				<p:dialog appendTo="@form" header="#{labels['documentsList.docData']}" widgetVar="modalDocData" position="top" width="100%" styleClass="docView-dialog" 
+					fitViewport="true" responsive="true" resizable="true" closeOnEscape="true"  dynamic="true" modal="true" >				
+				
+				<p:outputPanel id="panelDoc">
+				
+					<br/>
+
+					<div class="p-grid ui-fluid">
+					
+						<!-- Рег. номер на документа -->
+						<div class="p-col-12 p-sm-12 p-md-12 p-lg-6">
+							<h:outputText value="#{labels['compObjectDocs.rnDoc']}: " styleClass="form-label" />
+							<p:outputLabel id="regNum" value="#{documentsListView.objDoc.rnDoc}"/> 
+						</div>
+						
+						<!-- Дата рег. на документа -->
+						<div class="p-col-12 p-sm-12 p-md-12 p-lg-6">
+							<h:outputText value="#{labels['compObjectDocs.datDoc']}: " styleClass="form-label" />
+							<p:outputLabel id="datDoc" value="#{documentsListView.objDoc.datDoc}" >
+								<f:convertDateTime pattern="dd.MM.yyyy" timeZone="#{documentsListView.timeZone}" />	
+							</p:outputLabel>						 
+						</div>
+						
+						<!-- Вид на документа -->
+						<div class="p-col-12 p-sm-12 p-md-12 p-lg-12">
+							<h:outputText value="#{labels['compObjectDocs.type']}: " styleClass="form-label" />
+							<p:outputLabel id="docType" value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_DOC_TYPE, documentsListView.objDoc.type, documentsListView.lang, now)}" /> 
+						</div>		
+						
+						<!-- Относно - анотация -->
+						<div class="p-col-12 p-sm-12 p-md-12 p-lg-12">
+							<h:outputText value="#{labels['compObjectDocs.anot']}: " styleClass="form-label" />
+							<p:inputTextarea id="anot" value="#{documentsListView.objDocLang.anot}" rows="5" autoResize="false" style="width:99%" readonly="true"/> 
+						</div>	
+						
+						<!-- Допълнителна информация -->
+						<div class="p-col-12 p-sm-12 p-md-12 p-lg-12">
+							<h:outputText value="#{labels['compObjectDocs.desc']}: " styleClass="form-label" />							
+							<p:inputTextarea id="descInp" value="#{documentsListView.objDocLang.description}" rows="10" autoResize="false" style="width:99%" readonly="true"/> 								
+						</div>	
+											
+					</div>
+	
+				</p:outputPanel>
+				
+				<f:facet name="footer">
+					
+					<div class="p-grid p-nogutter">					
+						<div class="p-col-6" align="left">
+							
+						</div>
+							
+						<div class="p-col-6" align="right">
+							<p:commandButton update="panelDoc" process="@this panelDoc" icon="fas fa-times"
+								styleClass="ui-button-secondary" value="#{ui_labels['general.cancel']}" oncomplete="PF('modalDocData').hide();" />
+						</div>
+					</div>
+				
+				</f:facet>
+					
+			</p:dialog>
+
+		</h:form>
+
+	</ui:define>
+
+</ui:composition>

@@ -1,0 +1,221 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:of="http://omnifaces.org/functions"
+	xmlns:o="http://omnifaces.org/ui" xmlns:p="http://primefaces.org/ui"
+	xmlns:jsf="http://xmlns.jcp.org/jsf"
+	template="/templateSite/template.xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+	<ui:define name="title">#{navTexts['/pages/classificationsList.xhtml']}</ui:define>
+
+	<ui:define name="panelInfo">
+		<h:form id="searchForm">
+
+			<h:outputText value="#{labels['sidebar.classification']}"
+				styleClass="section-title" />
+
+			<h:panelGroup id="panelFilter" layout="block">
+				<div class="p-grid ui-fluid p-align-end">
+
+					<div class="p-col-12 p-sm-12 p-md-12 p-lg-6 p-xl-5 ui-fluid">
+						<p:inputText id="classifIdent"
+							value="#{classificationsListBean.ident}"
+							placeholder="#{labels['classificList.ident']}" />
+					</div>
+
+					<div class="p-col-12 p-sm-12 p-md-12 p-lg-6 p-xl-6 ui-fluid">
+						<p:inputText id="classifName"
+							value="#{classificationsListBean.nameC}"
+							placeholder="#{labels['classificList.name']}" />
+					</div>
+
+					<div class="p-col-12 p-sm-12 p-md-12 p-lg-6 p-xl-1 ui-fluid">
+						<p:commandButton id="btnSearch" icon="fa fa-search"
+							styleClass="p-mr-2" update="panelDataTable treetbl"
+							title="#{ui_labels['general.search']}"
+							process="@this panelFilter" ajax="false"
+							action="classificationsList?faces-redirect=true&amp;includeViewParams=true" />
+							
+						<p:commandButton id="btnClear" icon="fa fa-times"
+							styleClass="ui-button-warning"
+							title="#{ui_labels['general.clear']}"
+							action="#{classificationsListBean.actionClear()}"
+							update="panelFilter panelDataTable treetbl"
+							process="@this panelFilter" ajax="false" partialSubmit="true" />
+
+					</div>
+
+					<div class="p-col-12 p-sm-12 p-md-12 p-lg-6 p-xl-2 ui-fluid">
+						<div class="ui-inputgroup">
+							<p:selectBooleanCheckbox
+								value="#{classificationsListBean.activeVersion}"
+								itemLabel="#{labels['general.activeVersion']}" />
+						</div>
+					</div>
+				</div>
+
+			</h:panelGroup>
+		</h:form>
+	</ui:define>
+
+	<ui:define name="metadata">
+		<f:metadata>
+			<f:importConstants type="com.ib.nsiclassif.system.NSIConstants" />
+			<f:importConstants type="com.ib.indexui.system.Constants" />
+			<f:viewParam name="ident" value="#{classificationsListBean.ident}" />
+			<f:viewParam name="nameC" value="#{classificationsListBean.nameC}" />
+			<f:viewParam name="lang" />
+			<f:viewParam name="locale" />
+			<f:viewParam name="activeVersion"
+				value="#{classificationsListBean.activeVersion}" />
+		</f:metadata>
+	</ui:define>
+
+	<ui:define name="content">
+
+		<h:form id="formClassifList">
+
+			<h:panelGroup id="panelDataTable" layout="block">
+				<h:panelGroup layout="block" styleClass="card">
+
+					<div class="p-grid p-nogutter">
+						<div class="p-col-6 table-toolbar">
+							<h:outputText
+								value="#{labels['general.reportResult']}: #{classificationsListBean.treeSearch.fullTree.childCount}"
+								styleClass="form-label" />
+						</div>
+
+						<div class="p-col-6 lang" style="text-align: right;">
+							<p:commandButton id="lanBtn"
+								value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_LANG, classificationsListBean.lang, 1, null)}"
+								type="button" icon="fa fa-globe" />
+
+							<p:menu overlay="true" trigger="lanBtn" my="left top"
+								at="left bottom">
+								<c:forEach
+									items="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LANG, now, 1)}"
+									var="lang">
+
+									<p:menuitem value="#{lang.tekst}"
+										outcome="#{view.viewId}?faces-redirect=true&amp;includeViewParams=true&amp;lang=#{lang.code}"
+										immediate="true" ajax="false" icon="fa fa-flag">
+									</p:menuitem>
+								</c:forEach>
+							</p:menu>
+
+						</div>
+					</div>
+
+					<p:treeTable id="treetbl"
+						value="#{classificationsListBean.treeSearch.fullTree}"
+						var="classif" paginator="true" paginatorPosition="bottom"
+						expandMode="single" sortMode="single" allowUnsorting="true"
+						paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {Exporters}"
+						rows="30" rowsPerPageTemplate="20,30,50"
+						paginatorAlwaysVisible="false" size="small"
+						emptyMessage="#{ui_labels['general.norows']}">
+
+						<p:ajax event="expand" process="@this"
+							onstart="cfg.ext.params.push({name: 'locale', value: '#{param['locale']}'});"
+							partialSubmit="true" />
+
+						<ui:remove>
+							<f:facet name="header">
+								<div class="p-d-flex p-jc-end">
+									<div class="ui-inputgroup">
+										<p:selectBooleanCheckbox
+											value="#{classificationsListBean.activeVersion}"
+											itemLabel="#{labels['general.activeVersion']}" />
+									</div>
+									<div class="ui-inputgroup">
+										<p:inputText value="#{classificationsListBean.searchString}"
+											placeholder="#{labels['classificList.enterIdentName']}"
+											style="width:300px;" />
+
+										<p:commandButton id="btnSearch" icon="fa fa-search"
+											update="panelDataTable treetbl"
+											title="#{ui_labels['general.search']}"
+											process="@this panelFilter" ajax="false"
+											action="classificationsList?faces-redirect=true&amp;includeViewParams=true" />
+
+										<p:commandButton id="btnClear" icon="fa fa-times"
+											styleClass="ui-button-warning"
+											title="#{ui_labels['general.clear']}"
+											action="#{classificationsListBean.actionClear()}"
+											update="panelFilter panelDataTable treetbl"
+											process="@this panelFilter" ajax="false" partialSubmit="true" />
+									</div>
+
+
+								</div>
+							</f:facet>
+						</ui:remove>
+
+						<p:column width="80" responsivePriority="1">
+							<h:link rendered="#{classif.codeObject == 91}"
+								outcome="classification?faces-redirect=true&amp;idObj=#{classif.idObject}&amp;lang=#{classificationsListBean.lang}&amp;locale=#{param['locale']}"
+								title="#{labels['classifTree.viewClassif']}">
+								<i class="fa fa-info-circle"
+									style="vertical-align: middle; font-size: 16px"></i>
+								<f:param name="locale"
+									value="#{param['locale']!=null?param['locale']:'bg'}" />
+							</h:link>
+
+							<h:link rendered="#{classif.codeObject == 92}"
+								outcome="version?faces-redirect=true&amp;idObj=#{classif.idObject}&amp;idClassif=#{classif.idParent}&amp;lang=#{classificationsListBean.lang}&amp;locale=#{param['locale']}"
+								title="#{labels['classifTree.viewVersion']}">
+								<i class="fa fa-code-fork"
+									style="vertical-align: middle; font-size: 16px"></i>
+								<f:param name="locale"
+									value="#{param['locale']!=null?param['locale']:'bg'}" />
+							</h:link>
+
+							<h:link rendered="#{classif.codeObject == 98}"
+								outcome="correspTable?faces-redirect=true&amp;idObj=#{classif.idObject}&amp;lang=#{classificationsListBean.lang}&amp;locale=#{param['locale']}"
+								title="#{labels['classifTree.correspTable']}">
+								<i class="fa fa-table"
+									style="vertical-align: middle; font-size: 16px"></i>
+								<f:param name="locale"
+									value="#{param['locale']!=null?param['locale']:'bg'}" />
+							</h:link>
+						</p:column>
+
+						<p:column headerText="#{labels['classificList.ident']}"
+							width="25%" responsivePriority="1"
+							sortBy="#{classif.langMap[(classificationsListBean.lang).intValue()].ident}">
+
+							<i class="fa fa-check-square fa-lg"
+								style="color: #2CAA8D; margin-right: 10px;"
+								jsf:rendered="#{classif.active}"
+								title="#{labels['classif.activeVersion']}"></i>
+							<h:outputText
+								value="#{classificationsListBean.ident != null and (not empty classificationsListBean.ident) ? classificationsListBean.checkString(classif.langMap[(classificationsListBean.lang).intValue()].ident, 0) : classif.langMap[(classificationsListBean.lang).intValue()].ident}"
+								escape="false" />
+						</p:column>
+
+						<p:column headerText="#{labels['classificList.name']}"
+							responsivePriority="2"
+							sortBy="#{classif.langMap[(classificationsListBean.lang).intValue()].name}">
+							<h:outputText
+								value="#{classificationsListBean.nameC != null and (not empty classificationsListBean.nameC) ? classificationsListBean.checkString(classif.langMap[(classificationsListBean.lang).intValue()].name, 1) : classif.langMap[(classificationsListBean.lang).intValue()].name}"
+								escape="false" />
+						</p:column>
+
+						<ui:remove>
+							<!--  махнато от екрана по нареждане на КК 29,07
+						<p:column headerText="#{labels['classificList.family']}"
+							responsivePriority="3">
+							<h:outputText value="#" />
+						</p:column>
+						-->
+						</ui:remove>
+					</p:treeTable>
+
+
+				</h:panelGroup>
+			</h:panelGroup>
+		</h:form>
+	</ui:define>
+</ui:composition>

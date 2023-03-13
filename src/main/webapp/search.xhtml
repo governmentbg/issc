@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components"
+	xmlns:c="http://java.sun.com/jstl/core"
+	template="/templateSite/template.xhtml">
+
+<ui:define name="title">#{navTexts['/corespTableView']}</ui:define>
+
+	<ui:define name="panelInfo">
+		<h:outputText value="#{corespTableView.panelInfo}" />
+	</ui:define>
+
+	<ui:define name="content">
+	
+	<ui:define name="metadata">
+		<f:metadata>		
+			<f:viewParam name="lang" />
+			<f:viewParam name="locale" />
+		</f:metadata>
+	</ui:define>
+					<h:form id="searchForm">
+						<ui:include src="/include/searchInc.xhtml" >
+							<ui:param name="isVanshno" value="1"></ui:param>
+						</ui:include>
+					</h:form>
+
+		 
+	 </ui:define>
+</ui:composition>

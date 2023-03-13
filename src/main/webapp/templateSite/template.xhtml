@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui" xmlns:jsf="http://xmlns.jcp.org/jsf"
+	lang="bg">
+
+<f:view locale="#{!empty(param['locale'])?param['locale']:'bg'}">
+
+	<h:head>
+		<f:facet name="first">
+		    <link rel="icon" href="resources/images/nsi_logo_vector.png" />
+			<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+			<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+			<meta name="viewport"
+				content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+			<meta name="apple-mobile-web-app-capable" content="yes" />
+			
+		</f:facet>
+
+		<title><ui:insert name="title">NSICLassif</ui:insert></title>
+
+		<ui:insert name="head" />
+	</h:head>
+
+	<h:body>
+		<ui:insert name="metadata" />
+		
+		<ui:remove>
+			<!-- SESSION EXPIRED MONITOR 
+			<p:idleMonitor timeout="#{session.maxInactiveInterval * 1000 - 30000}" onidle="window.location.href = '../sessionExpired.xhtml';return" />
+			-->
+		</ui:remove>
+		
+		<h:form prependId="false">
+			<p:hotkey bind="alt+r" action="#{environment.resetSystemData()}" update="messagesGl" />
+		</h:form>
+
+		<p:tooltip />
+
+<ui:remove>
+		<div class="icon-bar" id="access-trigger">
+			<a class="access" title="#{labels['sidebar.accessibility']}"><i
+				class="fa fa-universal-access" style="font-size: 2em"></i></a>
+		</div>
+		</ui:remove>
+
+		<!-- SOCIAL MEDIA BAR
+			<div class="icon-bar">
+				<a href="https://www.facebook.com/nsibg" class="facebook" title="Виж Facebook профил"><i class="pi pi-facebook" style="font-size: 2em"></i></a>
+				<a href="https://www.youtube.com/user/bgnsi" class="youtube" title="Виж Youtube профил"><i class="pi pi-youtube" style="font-size: 2em"></i> </a>
+			</div>  -->
+
+		<div class="layout-main">
+			<ui:include src="./sidebar.xhtml" />
+
+			<div class="title-page">
+				<div class="title">	 
+					<ui:insert name="panelInfo" />
+				</div>
+			</div>
+			
+			<div class="layout-content">
+				
+				<p:messages id="messagesGl" showDetail="true" closable="true">
+					<p:autoUpdate />
+				</p:messages>
+				
+				<!-- CONTENT -->
+				<ui:insert name="content" />
+			</div>
+
+			<ui:include src="./footer.xhtml" />
+
+		</div>
+
+
+		<p:ajaxStatus style="width:32px;height:32px;position:fixed;left:50%;top:50%;transform: translate(-50%,-50%);z-index: 1000002">
+			<f:facet name="start">
+				<i class="fas fa-circle-notch fa-spin ajax-loader" aria-hidden="true"></i>
+			</f:facet>
+
+			<f:facet name="complete">
+				<h:outputText value="" />
+			</f:facet>
+		</p:ajaxStatus>
+
+		<h:outputStylesheet name="nsicSite.css" library="css"/>
+		<h:outputStylesheet name="css/nsiclassif.css" />
+		<h:outputStylesheet name="css/all.css" library="font-awesome" />
+		<h:outputStylesheet name="css/primeflex.min.css" library="mirage-layout" />
+		<h:outputStylesheet name="css/primeicons.css" library="mirage-layout" />
+		<script>
+        function changeMenuJs() {
+        	  var x = document.getElementById("myTopnav");
+        	  if (x.className === "topnav") {
+        	    x.className += " responsive";
+        	  } else {
+        	    x.className = "topnav";
+        	  }
+        	} 
+
+		(function(d) {
+			var s = d.createElement("script");
+			s.setAttribute("data-language", "bg");
+			s.setAttribute("data-color", "#035e7d");
+			s.setAttribute("data-mobile", true);
+			s.setAttribute("data-trigger", "headerForm\\:access-trigger");
+			s.setAttribute("src", "https://cdn.userway.org/widget.js");
+			(d.body || d.head).appendChild(s);
+		})(document)
+		
+		window.onload=function() {
+			var current_page = document.location.href;
+			
+	          if (current_page.indexOf("classificationsList") > -1 
+	        		  || current_page.indexOf("classification") > -1 
+	        		  || current_page.indexOf("versionsList") > -1 
+	        		  || current_page.indexOf("documentsList") > -1 
+	        		  || current_page.indexOf("version") > -1 
+	        		  || current_page.indexOf("position") > -1 
+	        		  || current_page.indexOf("correspTableList") > -1 
+	        		  || current_page.indexOf("correspTable") > -1 
+	        		  || current_page.indexOf("relations") > -1) {
+	        	  
+			    	$(".topnav a.classifsListItem").addClass('active');
+			    	
+			  } else if (current_page.indexOf("search") > -1) {
+				    $(".topnav a.searchItem").addClass('active');
+			  } else if (current_page.indexOf("sect=2") > -1) {
+				    $(".topnav a.casesItem").addClass('active');
+			  } else if (current_page.indexOf("sect=10") > -1) {
+				    $(".topnav a.relationsItem").addClass('active');
+			  } else if (current_page.indexOf("sect=3") > -1) {
+				    $(".topnav a.contactsItem").addClass('active');
+			  }
+		     
+		   };
+		   
+	</script>
+
+		<noscript>
+			Please ensure Javascript is enabled for purposes of <a
+				href="https://userway.org">website accessibility</a>
+		</noscript>
+
+	</h:body>
+</f:view>
+</html>

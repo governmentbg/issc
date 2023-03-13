@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components"
+	xmlns:c="http://java.sun.com/jstl/core">
+<h:head>
+	<title>NSICLassif</title>
+</h:head>
+<h:body>
+	<div class="layout-wrapper">
+			<p:tooltip />
+			
+			<!-- MENU -->
+			 
+			
+			<div class="layout-main">
+				<div class="layout-content">
+					<p:messages id="messagesGl" showDetail="true" closable="true">
+						<p:autoUpdate />
+					</p:messages>
+					
+					<h:form id="formDownload">
+						<ui:include src="/include/downloadFileInc.xhtml" />
+					</h:form>
+				</div>
+
+			</div>
+		</div>
+
+		 
+		
+		<h:outputStylesheet name="css/nsicSite.css" />
+		<h:outputStylesheet name="css/nsiclassif.css" />
+		<h:outputStylesheet name="css/all.css" library="font-awesome" />
+</h:body>
+</html>

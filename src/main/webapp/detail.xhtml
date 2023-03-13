@@ -1,0 +1,215 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui" xmlns:jsf="http://xmlns.jcp.org/jsf"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components"
+	template="/templateSite/template.xhtml"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:c="http://java.sun.com/jstl/core">
+
+	<ui:define name="title">#{navTexts['/detail.xhtml']}</ui:define>
+
+	<ui:define name="viewname">
+		<li>#{navTexts['/detail.xhtml']}</li>
+	</ui:define>
+
+	<ui:define name="metadata">
+		<f:metadata>
+			<f:importConstants type="com.ib.nsiclassif.system.NSIConstants" />
+			<f:viewParam name="lang" />
+			<f:viewParam name="idObj"/>
+			<f:viewParam name="locale"  />
+			<f:viewParam name="position"/>
+		</f:metadata>
+	</ui:define>
+	
+	<ui:define name="head">
+		<style>
+			.boxDataHead {
+			  background-color: #e9ebf0	;
+			  text-align: center;
+			  padding-top: 1rem;
+			  padding-bottom: 1rem;
+			  font-weight: bold;
+			  font-size: 1.2em;
+			  /* border-radius: 4px; */
+			  /* box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12); */
+			}
+			.boxDataP {
+			  background-color: #f5f6f7	;
+			  text-align: left;
+			  padding-top: 1rem;
+			  padding-bottom: 1rem;
+			  padding-left: 1rem;
+			  padding-right: 1rem;
+			  /* border-radius: 4px; */
+			  /* box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12); */
+			}
+			.boxDataPosLabel {
+			  background-color: #e9ebf0	;
+			  text-align: left;
+			  padding-top: 0.5rem;
+			  padding-bottom: 0.5rem;
+			  padding-left: 1rem;
+			  padding-right: 1rem;
+			  /* border-radius: 4px; */
+			  /* box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12); */
+			}
+			.p-nogutterCustom {
+			  margin-right: 0;
+			  margin-left: 0;
+			  margin-top: 0; }
+			
+			.p-nogutterCustom > .p-col,
+			.p-nogutterCustom > [class*="p-col-"] {
+			  padding:2px; }
+			  
+			  
+			body .ui-datatable .ui-datatable-data > tr > td{padding: 4px 10px;}  
+		</style>
+	</ui:define>
+	
+	<ui:define name="content">
+
+		<h:form id="position">
+
+				<div class="card">
+					
+					<p:commandButton id="langButton" type="button" icon="fas fa-solid fa-globe" style="float: right; z-index: 1;"
+						value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_LANG, (param['lang']!=null?param['lang']:'1'), 1, null)}" />
+
+					<p:menu overlay="true" trigger="langButton" my="left top" at="left bottom" id="menuLangClass">
+						<c:forEach items="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LANG, now, 1)}" var="lang" >
+							<p:menuitem value="#{lang.tekst}" immediate="true" ajax="false" icon="fas fa-solid fa-flag"
+								outcome="#{view.viewId}?faces-redirect=true&amp;includeViewParams=true&amp;lang=#{lang.code}">
+							</p:menuitem>
+						</c:forEach>
+					</p:menu>
+
+					<p:tabMenu activeIndex="1">
+						<p:menuitem value="#{labels['versionView.mainData']}"
+							includeViewParams="true" icon="fas fa-code-branch"
+							outcome="version.xhtml">
+						</p:menuitem>
+						
+						<p:menuitem value="#{labels['versionView.position']}" includeViewParams="true" icon="fas fa-code-branch"
+							outcome="position.xhtml">
+						</p:menuitem>
+						
+						<p:menuitem value="#{labels['classificEdit.correspondList']}"
+							includeViewParams="true" icon="fas fa fa-table"
+							outcome="correspTableList">
+						</p:menuitem>					
+						
+						<p:menuitem value="#{labels['documentsListView.title']}" includeViewParams="true" icon="fas fa-fw fa-files-o"
+							outcome="documentsList?codeObj=#{NSIConstants.CODE_ZNACHENIE_JOURNAL_STAT_VERSION}">
+						</p:menuitem>
+						
+						
+					</p:tabMenu>
+					
+					
+					<div class="p-grid p-nogutterCustom ui-fluid" jsf:id="detailsSelectedS" style="padding-top:1rem;">
+								
+								<div class="p-col-12">
+									<div class="boxDataP">
+									<ui:repeat var="parents" value="#{positionDetail.parentPossitions}" varStatus="myVarStatus">
+										<div>
+											<p:spacer width="#{(myVarStatus.index)*20}" height="25" /> 
+											
+											<p:link outcome="position" includeViewParams="true" style="padding-right:10px">
+												<i class="fa fa-minus" aria-hidden="true"></i>
+												<f:param name="parent" value="#{parents.idParent}"/>
+											</p:link>
+											<h:outputText value="#{parents.code} #{parents.name} #{parents.idParent} " />
+										</div>
+									</ui:repeat>
+									</div>
+								</div>
+									
+								<div class="p-col-12">
+									<div class="boxDataHead"><h:outputText value="#{labels['position.metadata']}"/></div>
+									
+								</div>
+							
+								<div class="p-col-12  #{!positionDetail.schemePosAttr[(2).intValue()] and !positionDetail.schemePosAttr[(3).intValue()]?'p-lg-12':'p-lg-4'}">
+									<div class="boxDataPosLabel"><h:outputText value="#{labels['position.code']}" styleClass="form-label "/></div>
+									<div class="boxDataP"><h:outputText value="#{positionDetail.selectedNode.code}" /> </div>
+								</div>
+								
+							
+								<div class="p-col-12 p-lg-4 " jsf:rendered="#{positionDetail.schemePosAttr[(2).intValue()]}">
+									<div class="boxDataPosLabel"><h:outputText value="#{labels['position.fullCode']}"  styleClass="form-label"/></div>
+									<div class="boxDataP"><h:outputText id="inFullCodeT" value="#{positionDetail.selectedNode.codeFull}" /></div>
+								</div>
+								
+								<div class="p-col-12 p-lg-4" jsf:rendered="#{positionDetail.schemePosAttr[(3).intValue()]}">
+									<div class="boxDataPosLabel"><h:outputText value="#{labels['position.codeSeparators']}"  styleClass="form-label"/></div>
+									<div class="boxDataP"><h:outputText id="codeSeparate" value="#{positionDetail.selectedNode.codeSeparate}" /></div>
+								</div>
+								
+								<div class="p-col-12" >
+									<div class="boxDataPosLabel"><h:outputText value="#{labels['position.offiName']}" styleClass="form-label" /></div>
+									<div class="boxDataP"><h:outputText id="inNameT" value="#{positionDetail.selectedNode.langMap[(positionDetail.lang).intValue()].offitialTitile}" /></div>
+								</div>
+								<div class="p-col-12" jsf:rendered="#{positionDetail.schemePosAttr[(12).intValue()]}">
+									<div class="boxDataPosLabel"><h:outputText value="#{labels['position.shortTitle']}"  styleClass="form-label"/></div>
+									<div class="boxDataP"><h:outputText id="inNameST" value="#{positionDetail.selectedNode.langMap[(positionDetail.lang).intValue()].shortTitle}" /></div>
+								</div>
+								<div class="p-col-12" jsf:rendered="#{positionDetail.schemePosAttr[(13).intValue()]}">
+									<div class="boxDataPosLabel"><h:outputText value="#{labels['position.longTitle']}"  styleClass="form-label"/></div>
+									<div class="boxDataP"><h:outputText id="inNameLT" 
+										value="#{positionDetail.selectedNode.langMap[(positionDetail.lang).intValue()].longTitle}" /></div>
+								</div>
+								<div class="p-col-12" jsf:rendered="#{positionDetail.schemePosAttr[(14).intValue()]}">
+									<div class="boxDataPosLabel"><h:outputText value="#{labels['position.alternativeNames']}"  styleClass="form-label"/></div>
+									<div class="boxDataP"><h:outputText id="alternativeNames"
+										value="#{positionDetail.selectedNode.langMap[(positionDetail.lang).intValue()].alternativeNames}" /></div>
+								</div>
+								<div class="p-col-12 p-lg-6" jsf:rendered="#{positionDetail.schemePosAttr[(7).intValue()]}">
+									<div class="boxDataPosLabel"><h:outputText value="#{labels['position.unitbg']}"  styleClass="form-label"/></div>
+									<div class="boxDataP"></div>
+								</div>
+								<div class="p-col-12 p-lg-6" jsf:rendered="#{positionDetail.schemePosAttr[(8).intValue()]}">
+									<div class="boxDataPosLabel"><h:outputText value="#{labels['position.unit']}"  styleClass="form-label"/></div>
+									<div class="boxDataP"></div>
+								</div>
+								
+								<div class="p-col-12" jsf:rendered="#{positionDetail.schemePosAttr[(16).intValue()]}">
+									<div class="boxDataPosLabel"><h:outputText value="#{labels['position.includes']}"  styleClass="form-label"/></div>
+									<div class="boxDataP"><h:outputText value="#{positionDetail.selectedNode.langMap[(positionDetail.lang).intValue()].includes}" /></div>
+								</div>
+								<div class="p-col-12" jsf:rendered="#{positionDetail.schemePosAttr[(17).intValue()]}">
+									<div class="boxDataPosLabel"><h:outputText value="#{labels['position.alsoIncludes']}"  styleClass="form-label"/></div>
+									<div class="boxDataP"><h:outputText value="#{positionDetail.selectedNode.langMap[(positionDetail.lang).intValue()].alsoIncludes}" /></div>
+								</div>
+								<div class="p-col-12" jsf:rendered="#{positionDetail.schemePosAttr[(18).intValue()]}">
+									<div class="boxDataPosLabel"><h:outputText value="#{labels['position.excludes']}"  styleClass="form-label"/></div>
+									<div class="boxDataP"><h:outputText value="#{positionDetail.selectedNode.langMap[(positionDetail.lang).intValue()].excludes}" /></div>
+								</div>
+								<div class="p-col-12" jsf:rendered="#{positionDetail.schemePosAttr[(19).intValue()]}">
+									<div class="boxDataPosLabel"><h:outputText value="#{labels['position.rules']}"  styleClass="form-label"/></div>
+									<div class="boxDataP"><h:outputText value="#{positionDetail.selectedNode.langMap[(positionDetail.lang).intValue()].rules}" /></div>
+								</div>
+								<div class="p-col-12" jsf:rendered="#{positionDetail.schemePosAttr[(15).intValue()]}">
+									<div class="boxDataPosLabel"><h:outputText value="#{labels['position.comment']}"  styleClass="form-label"/></div>
+									<div class="boxDataP"><h:outputText value="#{positionDetail.selectedNode.langMap[(positionDetail.lang).intValue()].comment}" /></div>
+								</div>
+								<div class="p-col-12" jsf:rendered="#{positionDetail.schemePosAttr[(21).intValue()]}">
+									<div class="boxDataPosLabel"><h:outputText value="#{labels['position.statPokazatel']}"  styleClass="form-label"/></div>
+									<div class="boxDataP"><h:outputText value="#{positionDetail.selectedNode.langMap[(positionDetail.lang).intValue()].statPokazatel}" /></div>
+								</div>
+								<div class="p-col-12" jsf:rendered="#{positionDetail.schemePosAttr[(20).intValue()]}">
+									<div class="boxDataPosLabel"><h:outputText value="#{labels['position.prepratka']}"  styleClass="form-label"/></div>
+									<div class="boxDataP"><h:outputText value="#{positionDetail.selectedNode.langMap[(positionDetail.lang).intValue()].prepratka}" /></div>
+								</div>
+					</div>
+				
+			    </div>
+						
+		</h:form>
+	
+	</ui:define>
+
+</ui:composition>

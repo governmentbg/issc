@@ -1,0 +1,137 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:jsf="http://xmlns.jcp.org/jsf" xmlns:p="http://primefaces.org/ui"
+	xmlns:cc="http://java.sun.com/jsf/composite"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components">
+
+
+
+	<cc:interface componentType="compObjectUsers">
+
+		<cc:attribute name="codeObject" type="java.lang.Integer"
+			shortDescription="kod na obekta" required="true" />
+		<cc:attribute name="idObject" type="java.lang.Integer"
+			shortDescription="Id na obekta" required="true" />
+		<cc:attribute name="lang" type="java.lang.Integer"
+			shortDescription="Ezik" required="true"  />
+		<cc:attribute name="isButtonDisabled" type="java.lang.Boolean"
+			shortDescription="disabledButtonNew"  default="false"/>
+	</cc:interface>
+
+	<cc:implementation>
+		<f:event type="preRenderComponent" listener="#{cc.init()}" /> <!--  За да се инициализира компонентата-->
+		
+		
+
+		<p:commandButton id="btnNewUser" value="Нов потребител"
+			icon="fas fa-plus" partialSubmit="true" disabled="#{cc.attrs.isButtonDisabled}"
+			styleClass="ui-button-success" oncomplete="PF('userDlg').show();"
+			action="#{cc.actionNewUser()}" process="@this"
+			update="#{cc.clientId}:usrDlgData" immediate="true" 
+			rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}"/>
+			
+		<p:dataTable value="#{cc.usersList}" var="row" lazy="true"
+			id="compTable" rowIndexVar="idx" sortMode="single" rows="20">
+			<p:column width="30" exportable="true" style="text-align: center;"
+				headerText="#{ui_labels['general.No-symbol']}">
+				<h:outputText value="#{idx + 1}" />
+			</p:column>
+			<p:column width="30" exportable="true" style="text-align: center;" rendered="#{request.userPrincipal.hasAccess(NSIConstants.CODE_CLASSIF_MENU,109)}">
+				<p:commandButton icon="fas fa-edit" id="alabala" process="@this" 
+					update="#{cc.clientId}:usrDlgData" ajax="true" partialSubmit="true"
+					immediate="true" title="#{ui_labels['general.edit']}" disabled="#{cc.attrs.isButtonDisabled}"
+					action="#{cc.actionOpenSelectedId(row[0],cc.attrs.lang)}"
+					oncomplete="PF('userDlg').show()">
+
+				</p:commandButton>
+		</p:column>
+			<p:column width="150" exportable="true" style="text-align: left;"
+				headerText="роля">
+				<h:outputText
+					value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_CLASSIFICATION_ROLE_LICE, row[4], cc.attrs.lang, null)}" />
+
+
+			</p:column>
+			<p:column width="250" exportable="true" style="text-align: left;"
+				headerText="Имена">
+				<h:outputText
+					value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_CLASSIFICATION_SLUJBI_LICA, row[3], cc.attrs.lang, null)}" />
+
+			</p:column>
+			<p:column width="120" exportable="true" style="text-align: left;"
+				headerText="Дата">
+				<h:outputText value="#{row[6]}">
+					<f:convertDateTime pattern="dd.MM.yyyy hh:mm" type="date" />
+				</h:outputText>
+			</p:column>
+			<p:column width="*" exportable="true" style="text-align: left;"
+				headerText="Коментар">
+				<h:outputText value="#{row[10]}" />
+			</p:column>
+
+		</p:dataTable>
+		
+		<p:dialog widgetVar="userDlg" id="babameca" closeOnEscape="true" modal="true" dynamic="true"
+			width="700" header="Потребители" appendTo="@form">
+				<h:panelGroup id="compErrorMessages">
+				<p:staticMessage id ="compErrorMessages00" severity="error" summary="!!!" detail="#{cc.message}"  
+				rendered="#{not empty cc.message}" style="width: 100%"/>
+				
+				</h:panelGroup>
+			<p:toolbar id="tlbButtonс">
+
+				<f:facet name="left">
+
+					<p:commandButton value="Запис" action="#{cc.actionSave}" disabled="#{cc.attrs.isButtonDisabled}"
+						process="#{cc.clientId}:usrDlgData @this" ajax="true"
+						partialSubmit="true" icon="fas fa-save" />
+					
+				</f:facet>
+				 
+				<f:facet name="right">
+
+				</f:facet>
+
+			</p:toolbar>
+			<h:panelGroup id="usrDlgData">
+				<div class="p-grid ui-fluid">
+					<div class="p-col-4">
+						<p:outputLabel for="role" value="Роля" styleClass="form-label" />
+						<p:selectOneMenu value="#{cc.selectedUser.role}" id="role">
+							<f:selectItems
+								value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_CLASSIFICATION_ROLE_LICE, now, cc.attrs['lang'])}"
+								var="role" itemLabel="#{role.tekst}" itemValue="#{role.code}" />
+						</p:selectOneMenu>
+					</div>
+					<div class="p-col-8">
+						<p:outputLabel for="codeLice2" value="Лице"
+							styleClass="form-label  req" />
+						<ibg:selectOneModalA id="codeLice2"
+							header="Административна структура"
+							codeClassif="#{NSIConstants.CODE_CLASSIF_CLASSIFICATION_SLUJBI_LICA}"
+							dateClassif="#{cc.selectedUser.roleDate}"
+							styleAutoComp="width:99%;"
+							selectedCode="#{cc.selectedUser.codeLice}" compType="2"
+							withBtnClear="true" saveStateTree="true" readonly="false"
+							isSelectNode="true" dopInfoAutoComp="true"
+							itemtipAtPosition="center bottom" styleClass="width:500px" />
+					</div>
+					<div class="p-col-12">
+						<p:outputLabel for="comment" value="Коментар"
+							styleClass="form-label" />
+						<p:inputTextarea
+							value="#{cc.selectedUser.langMap[(cc.attrs.lang).intValue()].roleComment}"
+							id="comment" rows="5" />
+
+					</div>
+				</div>
+				
+			</h:panelGroup>
+			
+		</p:dialog>
+	</cc:implementation>
+
+</ui:composition>

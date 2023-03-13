@@ -1,0 +1,140 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:of="http://omnifaces.org/functions"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:p="http://primefaces.org/ui" xmlns:jsf="http://xmlns.jcp.org/jsf"
+	template="/templateSite/template.xhtml"
+	xmlns:c="http://java.sun.com/jstl/core">
+
+	<ui:define name="title">#{navTexts['/relations']}</ui:define>
+
+	<ui:define name="viewname">
+		<li>#{navTexts['/relations']}</li>
+	</ui:define>
+
+
+	<ui:define name="metadata">
+		<f:metadata>
+			<f:importConstants type="com.ib.nsiclassif.system.NSIConstants" />
+			<f:importConstants type="com.ib.indexui.system.Constants" />
+			<f:viewParam name="idObj" value="#{relationsView.relId}" />
+			<f:viewParam name="searchString" value="#{relationsView.relationSearch.searchCode}" />
+			<f:viewParam name="searchRelWhere" value="#{relationsView.relationSearch.searchLocation}" />
+			<f:viewParam name="lang" default="1" value="#{relationsView.lang}"/> 
+			<f:viewParam name="locale" />
+		</f:metadata>
+	</ui:define>
+
+	<ui:define name="content">
+		<h:form id="formRelations">
+		 <div class="card">
+
+				<p:commandButton id="dynaButton" value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_LANG, (param['lang']!=null?param['lang']:'1'), 1, null)}" type="button" icon="fas fa-solid fa-globe" style="float: right; z-index: 1;" />
+				
+				<p:menu overlay="true" trigger="dynaButton" my="left top" at="left bottom">
+					<c:forEach items="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LANG, now, 1)}" var="lang">
+
+						<p:menuitem value="#{lang.tekst}"
+							outcome="#{view.viewId}?faces-redirect=true&amp;includeViewParams=true&amp;lang=#{lang.code}"
+							immediate="true" ajax="false" icon="fas fa-solid fa-flag">
+						</p:menuitem>
+					</c:forEach>
+				</p:menu>
+		
+				<p:tabMenu activeIndex="1">
+					<p:menuitem value="#{labels['correspTable.info']}"
+						icon="fas fa-info"
+						outcome="correspTable?faces-redirect=true&amp;idObj=#{relationsView.relId}&amp;lang=#{relationsView.lang}&amp;locale=#{param['locale']}">
+					</p:menuitem>
+
+					<p:menuitem value="#{labels['corespTable.relations']}"
+						outcome="relations.xhtml?faces-redirect=true&amp;idObj=#{relationsView.relId}&amp;lang=#{relationsView.lang}&amp;locale=#{param['locale']}"
+						icon="fas fa-th-list">
+					</p:menuitem>
+				</p:tabMenu>
+				
+				<h:panelGroup id="panelFilter" style="padding: 18px;">
+						<div class="p-grid ui-fluid ">
+							<div class="p-col-12 p-sm-6 p-md-4 p-lg-4 p-xl-4  ui-fluid">	
+								<p:inputText value="#{relationsView.relationSearch.searchCode}" id="searchCode" >	
+								</p:inputText>
+							</div>
+							<div class="p-col-12 p-sm-6 p-md-4 p-lg-4 p-xl-4  ui-fluid" >
+								<p:selectOneMenu id="searchRelWhere" value="#{relationsView.relationSearch.searchLocation}">
+									<f:selectItems
+										value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_RELATION_SEARCH, now, relationsView.currentLang)}"
+										var="expl" itemLabel="#{expl.tekst}" itemValue="#{expl.code}" />
+								</p:selectOneMenu>
+							</div>
+						</div>
+
+						<div class="filter-buttons"
+							style="text-align: right; margin-top: 1em;">
+							<p:commandButton value="#{ui_labels['general.search']}"
+								id="btnSearch" update="panelDataTable treetbl"
+								partialSubmit="true" process="@this panelFilter" ajax="false"
+								action="relations?faces-redirect=true&amp;includeViewParams=true"
+								style="margin-right: 1em;" />
+
+							 
+							<p:commandButton value="#{ui_labels['general.clear']}"
+								id="btnClear" action="#{relationsView.actionClear()}"
+								update="panelFilter panelDataTable treetbl"
+								process="@this panelFilter" ajax="false" partialSubmit="true"
+								styleClass="ui-button-warning" />
+						</div>
+				</h:panelGroup>
+
+				<h:panelGroup id="panelDataTable" layout="block">
+					<h:panelGroup layout="block">
+						<p:dataTable id="tblPos" value="#{relationsView.relationsList}"
+							var="row" widgetVar="tblPos" rowKey="#{row[0]}" rowIndexVar="rkv"
+							lazy="true" rows="10"
+							emptyMessage="#{ui_labels['general.norows']}" paginator="true"
+							paginatorPosition="bottom" 
+							paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} ">
+
+							<f:facet name="header">
+								<p:menuButton   ajax="false"   value="#{labels['export.fullExport']}" styleClass="ui-button-success">
+					            <p:menuitem value="ODS" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFiles?idObj=#{relationsView.relId}&amp;typeObj=coresp&amp;format=ods">
+					             </p:menuitem>
+					            <p:menuitem value="Excel" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFiles?idObj=#{relationsView.relId}&amp;typeObj=coresp&amp;format=xlsx">
+					             </p:menuitem>
+					            <p:menuitem value="PDF" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFiles?idObj=#{position.idVersion}&amp;typeObj=coresp&amp;format=pdf">
+					             </p:menuitem>
+					            <p:menuitem value="HTML" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFiles?idObj=#{relationsView.relId}&amp;typeObj=coresp&amp;format=html">
+					             </p:menuitem>
+					            <p:menuitem value="CSV" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFiles?idObj=#{relationsView.relId}&amp;typeObj=coresp&amp;format=csv">
+					             </p:menuitem>
+					            <p:menuitem value="TXT" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFiles?idObj=#{relationsView.relId}&amp;typeObj=coresp&amp;format=txt">
+					             </p:menuitem>
+					            <p:menuitem value="SDMX" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFiles?idObj=#{position.idVersion}&amp;typeObj=coresp&amp;format=sdmx">
+					             </p:menuitem>
+					            <p:menuitem value="SDMX-JSON" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFiles?idObj=#{position.idVersion}&amp;typeObj=coresp&amp;format=sdmx-json">
+					             </p:menuitem>
+					             </p:menuButton>
+							</f:facet>
+
+							<p:column headerText="#{ui_labels['general.No-symbol']}"
+								width="10">
+								<h:outputText value="#{rkv + 1}" />
+							</p:column>
+							<p:column headerText="#{labels['relations.positionSource']}">
+									#{row[1]}
+								</p:column>
+							<p:column headerText="#{labels['relations.positionTarget']}">
+									#{row[2]}
+								</p:column>
+						</p:dataTable>
+
+
+					</h:panelGroup>
+				</h:panelGroup>
+
+
+			</div>
+		</h:form>
+	</ui:define>
+</ui:composition>

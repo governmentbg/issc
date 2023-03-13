@@ -1,0 +1,198 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui" xmlns:jsf="http://xmlns.jcp.org/jsf"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components"
+	template="/templateSite/template.xhtml"
+	xmlns:c="http://java.sun.com/jstl/core">
+
+	<ui:define name="title">#{navTexts['/corespTableView']}</ui:define>
+
+	<ui:define name="panelInfo">
+		<h:outputText value="#{corespTableView.panelInfo}" />
+	</ui:define>
+
+	<ui:define name="content">
+
+		<f:metadata>
+			<f:importConstants type="com.ib.nsiclassif.system.NSIConstants" />
+			<f:viewParam name="idObj"  />
+			<f:viewParam name="lang"  />
+			<f:viewParam name="locale" />
+		</f:metadata>
+
+		<h:form id="corespTableViewForm">
+
+				<div class="card">
+
+					<p:commandButton id="langButton" type="button"
+						icon="fas fa-solid fa-globe" style="float: right; z-index: 1;"
+						value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_LANG, corespTableView.lang, 1, null)}" />
+
+					<p:menu overlay="true" trigger="langButton" my="left top"
+						at="left bottom">
+						<c:forEach
+							items="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LANG, now, 1)}"
+							var="lang">
+							<p:menuitem value="#{lang.tekst}" immediate="true" ajax="false"
+								icon="fas fa-solid fa-flag"
+								outcome="#{view.viewId}?faces-redirect=true&amp;includeViewParams=true&amp;lang=#{lang.code}">
+							</p:menuitem>
+						</c:forEach>
+					</p:menu>
+
+					<p:tabMenu activeIndex="0">
+						<p:menuitem value="#{labels['correspTable.info']}"
+							outcome="correspTable.xhtml?faces-redirect=true&amp;idObj=#{param['idObj']}&amp;lang=#{param['lang']}&amp;locale=#{param['locale']}"
+							icon="fas fa-info">
+						</p:menuitem>
+
+					  	<p:menuitem value="#{labels['corespTable.relations']}"
+							outcome="relations.xhtml?faces-redirect=true&amp;idObj=#{param['idObj']}&amp;lang=#{param['lang']}&amp;locale=#{param['locale']}"
+							icon="fas fa-th-list">
+						</p:menuitem>   
+					</p:tabMenu>
+
+					<h:panelGroup id="dataPanel" style="padding:0.5rem;">
+						<div class="p-grid ui-fluid p-align-end">
+
+							<!--Версия/ вариант източник-->
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-4 p-xl-4 ui-fluid">
+								<h:outputText value="#{labels['corespTable.versionSource']}"
+									styleClass="form-label" />
+								<p>
+									<p:outputLabel
+										value="#{corespTableView.actionDecode(corespTableView.corespTable.idVersSource, corespTableView.lang)}" />
+								</p>
+							</div>
+
+							<!--Версия/ вариант наследник-->
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-4 p-xl-4 ui-fluid">
+								<h:outputText value="#{labels['corespTable.versionInh']}"
+									styleClass="form-label" />
+								<p>
+									<p:outputLabel id="idVersInh"
+										value="#{corespTableView.actionDecode(corespTableView.corespTable.idVersTarget, corespTableView.lang)}" />
+								</p>
+							</div>
+
+							<!--Индетификатор-->
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-4 p-xl-4 ui-fluid">
+								<h:outputText value="#{labels['classificEdit.ident']}"
+									styleClass="form-label" />
+								<p>
+									<p:outputLabel id="identifikator"
+										value="#{corespTableView.corespTableLang.ident}" />
+								</p>
+							</div>
+
+							<!--Наименование-->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12 ui-fluid">
+								<h:outputText value="#{labels['classificEdit.name']}"
+									styleClass="form-label" />
+								<p>
+									<p:outputLabel id="name"
+										value="#{corespTableView.corespTableLang.name}" />
+								</p>
+							</div>
+
+							<!--Статус-->
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-4 p-xl-4 ui-fluid">
+								<h:outputText value="#{labels['versionEdit.status']}"
+									styleClass="form-label" />
+								<p>
+									<p:outputLabel id="status"
+										value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_CORESP_STATUS, corespTableView.corespTable.status, corespTableView.lang, now)}" />
+								</p>
+							</div>
+
+							<!--Тип на таблицата-->
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-4 p-xl-4 ui-fluid">
+								<h:outputText value="#{labels['corespTable.typeTable']}"
+									styleClass="form-label " />
+								<p>
+									<p:outputLabel id="typeTable"
+										value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_CORESP_TYPE, corespTableView.corespTable.tableType, corespTableView.lang, now)}" />
+								</p>
+							</div>
+
+							<!--Режим на свързване-->
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-4 p-xl-4 ui-fluid">
+								<h:outputText value="#{labels['corespTable.typeConn']}"
+									styleClass="form-label" />
+								<p>
+									<p:outputLabel id="typeConn"
+										value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_CORESP_RELATION_TYPE, corespTableView.corespTable.relationType, corespTableView.lang, now)}" />
+								</p>
+							</div>
+
+							<!--Брой релации-->
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-4 p-xl-4 ui-fluid">
+								<h:outputText value="#{labels['corespTable.numberRelations']}"
+									styleClass="form-label" />
+								<p>
+									<p:outputLabel id="numberRelations"
+										value="#{corespTableView.corespTable.relationsCount}" />
+								</p>
+							</div>
+
+							<!--Брой позиции - източници-->
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-4 p-xl-4 ui-fluid">
+								<h:outputText
+									value="#{labels['corespTable.numPossitionsSource']}"
+									styleClass="form-label" />
+								<p>
+									<p:outputLabel id="numberPossSource"
+										value="#{corespTableView.corespTable.sourcePosCount}" />
+								</p>
+							</div>
+
+							<!--Брой позиции - цели-->
+							<div class="p-col-12 p-sm-12 p-md-6 p-lg-4 p-xl-4 ui-fluid">
+								<h:outputText value="#{labels['corespTable.numberPossTarget']}"
+									styleClass="form-label" />
+								<p>
+									<p:outputLabel id="numberPossTarget"
+										value="#{corespTableView.corespTable.targetPosCount}" />
+								</p>
+							</div>
+
+							<!--Пътека за индиректни таблици-->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12 ui-fluid">
+								<h:outputText value="#{labels['corespTable.path']}"
+									styleClass="form-label" />
+								<p>
+									<p:outputLabel id="path"
+										value="#{corespTableView.corespTable.path}" />
+								</p>
+							</div>
+
+							<!--Област на приложение-->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12 ui-fluid">
+								<h:outputText value="#{labels['corespTable.region']}"
+									styleClass="form-label" />
+								<p>
+									<p:outputLabel id="region"
+										value="#{corespTableView.corespTableLang.region}" />
+								</p>
+							</div>
+
+							<!--Коментар-->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12 ui-fluid">
+								<h:outputText value="#{labels['classificEdit.comment']}"
+									styleClass="form-label" />
+								<p>
+									<p:outputLabel id="comment"
+										value="#{corespTableView.corespTableLang.comment}" />
+								</p>
+							</div>
+
+						</div>
+					</h:panelGroup>
+
+			</div>
+		</h:form>
+
+	</ui:define>
+</ui:composition>

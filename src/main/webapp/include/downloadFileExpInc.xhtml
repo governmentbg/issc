@@ -1,0 +1,59 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" 
+				xmlns:ui="http://java.sun.com/jsf/facelets" 
+				xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf"
+                xmlns:ibg="http://java.sun.com/jsf/composite/components">
+                
+    <ui:define name="metadata">
+		<f:metadata>
+			<f:viewParam name="idObj" value="#{downloadFileExp.idObj}"/>
+			<f:viewParam name="typeObj" value="#{downloadFileExp.type}"/>
+			<f:viewParam name="levels" value="#{downloadFileExp.levels}"/>
+			<f:viewParam name="begs" value="#{downloadFileExp.begs}"/>
+			<f:viewParam name="ends" value="#{downloadFileExp.ends}"/>
+			<f:viewParam name="nodeCodes" value="#{downloadFileExp.nodeCodes}"/>
+			<f:viewParam name="headers" value="#{downloadFileExp.headers}"/>
+			<f:viewParam name="lang" value="#{downloadFileExp.lang}"/>
+			<f:viewParam name="razd" value="#{downloadFileExp.separator}"/>
+			<f:viewParam name="format" value="#{downloadFileExp.format}"/>
+			<f:viewParam name="typeRel" value="#{downloadFileExp.typeRel}"/>
+			<f:viewParam name="changeRel" value="#{downloadFileExp.changeRel}"/>
+			
+		</f:metadata>
+	</ui:define>
+
+   
+    
+    <div class="p-grid p-align-end">
+     		<center>
+				 
+				 <br/><p:outputPanel id="message">
+					 <h:outputText value="#{downloadFileExp.message}" rendered="#{downloadFileExp.progress &lt; 100 and downloadFileExp.progress &gt; -1}"/>
+					 <p:staticMessage severity="info" summary="" detail="#{downloadFileExp.message}" style="width: 100%" rendered="#{downloadFileExp.progress==100 and !downloadFileExp.error}"/>
+					 <p:staticMessage severity="error" summary="" detail="#{downloadFileExp.message}" style="width: 100%" rendered="#{downloadFileExp.progress ==100 and downloadFileExp.error}"/>
+				 </p:outputPanel>
+				 <br/>
+				 <br/>
+				 <br/>
+			 </center>
+		<p:outputPanel id="test" >
+ 	 
+		 	  <p:commandButton value="Start" id="link" style="display:none"
+		                         onclick="PF('pbAjaxLong').start();PF('startButton3').disable()"  ajax="true" 
+		                         widgetVar="startButton3" actionListener="#{downloadFileExp.download}" styleClass="p-mr-2"/>
+		
+		                         
+		        <p:progressBar widgetVar="pbAjaxLong" ajax="true" value="#{downloadFileExp.progress}" 
+		                       labelTemplate="{value}%" styleClass="p-mt-3" global="false" interval="500">
+		                 <p:ajax event="complete"  update="message"/>
+		        </p:progressBar>
+			</p:outputPanel>
+		 
+			 
+			<p:remoteCommand name="onload" autoRun="true" oncomplete="document.getElementById('formDownloadExp:link').click();"/>
+    
+    </div>
+  
+</ui:composition> 

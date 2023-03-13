@@ -1,0 +1,390 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:jsf="http://xmlns.jcp.org/jsf"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components"
+	template="/template/template.xhtml">
+
+	<ui:define name="title">#{navTexts['/pages/classificationEdit.xhtml']}</ui:define>
+
+	<ui:define name="viewname">
+		<li>
+			<p:commandLink title="#{ui_labels['general.back']}" action="#{navigation.goBack()}" rendered="#{navigation.navPath.size()>1}">
+				<i class="fas fa-caret-left" />
+			</p:commandLink>
+		</li>
+		<li>#{navTexts['/pages/classificationEdit.xhtml']}</li>
+	</ui:define>
+
+	<ui:define name="content">
+
+		<f:metadata>
+			<!-- <f:viewAction action="#{userData.checkPageAccess(1)}" onPostback="false" /> -->		
+			<f:importConstants type="com.ib.nsiclassif.system.NSIConstants" />			
+		</f:metadata>
+
+		<h:form id="formClassificEdit">
+		
+			<div class="#{guestPreferences.containerPosition}">
+
+				<div class="card">
+
+					<p:toolbar id="tlbButton">
+
+						<f:facet name="left">
+
+							<p:commandButton icon="fas fa-save" value="#{ui_labels['general.save']}" id="btnSave"
+								update="formClassificEdit" partialSubmit="true" process="formClassificEdit @this" action="#">
+							</p:commandButton>
+							
+							<span class="p-mx-2">
+			                   	<span class="fas fa-ellipsis-v SoftGray"/>
+		                   </span>
+							
+							<p:commandButton icon="fas fa-user-friends" value="#{labels['general.users']}" id="btnUsers"
+								update="formClassificEdit" partialSubmit="true" process="formClassificEdit @this" action="#">
+							</p:commandButton>
+							
+							<span class="p-mx-2">
+			                   	<span class="fas fa-ellipsis-v SoftGray"/>
+		                   </span>
+							
+							<p:commandButton icon="fas fa-fw fa-files-o" value="#{labels['general.docs']}" id="btnDocs"
+								update="formClassificEdit" partialSubmit="true" process="formClassificEdit @this" action="#">
+							</p:commandButton>
+							
+						</f:facet>
+
+						<f:facet name="right">							
+							<p:commandButton icon="fas fa-times" id="btnDelete"
+								value="#{ui_labels['general.delete']}" update="formClassificEdit"
+								partialSubmit="true" process="formClassificEdit  @this" 
+								action="#" styleClass="ui-button-danger  p-ml-2">
+								<p:confirm header="#{ui_labels['general.comfirmation']}" message="#{beanMessages['sureErase']}" icon="fas fa-exclamation-triangle" />
+							</p:commandButton>
+						</f:facet>
+
+					</p:toolbar>
+					
+					<div class="title-group">
+						<p:commandLink class="extended-search-toggle expanded" onclick="toggleSection(this, '#formClassificEdit:basicDataClassific')">
+							<h:outputText value="#{labels['classificEdit.basicData']}" />
+							<i class="fas fa-caret-right"></i>
+						</p:commandLink>
+					</div>
+
+					<div jsf:id="basicDataClassific">
+					
+						<div jsf:id="dataClassific" class="p-grid ui-fluid p-align-end">
+						
+							<!-- Идентификатор -->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-3 p-xl-3">
+								<h:outputText value="#{labels['classificEdit.ident']}" styleClass="form-label req" />
+								<p:inputText value="#" id="ident" />
+							</div>
+							
+							<!-- Семейство/Подсемейство -->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-9 p-xl-9">
+								<h:outputText value="#{labels['classificEdit.family']}" styleClass="form-label" />
+								<p:selectOneMenu value="#" id="family">
+									<f:selectItem value="#{null}" itemValue="#{null}" />
+									<f:selectItems value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_CLASSIFICATION_FAMILY, now, classificationEdit.currentLang)}"
+										var="itemSc" itemLabel="#{itemSc.tekst}" itemValue="#{itemSc.code}" />
+								</p:selectOneMenu>
+							</div>
+							
+							<!-- Наименование -->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12">
+								<h:outputText value="#{labels['classificEdit.name']}" styleClass="form-label req" />
+								<p:inputTextarea value="#" rows="3" autoResize="false" id="name" maxlength="4000"/>
+							</div>
+							
+							<!-- Тип на класификацията -->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-6 p-xl-6">
+								<h:outputText value="#{labels['classificEdit.type']}" styleClass="form-label req" />
+								<p:selectOneMenu value="#" id="type">
+									<f:selectItem value="#{null}" itemValue="#{null}" />
+									<f:selectItems value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_CLASSIFICATION_TYPE, now, classificationEdit.currentLang)}"
+										var="itemSc" itemLabel="#{itemSc.tekst}" itemValue="#{itemSc.code}" />
+								</p:selectOneMenu>
+							</div>
+							
+							<!-- Класификационна единица -->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-6 p-xl-6">
+								<h:outputText value="#{labels['classificEdit.unit']}" styleClass="form-label req" />								
+								<p:selectOneMenu value="#" id="classUnit">
+									<f:selectItem value="#{null}" itemValue="#{null}" />
+									<f:selectItems value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_CLASSIFICATION_UNIT, now, classificationEdit.currentLang)}"
+										var="itemSc" itemLabel="#{itemSc.tekst}" itemValue="#{itemSc.code}" />
+								</p:selectOneMenu>
+							</div>
+						
+						</div>
+					
+					</div>
+					
+					<div class="p-col-12" jsf:rendered="true">
+					
+						<p:commandLink class="extended-search-toggle expanded" onclick="toggleSection(this, '#formClassificEdit:classVerList')">
+							<h:outputText value="#{labels['classificEdit.classVerList']}" />
+							<i class="fas fa-caret-right"></i>
+						</p:commandLink>
+						
+						<p:commandButton icon="fas fa-edit" action="#" ajax="false" value="#{labels['classificEdit.newVer']}" styleClass="ui-button-success" />									
+					
+						<div jsf:id="classVerList" class="p-grid ui-fluid">
+						
+						<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12">
+
+							<p:dataTable id="tblClassVerList" var="row" value="#" rowIndexVar="idx"
+								emptyMessage="#{ui_labels['general.norows']}" rows="5" sortMode="single" reflow="true"
+								paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {Exporters}"
+								rowsPerPageTemplate="5,10,15,20,25" paginatorPosition="bottom" paginatorAlwaysVisible="true" paginator="true">
+								
+								<f:facet name="{Exporters}">
+								
+								<div style="float: left">
+									<h:commandLink id="excel">
+										<h:graphicImage library="images" name="excel2.png" />
+										<p:dataExporter type="xls" target="tblClassVerList" fileName="classVerListXls" />
+									</h:commandLink>
+
+									<h:commandLink id="pdf">
+										<h:graphicImage library="images" name="pdf.png" />
+										<p:dataExporter type="pdf"  target="tblClassVerList" fileName="classVerListPdf" encoding="windows-1251"
+					        						    options="#"/>
+									</h:commandLink>
+
+									<h:commandLink id="csv">
+										<h:graphicImage library="images" name="csv.png" />
+										<p:dataExporter type="csv" target="tblClassVerList" fileName="classVerListCsv" encoding="CP1251" />
+									</h:commandLink>
+								</div>
+							</f:facet>
+
+								<p:column width="5" exportable="false" headerText="#{ui_labels['general.No-symbol']}">
+									<h:outputText value="#{idx + 1}" />
+								</p:column>
+
+								<p:column width="10" exportable="false">
+									<p:commandButton icon="fas fa-edit" action="#" styleClass="btn-new" ajax="false" />
+								</p:column>
+								
+								<p:column width="10" exportable="false">
+									<p:button  icon="fas fa-eye" href="#" target="_blank" title="#{ui_labels['general.view']}" />
+						  		</p:column>
+
+								<p:column width="150" sortBy="#" headerText="#{labels['classificEdit.identVer']}">
+									<h:outputText value="#" />
+								</p:column>
+
+								<p:column width="400" sortBy="#" headerText="#{labels['classificEdit.nameVer']}">
+									<h:outputText value="#" />
+								</p:column>
+								
+								<p:column width="10" exportable="false">
+									<p:commandButton icon="fas fa-trash" action="#" ajax="true" styleClass="ui-button-danger" update="formClassificEdit:tblClassVerList" >
+										<p:confirm header="#{ui_labels['general.comfirmation']}" message="#{beanMessages['sureDelete']}" icon="fas fa-exclamation-triangle" />
+									</p:commandButton>
+								</p:column>
+
+							</p:dataTable>
+							
+							</div>
+
+						</div>
+
+					</div>
+					
+					<div class="p-col-12" jsf:rendered="true">
+					
+						<p:commandLink class="extended-search-toggle expanded" onclick="toggleSection(this, '#formClassificEdit:correspondList')">
+							<h:outputText value="#{labels['classificEdit.correspondList']}" />
+							<i class="fas fa-caret-right"></i>
+						</p:commandLink>
+						
+						<p:commandButton icon="fas fa-edit" action="#" ajax="false" value="#{labels['classificEdit.newCorrespond']}" styleClass="ui-button-success" />									
+					
+						<div jsf:id="correspondList" class="p-grid ui-fluid">
+						
+						<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12">
+
+							<p:dataTable id="tblCorrespondList" var="row" value="#" rowIndexVar="idx"
+								emptyMessage="#{ui_labels['general.norows']}" rows="5" sortMode="single" reflow="true"
+								paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {Exporters}"
+								rowsPerPageTemplate="5,10,15,20,25" paginatorPosition="bottom" paginatorAlwaysVisible="true" paginator="true">
+								
+								<f:facet name="{Exporters}">
+								
+								<div style="float: left">
+									<h:commandLink id="excel">
+										<h:graphicImage library="images" name="excel2.png" />
+										<p:dataExporter type="xls" target="tblCorrespondList" fileName="correspondListXls" />
+									</h:commandLink>
+
+									<h:commandLink id="pdf">
+										<h:graphicImage library="images" name="pdf.png" />
+										<p:dataExporter type="pdf"  target="tblCorrespondList" fileName="correspondListPdf" encoding="windows-1251"
+					        						    options="#"/>
+									</h:commandLink>
+
+									<h:commandLink id="csv">
+										<h:graphicImage library="images" name="csv.png" />
+										<p:dataExporter type="csv" target="tblCorrespondList" fileName="correspondListCsv" encoding="CP1251" />
+									</h:commandLink>
+								</div>
+							</f:facet>
+
+								<p:column width="5" exportable="false" headerText="#{ui_labels['general.No-symbol']}">
+									<h:outputText value="#{idx + 1}" />
+								</p:column>
+
+								<p:column width="10" exportable="false">
+									<p:commandButton icon="fas fa-edit" action="#" styleClass="btn-new" ajax="false" />
+								</p:column>
+								
+								<p:column width="10" exportable="false">
+									<p:button  icon="fas fa-eye" href="#" target="_blank" title="#{ui_labels['general.view']}" />
+						  		</p:column>
+
+								<p:column width="150" sortBy="#" headerText="#{labels['classificEdit.identCorrespond']}">
+									<h:outputText value="#" />
+								</p:column>
+
+								<p:column width="400" sortBy="#" headerText="#{labels['classificEdit.nameCorrespond']}">
+									<h:outputText value="#" />
+								</p:column>
+								
+								<p:column width="10" exportable="false">
+									<p:commandButton icon="fas fa-trash" action="#" ajax="true" styleClass="ui-button-danger" update="formClassificEdit:tblCorrespondList" >
+										<p:confirm header="#{ui_labels['general.comfirmation']}" message="#{beanMessages['sureDelete']}" icon="fas fa-exclamation-triangle" />
+									</p:commandButton>
+								</p:column>
+
+							</p:dataTable>
+							
+							</div>
+
+						</div>
+
+					</div>
+					
+					<div class="title-group">
+						<p:commandLink class="extended-search-toggle expanded" onclick="toggleSection(this, '#formClassificEdit:otherMetadata')">
+							<h:outputText value="#{labels['classificEdit.otherMetadata']}" />
+							<i class="fas fa-caret-right"></i>
+						</p:commandLink>
+					</div>
+
+					<div jsf:id="otherMetadata">
+					
+						<div jsf:id="otherMetadataClassific" class="p-grid ui-fluid p-align-end">
+							
+							<!-- Описание -->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12">
+								<h:outputText value="#{labels['classificEdit.opisanie']}" styleClass="form-label" />
+								<div class="ui-inputgroup">
+									<p:inputTextarea id="opisanieInp" value="#" rows="3" autoResize="false" style="width:99%">
+										<p:ajax event="change" update="formClassificEdit:opisanie" />
+									</p:inputTextarea>
+									<p:commandButton icon="fas fa-book-open" title="#{labels['classificEdit.opisanie']}" id="btnOpisanie" styleClass="inputgroup-button" />
+								</div>
+								
+								<p:overlayPanel for="btnOpisanie" appendTo="@form" showEffect="fade" dynamic="true" hideEffect="fade" dismissable="false" style="width:90%" showCloseIcon="true" my="left center" at="right center">
+									<h:outputText value="#{labels['classificEdit.opisanie']}" styleClass="form-label" />
+									<p:inputTextarea id="opisanie" value="#" rows="20" style="width:100%;" autoResize="false">
+										<p:ajax event="change" update="formClassificEdit:opisanieInp" />
+									</p:inputTextarea>
+								</p:overlayPanel>
+							</div>
+							
+							<!-- Коментар -->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12">
+								<h:outputText value="#{labels['classificEdit.comment']}" styleClass="form-label" />
+								<div class="ui-inputgroup">
+									<p:inputTextarea id="commentInp" value="#" rows="3" autoResize="false" style="width:99%">
+										<p:ajax event="change" update="formClassificEdit:comment" />
+									</p:inputTextarea>
+									<p:commandButton icon="fas fa-book-open" title="#{labels['classificEdit.comment']}" id="btnComment" styleClass="inputgroup-button" />
+								</div>
+								
+								<p:overlayPanel for="btnComment" appendTo="@form" showEffect="fade" dynamic="true" hideEffect="fade" dismissable="false" style="width:90%" showCloseIcon="true" my="left center" at="right center">
+									<h:outputText value="#{labels['classificEdit.comment']}" styleClass="form-label" />
+									<p:inputTextarea id="comment" value="#" rows="20" style="width:100%;" autoResize="false">
+										<p:ajax event="change" update="formClassificEdit:commentInp" />
+									</p:inputTextarea>
+								</p:overlayPanel>
+							</div>	
+							
+							<!-- Актуални новини -->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12">
+								<h:outputText value="#{labels['classificEdit.currentNews']}" styleClass="form-label" />
+								<div class="ui-inputgroup">
+									<p:inputTextarea id="currentNewsInp" value="#" rows="3" autoResize="false" style="width:99%">
+										<p:ajax event="change" update="formClassificEdit:currentNews" />
+									</p:inputTextarea>
+									<p:commandButton icon="fas fa-book-open" title="#{labels['classificEdit.currentNews']}" id="btnCurrentNews" styleClass="inputgroup-button" />
+								</div>
+								
+								<p:overlayPanel for="btnCurrentNews" appendTo="@form" showEffect="fade" dynamic="true" hideEffect="fade" dismissable="false" style="width:90%" showCloseIcon="true" my="left center" at="right center">
+									<h:outputText value="#{labels['classificEdit.currentNews']}" styleClass="form-label" />
+									<p:inputTextarea id="currentNews" value="#" rows="20" style="width:100%;" autoResize="false">
+										<p:ajax event="change" update="formClassificEdit:currentNewsInp" />
+									</p:inputTextarea>
+								</p:overlayPanel>
+							</div>
+							
+							<!-- Област на приложение -->
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12">
+								<h:outputText value="#{labels['classificEdit.fieldOfApplication']}" styleClass="form-label" />
+								<div class="ui-inputgroup">
+									<p:inputTextarea id="fieldOfApplicationInp" value="#" rows="3" autoResize="false" style="width:99%">
+										<p:ajax event="change" update="formClassificEdit:fieldOfApplication" />
+									</p:inputTextarea>
+									<p:commandButton icon="fas fa-book-open" title="#{labels['classificEdit.fieldOfApplication']}" id="btnFieldOfApplication" styleClass="inputgroup-button" />
+								</div>
+								
+								<p:overlayPanel for="btnFieldOfApplication" appendTo="@form" showEffect="fade" dynamic="true" hideEffect="fade" dismissable="false" style="width:90%" showCloseIcon="true" my="left center" at="right center">
+									<h:outputText value="#{labels['classificEdit.fieldOfApplication']}" styleClass="form-label" />
+									<p:inputTextarea id="fieldOfApplication" value="#" rows="20" style="width:100%;" autoResize="false">
+										<p:ajax event="change" update="formClassificEdit:fieldOfApplicationInp" />
+									</p:inputTextarea>
+								</p:overlayPanel>
+							</div>										
+						
+						</div>
+					
+					</div>
+					
+					<div class="title-group">
+						<p:commandLink class="extended-search-toggle expanded" onclick="toggleSection(this, '#formClassificEdit:posAttr')">
+							<h:outputText value="#{labels['classificEdit.posAttr']}" />
+							<i class="fas fa-caret-right"></i>
+						</p:commandLink>
+					</div>
+
+					<div jsf:id="posAttr">
+					
+						<div jsf:id="posAttrSel" class="p-grid ui-fluid p-align-end">
+						
+							<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12">
+								<p:selectManyCheckbox id="selAttr" layout="responsive" columns="3">
+									<f:selectItems value="#{classificationEdit.posAttrList}" var="attr" itemLabel="#{attr}" itemValue="#{attr}"/>
+								</p:selectManyCheckbox>
+							</div>
+						
+						</div>
+					
+					</div>						
+				
+				</div>
+				
+			</div>
+		
+		</h:form>
+		
+	</ui:define>
+
+</ui:composition>

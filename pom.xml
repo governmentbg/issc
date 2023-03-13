@@ -1,0 +1,584 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.ib</groupId>
+	<artifactId>NSIClassif</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>war</packaging>
+
+	<name>NSIClassif Maven Webapp</name>
+	<!-- FIXME change it to the project's website -->
+	<url>http://www.example.com</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.release>11</maven.compiler.release>
+		
+		<poi.version>5.0.0</poi.version>
+		<open-pdf.version>1.3.24</open-pdf.version>
+		
+		<war.filename>NSIClassif</war.filename>
+		<prop.file>default.properties</prop.file>
+		<!-- Set project stage in web.xml -->
+		<prop.projectStage>development</prop.projectStage>
+		<!-- Set welcome page in  web.xml -->
+		<prop.welcomePage>login.xhtml</prop.welcomePage>
+		<!--  Set THEME in web.xml -->
+		<prop.theme>mirage-#{guestPreferences.theme}</prop.theme>
+		<!--  Set pageNotFound in web.xml -->
+		<prop.pageNotFound>pages/pageNotFound.xhtml</prop.pageNotFound>
+
+	</properties>
+
+	<profiles>
+		<profile>
+			<id>development</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<jndi.begin>&lt;!--</jndi.begin>
+				<jndi.end>--&gt;</jndi.end>
+				<conn.params.begin></conn.params.begin>
+				<conn.params.end></conn.params.end>
+				<jndi.quartz>#</jndi.quartz>
+				<conn.params.quartz></conn.params.quartz>
+			</properties>
+			<dependencies>
+				
+				<dependency>
+					<groupId>com.microsoft.sqlserver</groupId>
+					<artifactId>mssql-jdbc</artifactId>
+					<version>9.4.0.jre11</version>
+				</dependency>
+				
+				<!-- https://mvnrepository.com/artifact/com.ibm.informix/jdbc 
+				<dependency>
+				    <groupId>com.ibm.informix</groupId>
+				    <artifactId>jdbc</artifactId>
+				    <version>4.50.1</version>
+				</dependency>
+				-->
+				<dependency>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>resteasy-jaxb-provider</artifactId>
+					<version>4.5.2.Final</version>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+			        <groupId>org.jboss.resteasy</groupId>
+			        <artifactId>resteasy-client</artifactId>
+			        <version>4.5.2.Final</version>
+					<scope>provided</scope>
+			    </dependency>
+			   
+
+			</dependencies>
+		</profile>
+		<profile>
+			<id>production</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<properties>
+				<jndi.begin></jndi.begin>
+				<jndi.end></jndi.end>
+				<conn.params.begin>&lt;!--</conn.params.begin>
+				<conn.params.end>--&gt;</conn.params.end>
+				<jndi.quartz></jndi.quartz>
+				<conn.params.quartz>#</conn.params.quartz>
+				<quartz.start>true</quartz.start>
+				<prop.projectStage>production</prop.projectStage>
+			</properties>
+		</profile>
+		<!-- This profile need to bi activated wif u want to build/work with external application -->
+		<profile>
+			<id>external</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<properties>
+				<war.filename>NSIExt</war.filename>
+				<prop.welcomePage>classificationsList.xhtml</prop.welcomePage>
+				<prop.theme>saga</prop.theme>
+				<prop.pageNotFound>pageNotFound.xhtml</prop.pageNotFound>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-war-plugin</artifactId>
+						<configuration>
+							<packagingExcludes>
+								WEB-INF/classes/com/ib/nsiclassif/beans/**,
+								template/**,
+								pages/**
+							</packagingExcludes>
+							<warSourceExcludes>
+								login.xhtml
+							</warSourceExcludes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<!-- за чии ни е да махаме каквото и да било от вътрешното -->
+		<!-- <profile>
+			<id>internal</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-war-plugin</artifactId>
+						<configuration>
+							<packagingExcludes>
+								WEB-INF/classes/com/ib/nsiclassif/beansSite/**,
+								templateSite/**,
+								
+							</packagingExcludes>
+							<warSourceExcludes>
+							</warSourceExcludes>
+							<warSourceIncludes>
+								login.xhtml,
+								downloadFiles.xhtml
+							</warSourceIncludes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile> -->
+		<profile>
+			<id>sonar</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<properties>
+				<!-- Optional URL to server. Default value is http://localhost:9000 -->
+				<sonar.host.url>
+					http://10.29.1.16:9000
+				</sonar.host.url>
+			</properties>
+		</profile>
+	</profiles>
+
+	<repositories>
+		<repository>
+			<id>prime-repo</id>
+			<name>PrimeFaces Maven Repository</name>
+			<url>http://repository.primefaces.org</url>
+			<layout>default</layout>
+		</repository>
+		<repository>
+			<id>AsposeJavaAPI</id>
+			<name>Aspose Java API</name>
+			<url>https://repository.aspose.com/repo/</url>
+		</repository>
+	</repositories>
+
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.ib.system</groupId>
+			<artifactId>SystemX</artifactId>
+			<version>0.1</version>
+			<scope>compile</scope>
+			<type>jar</type>
+			<exclusions>
+				<exclusion>
+					<artifactId>*</artifactId>
+					<groupId>*</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.ib.indexui</groupId>
+			<artifactId>IndexUIx</artifactId>
+			<version>0.1</version>
+			<scope>compile</scope>
+			<type>jar</type>
+			<exclusions>
+				<exclusion>
+					<artifactId>*</artifactId>
+					<groupId>*</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>javax</groupId>
+			<artifactId>javaee-api</artifactId>
+			<version>8.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>5.4.10.Final</version>
+			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.glassfish.jaxb</groupId>
+					<artifactId>jaxb-runtime</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-search-orm</artifactId>
+			<version>5.11.5.Final</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-search-elasticsearch</artifactId>
+			<version>5.11.5.Final</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.26</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
+			<version>2.11.2</version>
+			<scope>test</scope>
+		</dependency>
+		<!--<dependency>
+			<groupId>org.primefaces</groupId>
+			<artifactId>primefaces</artifactId>
+			<version>10.0.7</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/primefaces-10.0.7.jar</systemPath>
+		</dependency>-->
+		<dependency>
+			<groupId>org.primefaces</groupId>
+			<artifactId>primefaces</artifactId>
+			<version>10.0.7</version>
+		</dependency>
+		<!-- <dependency>
+			<groupId>org.primefaces</groupId>
+			<artifactId>mirage</artifactId>
+			<version>2.0.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/mirage-theme-2.0.0.jar</systemPath>
+		</dependency> -->
+		<dependency>
+			<groupId>org.primefaces</groupId>
+			<artifactId>mirage</artifactId>
+			<version>2.0.0</version>
+
+		</dependency>
+		<dependency>
+			<groupId>org.primefaces.extensions</groupId>
+			<artifactId>primefaces-extensions</artifactId>
+			<version>10.0.7</version>
+			<exclusions>
+				<exclusion> <!-- това не ни трябва -->
+					<groupId>com.google.code.gson</groupId>
+					<artifactId>gson</artifactId>
+				</exclusion>
+				<exclusion> <!-- това ще се вземе от wildfly -->
+					<groupId>org.apache.commons</groupId>
+					<artifactId>commons-lang3</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.primefaces</groupId>
+					<artifactId>primefaces</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-lang3</artifactId>
+		    <version>3.11</version>
+		    <scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.omnifaces</groupId>
+			<artifactId>omnifaces</artifactId>
+			<version>3.8</version>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.4.199</version>
+			<scope>compile</scope>
+			<!-- <scope>test</scope> само докато се разработва, защото като се използва 
+				кеша от сървъра и има повече системни се смесват данните -->
+		</dependency>
+				        <!-- Data Exporter -->
+        <dependency>
+	        <groupId>org.apache.odftoolkit</groupId>
+	        <artifactId>simple-odf</artifactId>
+	        <version>0.7-incubating</version>
+	        <exclusions>
+	        	<exclusion>
+	        		<groupId>xml-apis</groupId>
+	        		<artifactId>xml-apis</artifactId>
+	        	</exclusion>
+	        	<exclusion>
+	        		<groupId>xerces</groupId>
+	        		<artifactId>xercesImpl</artifactId>
+	        	</exclusion>
+	        </exclusions>
+	    </dependency>
+		<dependency>
+			<groupId>xerces</groupId>
+		  	<artifactId>xercesImpl</artifactId>
+		  	<version>2.9.1</version>
+		  	<scope>provided</scope>
+			  <exclusions>
+			  	<exclusion>
+		        		<groupId>xml-apis</groupId>
+		        		<artifactId>xml-apis</artifactId>
+		        	</exclusion>
+			  </exclusions>
+	</dependency>
+	
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${poi.version}</version>
+            <exclusions>
+            	<exclusion>
+            		<groupId>org.apache.xmlgraphics</groupId>
+            		<artifactId>batik-all</artifactId>
+            	</exclusion>
+            	<exclusion>
+            		<groupId>de.rototor.pdfbox</groupId>
+            		<artifactId>graphics2d</artifactId>
+            	</exclusion>
+            	<exclusion>
+            		<groupId>org.apache.santuario</groupId>
+            		<artifactId>xmlsec</artifactId>
+            	</exclusion>
+            	<exclusion>
+            		<groupId>org.bouncycastle</groupId>
+            		<artifactId>bcpkix-jdk15on</artifactId>
+            	</exclusion>
+            	<exclusion>
+            		<groupId>com.github.virtuald</groupId>
+            		<artifactId>curvesapi</artifactId>
+            	</exclusion>
+            	<exclusion>
+            		<groupId>org.bouncycastle</groupId>
+            		<artifactId>bcprov-jdk15on</artifactId>
+            	</exclusion>
+            </exclusions>
+        </dependency>
+       <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+            <version>${open-pdf.version}</version>
+        </dependency>
+       <dependency>
+       	<groupId>com.github.miachm.sods</groupId>
+       	<artifactId>SODS</artifactId>
+       	<version>1.4.0</version>
+       </dependency>
+ 	 <!-- Надолу от мен ЛМ-->
+				<dependency>
+				    <groupId>org.apache.pdfbox</groupId>
+				    <artifactId>pdfbox</artifactId>
+				    <version>2.0.24</version>
+				</dependency>
+				<dependency>
+				    <groupId>technology.tabula</groupId>
+				    <artifactId>tabula</artifactId>
+				    <version>1.0.5</version>
+				</dependency>
+				<!-- https://mvnrepository.com/artifact/org.apache.tika/tika-parsers -->
+				<dependency>
+				  <groupId>net.sf.opencsv</groupId>
+				  <artifactId>opencsv</artifactId>
+				  <version>2.3</version>
+				</dependency>
+							
+					
+ 	<!-- До тук от мен ЛМ-->
+       
+       
+       
+	</dependencies>
+
+
+	<build>
+		<finalName>${war.filename}</finalName>
+		<filters>
+			<filter>src/main/resources/META-INF/${prop.file}</filter>
+		</filters>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+
+			<plugins>
+				<plugin>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>3.1.0</version>
+				</plugin>
+				<!-- see http://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_war_packaging -->
+				<plugin>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>3.0.2</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.8.0</version>
+					<configuration>
+						<release>${maven.compiler.release}</release>
+					</configuration>
+				</plugin>
+				<plugin>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.22.1</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>3.2.2</version>
+					<configuration>
+						<detail>true</detail>
+						<!-- Махаме приопърти файловете за персистанса -->
+						<packagingExcludes>**/META-INF/*.properties</packagingExcludes>
+						<webResources>
+							<resource>
+								<!-- За да се сетнат в системните настройки стойности от ${prop.file} -->
+								<directory>src/main/resources</directory>
+								<include>system.properties</include>
+								<filtering>true</filtering>
+							</resource>
+							<resource>
+								<!-- за да се сетне билд версията -->
+								<directory>src/main/webapp</directory>
+								<include>**/footer.xhtml</include>
+								<include>**/web.xml</include>
+								<filtering>true</filtering>
+							</resource>
+						</webResources>
+					</configuration>
+				</plugin>
+
+				<!--<plugin>
+					<artifactId>maven-install-plugin</artifactId>
+					<version>2.5.2</version>
+				</plugin>-->
+				<plugin>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>2.8.2</version>
+				</plugin>
+				<plugin>
+	                <groupId>org.apache.maven.plugins</groupId>
+	                <artifactId>maven-help-plugin</artifactId>
+	                <version>3.2.0</version>
+	            </plugin>
+	            
+	            <!-- Този плъгин е единствено да вкара jar-овете от директорията local-maven-repo 
+					в локалното мавен репо когато се изпълни mvn clean описаните jar-ове се вкарват 
+					в репото и после могат да се достъпват от депенденситата -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-install-plugin</artifactId>
+					<version>2.5.2</version>
+					<executions>
+						<execution>
+							<id>1</id>
+							<phase>clean</phase>
+							<goals>
+								<goal>install-file</goal>
+							</goals>
+							<configuration>
+								<file>local-maven-repo/primefaces-10.0.7.jar</file>
+								<groupId>org.primefaces</groupId>
+								<artifactId>primefaces</artifactId>
+								<version>10.0.7</version>
+								<packaging>jar</packaging>
+							</configuration>
+						</execution>
+						<execution>
+							<id>2</id>
+							<phase>clean</phase>
+							<goals>
+								<goal>install-file</goal>
+							</goals>
+							<configuration>
+								<file>local-maven-repo/mirage-theme-2.0.0.jar</file>
+								<groupId>org.primefaces</groupId>
+								<artifactId>mirage</artifactId>
+								<version>2.0.0</version>
+								<packaging>jar</packaging>
+							</configuration>
+						</execution>
+						
+
+					</executions>
+				</plugin>
+
+
+				<!-- Това е за да генерираме билд тайма.
+				Ако ползваме стандартната възможност на MAVEN-a часа е неверен -->
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>build-helper-maven-plugin</artifactId>
+					<version>3.3.0</version>
+					<executions>
+						<execution>
+							<id>timestamp-property</id>
+
+							<goals>
+								<goal>timestamp-property</goal>
+							</goals>
+							<configuration>
+								<name>build.timestamp</name>
+								<pattern>ddMM(HH:mm)</pattern>
+								<locale>bg_BG</locale>
+								<timeZone>Europe/Sofia</timeZone>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+
+
+		</plugins>
+
+
+		<!-- <plugins>
+			display active profile in compile phase
+	            <plugin>
+	                <groupId>org.apache.maven.plugins</groupId>
+	                <artifactId>maven-help-plugin</artifactId>
+	                <version>3.1.0</version>
+	                <executions>
+	                    <execution>
+	                    	<id>show-profiles</id>
+	                    	<phase>clean</phase>
+	                    	<goals>
+	                    	  <goal>active-profiles</goal>
+	                    	  <goal>help</goal>
+	                    	  
+	                    	</goals>
+	                    </execution>
+	                </executions>
+	            </plugin>
+		</plugins> -->
+	</build>
+</project>

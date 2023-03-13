@@ -1,0 +1,150 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components"
+	xmlns:jsf="http://xmlns.jcp.org/jsf">
+	
+		<div style="left: calc(100% - 135px); top: -55px; position: relative; width: 150px">
+		<p:selectOneMenu id="langExportR" value="#{exportRalacii.lang}" style="width:150px">
+			<f:selectItems value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LANG, now, NSIConstants.CODE_DEFAULT_LANG)}"
+				var="lang" itemLabel="#{lang.tekst}" itemValue="#{lang.code}" />
+			<p:ajax event="change" listener="#{exportRalacii.changeLang}"
+				update="panelGenerate" process="@this" partialSubmit="ture" />
+		</p:selectOneMenu>
+	</div>
+ 
+  	<h:panelGroup id="ExportPanel" layout="block">
+    					<ui:remove><div class="p-col-12 p-sm-12 p-md-2 p-lg-2 p-xl-2">
+						<p:selectBooleanCheckbox value="#{exportRalacii.generate}" 
+						styleClass="form-label" itemLabel="Генерирай наново" > 	
+						</p:selectBooleanCheckbox>
+					</div></ui:remove>
+   
+
+		<h:panelGroup id="panelGenerate" >
+		
+			<div class="title-group">
+				
+
+			<h:outputText value="#{labels['corespTable.export']} #{corespTableBean.corespTableLang.name}" />
+
+			
+			</div>
+			<div jsf:id="tblExportPanel">
+			<div class="p-col-12 p-sm-6 p-md-3 p-lg-3 p-xl-3  ui-fluid">
+			<ui:remove>rendered="#{corespTableBean.corespTable.tableType!=NSIConstants.CODE_ZNACHENIE_COR_TAB_HIST or corespTableBean.relationsList.rowCount>0}"</ui:remove>
+						<p:menuButton   id="ExportMenuUp" ajax="false"   value="Експорт" styleClass="ui-button-success" >
+				            <p:menuitem value="ODS" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFileExp?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;headers=#{exportRalacii.headersAsString}&amp;lang=#{exportRalacii.lang}&amp;razd=#{exportRalacii.razdelitel}&amp;typeRel=#{exportRalacii.typeRel}&amp;changeRel=#{exportRalacii.changeRel}&amp;expName=#{exportRalacii.fName}&amp;format=ods">
+				             </p:menuitem>
+				            <p:menuitem value="Excel" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFileExp?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;headers=#{exportRalacii.headersAsString}&amp;lang=#{exportRalacii.lang}&amp;razd=#{exportRalacii.razdelitel}&amp;typeRel=#{exportRalacii.typeRel}&amp;changeRel=#{exportRalacii.changeRel}&amp;expName=#{exportRalacii.fName}&amp;format=xlsx">
+				             </p:menuitem>
+				            <p:menuitem value="PDF" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFileExp?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;headers=#{exportRalacii.headersAsString}&amp;lang=#{exportRalacii.lang}&amp;razd=#{exportRalacii.razdelitel}&amp;typeRel=#{exportRalacii.typeRel}&amp;changeRel=#{exportRalacii.changeRel}&amp;expName=#{exportRalacii.fName}&amp;format=pdf">
+				             </p:menuitem>
+				            <p:menuitem value="HTML" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFileExp?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;headers=#{exportRalacii.headersAsString}&amp;lang=#{exportRalacii.lang}&amp;razd=#{exportRalacii.razdelitel}&amp;typeRel=#{exportRalacii.typeRel}&amp;changeRel=#{exportRalacii.changeRel}&amp;expName=#{exportRalacii.fName}&amp;format=html">
+				             </p:menuitem>
+				            <p:menuitem value="CSV" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFileExp?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;headers=#{exportRalacii.headersAsString}&amp;lang=#{exportRalacii.lang}&amp;razd=#{exportRalacii.razdelitel}&amp;typeRel=#{exportRalacii.typeRel}&amp;changeRel=#{exportRalacii.changeRel}&amp;expName=#{exportRalacii.fName}&amp;format=csv">
+				             </p:menuitem>
+				            <p:menuitem value="TXT" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFileExp?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;headers=#{exportRalacii.headersAsString}&amp;lang=#{exportRalacii.lang}&amp;razd=#{exportRalacii.razdelitel}&amp;typeRel=#{exportRalacii.typeRel}&amp;changeRel=#{exportRalacii.changeRel}&amp;expName=#{exportRalacii.fName}&amp;format=txt">
+				             </p:menuitem>
+				            <p:menuitem value="SDMX" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFileExp?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;headers=#{exportRalacii.headersAsString}&amp;lang=#{exportRalacii.lang}&amp;razd=#{exportRalacii.razdelitel}&amp;typeRel=#{exportRalacii.typeRel}&amp;changeRel=#{exportRalacii.changeRel}&amp;expName=#{exportRalacii.fName}&amp;format=sdmx">
+				             </p:menuitem>
+				            <p:menuitem value="SDMX-JSON" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFileExp?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;headers=#{exportRalacii.headersAsString}&amp;lang=#{exportRalacii.lang}&amp;razd=#{exportRalacii.razdelitel}&amp;typeRel=#{exportRalacii.typeRel}&amp;changeRel=#{exportRalacii.changeRel}&amp;expName=#{exportRalacii.fName}&amp;format=sdmx-json">
+				             </p:menuitem>
+				        </p:menuButton>
+					</div>
+		
+			        <p:growl>
+			            <p:autoUpdate/>
+			        </p:growl>
+			        <div class="p-grid">
+			     <ui:remove> </ui:remove> 
+			      <div class="p-col-12 p-md-4 ui-fluid">
+			       <h:outputText value="Характер на промяната:" styleClass="form-label" />
+			        <p:dataTable id="symbol" var="symbol" value="#{exportRalacii.symbols}">
+			            <p:column headerText="">
+			                <h:outputText value="#{symbol.tekst}" />
+			            </p:column>
+			        </p:dataTable>
+			    </div> 
+				<div class="p-col-12 p-md-4 ui-fluid">
+					<h:outputText value="Тип промяна на релацията:" styleClass="form-label" />
+				    <p:dataTable id="typeChangeRelation" var="change" value="#{exportRalacii.typeChangeRelation}" 
+				                 selection="#{exportRalacii.selectedTypeChangeRelation}" rowKey="#{change.id}" showGridlines="false"  >
+				         <p:ajax event="rowSelectCheckbox"  process="@this" partialSubmit="true" listener="#{exportRalacii.checkChange}"/>
+  						 <p:ajax event="rowUnselectCheckbox" process="@this" partialSubmit="true" listener="#{exportRalacii.checkChange}"/>
+  						 <p:ajax event="toggleSelect" process="@this" partialSubmit="true" listener="#{exportRalacii.checkChange}"/>
+				        <p:column selectionMode="multiple" style="width:16px;text-align:center" />
+				        <p:column headerText="" >
+				            <h:outputText value="#{change.tekst}" />
+				        </p:column>
+				        
+				    </p:dataTable>
+				</div>
+				<div class="p-col-12 p-md-4 ui-fluid">
+					<h:outputText value="Тип на релацията:" styleClass="form-label" />
+				  	<p:dataTable id="typeRelation" var="type" value="#{exportRalacii.typeRelation}"
+				               selection="#{exportRalacii.selectedTypeRelation}" rowKey="#{type.id}">
+				        <p:ajax event="toggleSelect" process="@this" partialSubmit="true" listener="#{exportRalacii.checkType}" />
+				    	<p:ajax event="rowSelectCheckbox"  process="@this" partialSubmit="true" listener="#{exportRalacii.checkType}"/>
+  					    <p:ajax event="rowUnselectCheckbox" process="@this" partialSubmit="true" listener="#{exportRalacii.checkType}"/>
+				      <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+
+				      <p:column headerText="">
+				          <h:outputText value="#{type.tekst}" />
+				      </p:column>
+				  	</p:dataTable> 
+				</div>
+						<div class="p-col-12 p-md-6 ui-fluid">
+ 			    		<h:outputText value="Избор на атрибути за експорт:" styleClass="form-label req" />
+			      <p:selectCheckboxMenu id="multiple1" value="#{exportRalacii.selectedItems}" label="#{labels['export.exportOrder']}" style="min-width: 15rem"
+		                                  multiple="true" filter="true" filterMatchMode="startsWith" panelStyle="width: 30rem" scrollHeight="250">
+					    <p:ajax event="change" process="multiple1" partialSubmit="true" update="ExportMenuDown ExportMenuUp"/>
+		                <f:selectItems value="#{exportRalacii.orderItems}"/>
+		            </p:selectCheckboxMenu>
+		            </div>
+		            
+		            
+		            <div class="p-col-12 p-md-6 ui-fluid">
+			    		<h:outputText value="#{labels['general.separator']}:" styleClass="form-label" />
+			    		<br/>
+						<h:inputText id="separator" value="#{exportRalacii.razdelitel}" maxlength="2" />
+						<p:commandButton icon="fas fa-check" style="margin-left:-42px;width:40px;"
+									value=" ." id="checkButton" process="separator"
+									action="#{exportRalacii.actionRazdl}" partialSubmit="true"
+									update="ExportMenuDown ExportMenuUp" />
+					</div>
+					</div>
+				
+
+					<div class="p-col-12 p-sm-6 p-md-3 p-lg-3 p-xl-3  ui-fluid">
+					<ui:remove>rendered="#{corespTableBean.corespTable.tableType!=NSIConstants.CODE_ZNACHENIE_COR_TAB_HIST or corespTableBean.relationsList.rowCount>0}"</ui:remove>
+						<p:menuButton  id="ExportMenuDown" ajax="false"   value="Експорт" styleClass="ui-button-success" >
+				            <p:menuitem value="ODS" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFileExp?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;headers=#{exportRalacii.headersAsString}&amp;lang=#{exportRalacii.lang}&amp;razd=#{exportRalacii.razdelitel}&amp;typeRel=#{exportRalacii.typeRel}&amp;changeRel=#{exportRalacii.changeRel}&amp;expName=#{exportRalacii.fName}&amp;format=ods">
+				             </p:menuitem>
+				            <p:menuitem value="Excel" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFileExp?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;headers=#{exportRalacii.headersAsString}&amp;lang=#{exportRalacii.lang}&amp;razd=#{exportRalacii.razdelitel}&amp;typeRel=#{exportRalacii.typeRel}&amp;changeRel=#{exportRalacii.changeRel}&amp;expName=#{exportRalacii.fName}&amp;format=xlsx">
+				             </p:menuitem>
+				            <p:menuitem value="PDF" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFileExp?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;headers=#{exportRalacii.headersAsString}&amp;lang=#{exportRalacii.lang}&amp;razd=#{exportRalacii.razdelitel}&amp;typeRel=#{exportRalacii.typeRel}&amp;changeRel=#{exportRalacii.changeRel}&amp;expName=#{exportRalacii.fName}&amp;format=pdf">
+				             </p:menuitem>
+				            <p:menuitem value="HTML" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFileExp?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;headers=#{exportRalacii.headersAsString}&amp;lang=#{exportRalacii.lang}&amp;razd=#{exportRalacii.razdelitel}&amp;typeRel=#{exportRalacii.typeRel}&amp;changeRel=#{exportRalacii.changeRel}&amp;expName=#{exportRalacii.fName}&amp;format=html">
+				             </p:menuitem>
+				            <p:menuitem value="CSV" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFileExp?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;headers=#{exportRalacii.headersAsString}&amp;lang=#{exportRalacii.lang}&amp;razd=#{exportRalacii.razdelitel}&amp;typeRel=#{exportRalacii.typeRel}&amp;changeRel=#{exportRalacii.changeRel}&amp;expName=#{exportRalacii.fName}&amp;format=csv">
+				             </p:menuitem>
+				            <p:menuitem value="TXT" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFileExp?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;headers=#{exportRalacii.headersAsString}&amp;lang=#{exportRalacii.lang}&amp;razd=#{exportRalacii.razdelitel}&amp;typeRel=#{exportRalacii.typeRel}&amp;changeRel=#{exportRalacii.changeRel}&amp;expName=#{exportRalacii.fName}&amp;format=txt">
+				             </p:menuitem>
+				            <p:menuitem value="SDMX" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFileExp?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;headers=#{exportRalacii.headersAsString}&amp;lang=#{exportRalacii.lang}&amp;razd=#{exportRalacii.razdelitel}&amp;typeRel=#{exportRalacii.typeRel}&amp;changeRel=#{exportRalacii.changeRel}&amp;expName=#{exportRalacii.fName}&amp;format=sdmx">
+				             </p:menuitem>
+				            <p:menuitem value="SDMX-JSON" icon="fas fa-copy" ajax="false" target="_blank" outcome="downloadFileExp?idObj=#{corespTableBean.corespTable.id}&amp;typeObj=coresp&amp;headers=#{exportRalacii.headersAsString}&amp;lang=#{exportRalacii.lang}&amp;razd=#{exportRalacii.razdelitel}&amp;typeRel=#{exportRalacii.typeRel}&amp;changeRel=#{exportRalacii.changeRel}&amp;expName=#{exportRalacii.fName}&amp;format=sdmx-json">
+				             </p:menuitem>
+				          
+				            
+				        </p:menuButton>
+					</div>
+			</div>
+		</h:panelGroup>
+ 	
+	</h:panelGroup>
+	
+	
+</ui:composition>

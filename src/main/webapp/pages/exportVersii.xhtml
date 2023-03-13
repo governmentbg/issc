@@ -1,0 +1,195 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components"
+	xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+	<div style="left: calc(100% - 135px); top: -55px; position: relative; width: 150px">
+		<p:selectOneMenu id="langExportV" value="#{exportVersii.lang}" style="width:150px">
+			<f:selectItems value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LANG, now, NSIConstants.CODE_DEFAULT_LANG)}"
+				var="lang" itemLabel="#{lang.tekst}" itemValue="#{lang.code}" />
+			<p:ajax event="change" listener="#{exportVersii.changeLang}"
+				update="panelGenerate" process="@this" partialSubmit="ture" />
+		</p:selectOneMenu>
+	</div>
+
+	<h:panelGroup id="ExportPanel" layout="block">
+		<ui:remove><div class="p-col-12 p-sm-12 p-md-2 p-lg-2 p-xl-2">
+			<p:selectBooleanCheckbox value="#{exportVersii.generate}"
+				styleClass="form-label" itemLabel="Генерирай наново">
+			</p:selectBooleanCheckbox>
+		</div></ui:remove>
+
+		<div class="p-col-12 ">
+			<p:menuButton ajax="false" value="Експорт" id="ExportMenuUp"
+				styleClass="ui-button-success">
+				<p:menuitem value="ODS" icon="fas fa-copy" ajax="false"
+					target="_blank" 
+					outcome="downloadFileExp?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;headers=#{exportVersii.headerCodes}&amp;lang=#{exportVersii.lang}&amp;razd=#{exportVersii.razdelitel}&amp;levels=#{exportVersii.levels}&amp;begs=#{exportVersii.begs}&amp;ends=#{exportVersii.ends}&amp;nodeCodes=#{exportVersii.nodeCodes}&amp;expName=#{exportVersii.fName}&amp;units=#{exportVersii.units}&amp;format=ods">
+				</p:menuitem>
+				<p:menuitem value="Excel" icon="fas fa-copy" ajax="false"
+					target="_blank" 
+					outcome="downloadFileExp?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;headers=#{exportVersii.headerCodes}&amp;lang=#{exportVersii.lang}&amp;razd=#{exportVersii.razdelitel}&amp;levels=#{exportVersii.levels}&amp;begs=#{exportVersii.begs}&amp;ends=#{exportVersii.ends}&amp;nodeCodes=#{exportVersii.nodeCodes}&amp;expName=#{exportVersii.fName}&amp;units=#{exportVersii.units}&amp;format=xlsx">
+				</p:menuitem>
+				<p:menuitem value="PDF" icon="fas fa-copy" ajax="false"
+					target="_blank" 
+					outcome="downloadFileExp?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;headers=#{exportVersii.headerCodes}&amp;lang=#{exportVersii.lang}&amp;razd=#{exportVersii.razdelitel}&amp;levels=#{exportVersii.levels}&amp;begs=#{exportVersii.begs}&amp;ends=#{exportVersii.ends}&amp;nodeCodes=#{exportVersii.nodeCodes}&amp;expName=#{exportVersii.fName}&amp;units=#{exportVersii.units}&amp;format=pdf">
+				</p:menuitem>
+				<p:menuitem value="HTML" icon="fas fa-copy" ajax="false"
+					target="_blank" 
+					outcome="downloadFileExp?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;headers=#{exportVersii.headerCodes}&amp;lang=#{exportVersii.lang}&amp;razd=#{exportVersii.razdelitel}&amp;levels=#{exportVersii.levels}&amp;begs=#{exportVersii.begs}&amp;ends=#{exportVersii.ends}&amp;nodeCodes=#{exportVersii.nodeCodes}&amp;expName=#{exportVersii.fName}&amp;units=#{exportVersii.units}&amp;format=html">
+				</p:menuitem>
+				<p:menuitem value="CSV" icon="fas fa-copy" ajax="false"
+					target="_blank"
+					outcome="downloadFileExp?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;headers=#{exportVersii.headerCodes}&amp;lang=#{exportVersii.lang}&amp;razd=#{exportVersii.razdelitel}&amp;levels=#{exportVersii.levels}&amp;begs=#{exportVersii.begs}&amp;ends=#{exportVersii.ends}&amp;nodeCodes=#{exportVersii.nodeCodes}&amp;expName=#{exportVersii.fName}&amp;units=#{exportVersii.units}&amp;format=csv">
+				</p:menuitem>
+				<p:menuitem value="TXT" icon="fas fa-copy" ajax="false"
+					target="_blank" 
+					outcome="downloadFileExp?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;headers=#{exportVersii.headerCodes}&amp;lang=#{exportVersii.lang}&amp;razd=#{exportVersii.razdelitel}&amp;levels=#{exportVersii.levels}&amp;begs=#{exportVersii.begs}&amp;ends=#{exportVersii.ends}&amp;nodeCodes=#{exportVersii.nodeCodes}&amp;expName=#{exportVersii.fName}&amp;units=#{exportVersii.units}&amp;format=txt">
+				</p:menuitem>
+				<p:menuitem value="SDMX" icon="fas fa-copy" ajax="false"
+					target="_blank" 
+					outcome="downloadFileExp?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;headers=#{exportVersii.headerCodes}&amp;lang=#{exportVersii.lang}&amp;razd=#{exportVersii.razdelitel}&amp;levels=#{exportVersii.levels}&amp;begs=#{exportVersii.begs}&amp;ends=#{exportVersii.ends}&amp;nodeCodes=#{exportVersii.nodeCodes}&amp;expName=#{exportVersii.fName}&amp;units=#{exportVersii.units}&amp;format=sdmx">
+				</p:menuitem>
+				<p:menuitem value="SDMX-JSON" icon="fas fa-copy" ajax="false"
+					target="_blank" 
+					outcome="downloadFileExp?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;headers=#{exportVersii.headerCodes}&amp;lang=#{exportVersii.lang}&amp;razd=#{exportVersii.razdelitel}&amp;levels=#{exportVersii.levels}&amp;begs=#{exportVersii.begs}&amp;ends=#{exportVersii.ends}&amp;nodeCodes=#{exportVersii.nodeCodes}&amp;expName=#{exportVersii.fName}&amp;units=#{exportVersii.units}&amp;format=sdmx-json">
+				</p:menuitem>
+			</p:menuButton>
+		</div>
+
+		<h:panelGroup id="panelGenerate">
+
+			<div class="title-group">
+			<h:outputText
+						value="#{labels['corespTable.export']} #{versionEditBean.versionLang.ident}" />
+
+				<ui:remove><p:commandLink class="extended-search-toggle expanded"
+					onclick="toggleSection(this, '#versionEditForm:tabsVersion:tblExportsPanel')">
+					<h:outputText
+						value="#{labels['corespTable.export']} #{versionEditBean.versionLang.ident}" />
+					<i class="fas fa-caret-right"></i>
+				</p:commandLink></ui:remove>
+
+			</div>
+			<div jsf:id="tblExportsPanel">
+			 <p:growl id="msg" showDetail="true" escape="false"/>
+				<!-- first row -->
+				<div class="p-grid">
+				<div class="p-col-12 p-lg-6  ui-fluid">
+					<h:outputText value="Избор на атрибути за експорт:" styleClass="form-label req" />
+					<p:pickList id="posAttr" value="#{exportVersii.posAttrList}"
+						var="posAttr" itemLabel="#{posAttr.tekst}-#{posAttr.code}"
+						itemValue="#{posAttr}" escape="false" escapeValue="false" converter="pickListSCConverter">
+						
+						<p:ajax event="transfer" listener="#{exportVersii.onTransfer}" update="msg ExportMenuDown ExportMenuUp"/>
+					</p:pickList>
+				</div>
+				<!-- omnifaces.SelectItemsConverter converter="levelsConverter" -->
+				<div class="p-col-12 p-lg-6 ui-fluid">
+						<h:outputText value="Нива:" styleClass="form-label"/>
+						<p:selectManyMenu id="levels" value="#{exportVersii.selectedLevels}" var="l"
+							showCheckbox="true"  converter="omnifaces.SelectItemsConverter" converterMessage="Конвертирането на нивата има проблем">
+							<f:selectItems value="#{exportVersii.availableLevels}" var="le" 
+								itemValue="#{l}"
+								itemLabel="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_LEVEL_NAME, l.levelName, exportVersii.lang, null)}" />
+							<p:column>
+								<h:outputText value="#{l.levelNumber}  -  " />
+								<h:outputText
+									value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_LEVEL_NAME, l.levelName, exportVersii.lang, null)}" />
+							</p:column>
+							<p:ajax event="change" update="msg ExportMenuDown ExportMenuUp" process="levels" partialSubmit="true" />
+						</p:selectManyMenu>
+					</div>
+
+				<div class="p-col-12 p-lg-6  ui-fluid">
+					<h:outputText value="Интервали" styleClass="form-label"/>
+					<p:inputText id="intervals" value="#{exportVersii.intervals}" />
+					<h:outputText value="Въведете интервали за експорт във вида код1(разделител)код2;код3(разделител)код4; и т.н." />
+				</div>
+				
+				<div class="p-col-12 p-lg-3  ui-fluid">
+					<h:outputText value="#{labels['general.separator']}:" styleClass="form-label"/>
+					<br/>
+					<h:inputText id="separator" value="#{exportVersii.razdelitel}" maxlength="2" >
+					
+					<h:outputText value="Въведеният разделител ще се използва за експортите в CSV формат и при обработката на интервалите от кодове" />
+					</h:inputText>
+					<p:commandButton icon="fas fa-check" style="margin-left:-42px;width:40px;"
+									value=" ." id="checkButton" process="separator intervals"
+									action="#{exportVersii.actionRazdl}" partialSubmit="true"
+									update=" msg ExportMenuDown ExportMenuUp" >
+									<p:tooltip id="tooltipCheck" value="Обнови стойностите на интервали и разделител" for="checkButton"  escape="false"/>
+									</p:commandButton>
+				</div>
+				<div class="p-col-12 p-lg-3  ui-fluid">
+					<h:outputText value="Мерни единици в отделни колони:" styleClass="form-label"/>
+					<p:selectBooleanCheckbox id="units" value="#{exportVersii.units}"  >
+					<p:ajax event="change" update="msg ExportMenuDown ExportMenuUp" />
+					</p:selectBooleanCheckbox>
+					<br/>
+				</div>
+				<div class="p-col-12  p-lg-12 ui-fluid " style="overflow: scroll; height: 600px;">
+						<h:outputText value="Позиции:" styleClass="form-label"/>
+							<p:tree id="exportTrees" value="#{exportVersii.rootS}" var="node"
+								selectionMode="checkbox" cache="true" dynamic="true" selection="#{exportVersii.selectedNodes}">
+								<p:ajax event="expand" partialSubmit="true" process="@this"
+									listener="#{exportVersii.onNodeExpand}" />
+								<p:ajax event="select"  partialSubmit="true" process="@this" listener="#{exportVersii.displaySelectedMultiple(exportVersii.selectedNodes)}" />
+								<p:ajax event="unselect"  partialSubmit="true" process="@this" listener="#{exportVersii.displaySelectedMultiple(exportVersii.selectedNodes)}" />
+								<p:treeNode>
+									<h:outputText value="#{node.code} #{node.deffName}" />
+								</p:treeNode>
+							</p:tree>
+							
+							<p:commandButton value="Display" update="msg" icon="pi pi-clone" styleClass="mt-3" partialSubmit="true" process="@this"
+                         action="#{exportVersii.displaySelectedMultiple(exportVersii.selectedNodes)}"/>
+						</div>
+
+				</div>
+			</div>
+		</h:panelGroup>
+		<div class="p-col-12 ">
+			<p:menuButton ajax="false" value="Експорт" id="ExportMenuDown"
+				styleClass="ui-button-success">
+				<p:menuitem value="ODS" icon="fas fa-copy" ajax="false"
+					target="_blank" action="#{exportVersii.proccess(ODF)}"
+					outcome="downloadFileExp?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;headers=#{exportVersii.headerCodes}&amp;lang=#{exportVersii.lang}&amp;razd=#{exportVersii.razdelitel}&amp;levels=#{exportVersii.levels}&amp;begs=#{exportVersii.begs}&amp;ends=#{exportVersii.ends}&amp;nodeCodes=#{exportVersii.nodeCodes}&amp;expName=#{exportVersii.fName}&amp;units=#{exportVersii.units}&amp;format=ods">
+				</p:menuitem>
+				<p:menuitem value="Excel" icon="fas fa-copy" ajax="false"
+					target="_blank" 
+					outcome="downloadFileExp?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;headers=#{exportVersii.headerCodes}&amp;lang=#{exportVersii.lang}&amp;razd=#{exportVersii.razdelitel}&amp;levels=#{exportVersii.levels}&amp;begs=#{exportVersii.begs}&amp;ends=#{exportVersii.ends}&amp;nodeCodes=#{exportVersii.nodeCodes}&amp;expName=#{exportVersii.fName}&amp;units=#{exportVersii.units}&amp;format=xlsx">
+				</p:menuitem>
+				<p:menuitem value="PDF" icon="fas fa-copy" ajax="false"
+					target="_blank" 
+					outcome="downloadFileExp?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;headers=#{exportVersii.headerCodes}&amp;lang=#{exportVersii.lang}&amp;razd=#{exportVersii.razdelitel}&amp;levels=#{exportVersii.levels}&amp;begs=#{exportVersii.begs}&amp;ends=#{exportVersii.ends}&amp;nodeCodes=#{exportVersii.nodeCodes}&amp;expName=#{exportVersii.fName}&amp;units=#{exportVersii.units}&amp;format=pdf">
+				</p:menuitem>
+				<p:menuitem value="HTML" icon="fas fa-copy" ajax="false"
+					target="_blank" 
+					outcome="downloadFileExp?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;headers=#{exportVersii.headerCodes}&amp;lang=#{exportVersii.lang}&amp;razd=#{exportVersii.razdelitel}&amp;levels=#{exportVersii.levels}&amp;begs=#{exportVersii.begs}&amp;ends=#{exportVersii.ends}&amp;nodeCodes=#{exportVersii.nodeCodes}&amp;expName=#{exportVersii.fName}&amp;units=#{exportVersii.units}&amp;format=html">
+				</p:menuitem>
+				<p:menuitem value="CSV" icon="fas fa-copy" ajax="false"
+					target="_blank" 
+					outcome="downloadFileExp?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;headers=#{exportVersii.headerCodes}&amp;lang=#{exportVersii.lang}&amp;razd=#{exportVersii.razdelitel}&amp;levels=#{exportVersii.levels}&amp;begs=#{exportVersii.begs}&amp;ends=#{exportVersii.ends}&amp;nodeCodes=#{exportVersii.nodeCodes}&amp;expName=#{exportVersii.fName}&amp;units=#{exportVersii.units}&amp;format=csv">
+				</p:menuitem>
+				<p:menuitem value="TXT" 
+					target="_blank" 
+					outcome="downloadFileExp?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;headers=#{exportVersii.headerCodes}&amp;lang=#{exportVersii.lang}&amp;razd=#{exportVersii.razdelitel}&amp;levels=#{exportVersii.levels}&amp;begs=#{exportVersii.begs}&amp;ends=#{exportVersii.ends}&amp;nodeCodes=#{exportVersii.nodeCodes}&amp;expName=#{exportVersii.fName}&amp;units=#{exportVersii.units}&amp;format=txt">
+				</p:menuitem>
+				<p:menuitem value="SDMX" icon="fas fa-copy" ajax="false"
+					target="_blank" 
+					outcome="downloadFileExp?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;headers=#{exportVersii.headerCodes}&amp;lang=#{exportVersii.lang}&amp;razd=#{exportVersii.razdelitel}&amp;levels=#{exportVersii.levels}&amp;begs=#{exportVersii.begs}&amp;ends=#{exportVersii.ends}&amp;nodeCodes=#{exportVersii.nodeCodes}&amp;expName=#{exportVersii.fName}&amp;units=#{exportVersii.units}&amp;format=sdmx">
+				</p:menuitem>
+				<p:menuitem value="SDMX-JSON" icon="fas fa-copy" ajax="false"
+					target="_blank"                                                          
+					outcome="downloadFileExp?idObj=#{versionEdit.version.id}&amp;typeObj=version&amp;headers=#{exportVersii.headerCodes}&amp;lang=#{exportVersii.lang}&amp;razd=#{exportVersii.razdelitel}&amp;levels=#{exportVersii.levels}&amp;begs=#{exportVersii.begs}&amp;ends=#{exportVersii.ends}&amp;nodeCodes=#{exportVersii.nodeCodes}&amp;expName=#{exportVersii.fName}&amp;units=#{exportVersii.units}&amp;format=sdmx-json">
+				</p:menuitem>
+			</p:menuButton>
+		</div>
+
+	</h:panelGroup>
+
+
+</ui:composition>

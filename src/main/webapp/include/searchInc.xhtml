@@ -1,0 +1,220 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" 
+				xmlns:ui="http://java.sun.com/jsf/facelets" 
+				xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf"
+                xmlns:ibg="http://java.sun.com/jsf/composite/components"
+                xmlns:c="http://java.sun.com/jstl/core">
+                
+    <ui:define name="metadata">
+		<f:metadata>
+			<f:viewParam name="idObj" value="#{downloadFile.idObj}"/>
+			<f:viewParam name="typeObj" value="#{downloadFile.type}"/>
+			<f:viewParam name="levels" value="#{downloadFile.levels}"/>
+			<f:viewParam name="begs" value="#{downloadFile.begs}"/>
+			<f:viewParam name="ends" value="#{downloadFile.ends}"/>
+			<f:viewParam name="nodeCodes" value="#{downloadFile.nodeCodes}"/>
+			<f:viewParam name="headers" value="#{downloadFile.headers}"/>
+			<f:viewParam name="lang" value="#{downloadFile.lang}"/>
+			<f:viewParam name="razd" value="#{downloadFile.separator}"/>
+			<f:viewParam name="format" value="#{downloadFile.format}"/>
+			<f:viewParam name="typeRel" value="#{downloadFile.typeRel}"/>
+			<f:viewParam name="changeRel" value="#{downloadFile.changeRel}"/>
+			
+		</f:metadata>
+	</ui:define>
+
+   
+    
+    <h:outputText value="#{labels['section.searchOfPositions']}"
+				styleClass="section-title" />
+
+			<h:panelGroup id="panelFilter" styleClass="searchFilter"
+				layout="block">
+
+				<div class="p-grid ui-fluid p-align-end">
+					<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12 ui-fluid">
+						<div class="ui-inputgroup">
+
+							<p:inputText id="classifName" value="#{searchBean.nameSearch}" />
+
+							<p:commandButton icon="fas fa-fw fa-search"
+								title="#{ui_labels['general.search']}" id="btnSearch"
+								update="panelDataTable panelFilter" partialSubmit="true"
+								process="@this panelFilter"
+								actionListener="#{searchBean.actionSearch()}" />
+
+							<p:commandButton icon="fa fa-times"
+								title="#{ui_labels['general.clear']}" id="btnClear"
+								update="panelDataTable" partialSubmit="true"
+								process="@this panelFilter panelDataTable"
+								action="#{searchBean.actionClear()}"
+								styleClass="ui-button-warning" />
+						</div>
+					</div>
+					</div>
+						<p:outputPanel id="panelCheckBoxes">
+			<div class="p-grid ui-fluid p-align-end">
+				<div class="p-col-12 p-sm-12 p-md-6 p-lg-6 p-xl-3 ui-fluid end">
+					<p:selectBooleanCheckbox styleClass="p-mr-2" value="#{searchBean.oficialTitle}" />
+					<h:outputText value="#{labels['position.offiName']}" styleClass="form-label" />
+				</div>
+
+				<div class="p-col-12 p-sm-12 p-md-6 p-lg-6 p-xl-3 ui-fluid end">
+					<p:selectBooleanCheckbox value="#{searchBean.longTitle}"
+						styleClass="p-mr-2" />
+					<h:outputText value="#{labels['position.longTitle']}"
+						styleClass="form-label" />
+
+				</div>
+				<div class="p-col-12 p-sm-12 p-md-6 p-lg-6 p-xl-3 ui-fluid end">
+					<p:selectBooleanCheckbox styleClass="p-mr-2" value="#{searchBean.shortTitle}" />
+					<h:outputText value="#{labels['position.shortTitle']}"
+						styleClass="form-label"  />
+				</div>
+				<div class="p-col-12 p-sm-12 p-md-6 p-lg-6 p-xl-3 ui-fluid end">
+				    <p:selectBooleanCheckbox styleClass="p-mr-2" value="#{searchBean.alternateTitle}" />
+					<h:outputText value="#{labels['position.alternativeNames']}"
+						styleClass="form-label"  />
+				</div>
+
+				<div class="p-col-12 p-sm-12 p-md-6 p-lg-6 p-xl-3 ui-fluid end">
+				    <p:selectBooleanCheckbox styleClass="p-mr-2" value="#{searchBean.include}" />
+					<h:outputText value="#{labels['position.includes']}"
+						styleClass="form-label"  />			
+				</div>
+
+				<div class="p-col-12 p-sm-12 p-md-6 p-lg-6 p-xl-3 ui-fluid end">
+				    <p:selectBooleanCheckbox styleClass="p-mr-2" value="#{searchBean.alsoInclude}" />
+					<h:outputText value="#{labels['position.alsoIncludes']}"
+						styleClass="form-label"  />
+					
+				</div>
+
+				<div class="p-col-12 p-sm-12 p-md-6 p-lg-6 p-xl-3 ui-fluid end">
+				    <p:selectBooleanCheckbox styleClass="p-mr-2" value="#{searchBean.exclude}" />
+					<h:outputText value="#{labels['position.excludes']}"
+						styleClass="form-label"  />					
+				</div>
+
+				<div class="p-col-12 p-sm-12 p-md-6 p-lg-6 p-xl-3 ui-fluid end">
+				    <p:selectBooleanCheckbox styleClass="p-mr-2" value="#{searchBean.rules}" />
+					<h:outputText value="#{labels['position.rules']}"
+						styleClass="form-label"  />					
+				</div>
+
+				<div class="p-col-12 p-sm-12 p-md-6 p-lg-6 p-xl-3 ui-fluid end">
+				    <p:selectBooleanCheckbox styleClass="p-mr-2" value="#{searchBean.comment}" />
+					<h:outputText value="#{labels['versionEdit.comment']}"
+						styleClass="form-label"  />					
+				</div>
+
+				<div class="p-col-12 p-sm-12 p-md-12 p-lg-12 p-xl-12 ui-fluid">
+					<p:divider />
+					<i class="p-mr-2 #{searchBean.markedAll ? 'pi pi-times' : 'pi pi-check-square'}"
+						style="color: #035e7d;"></i>
+					<p:commandLink process="@this panelDataTable" partialSubmit="true"
+						update="@this panelCheckBoxes"
+						value="#{searchBean.markedAll ? labels['search.unmarkAll'] : labels['search.markAll'] }"
+						id="btnMark" actionListener="#{searchBean.markAll()}" />
+				</div>
+			</div>
+		</p:outputPanel>
+				
+			</h:panelGroup>
+
+			<h:panelGroup id="panelDataTable" layout="block">
+				<h:panelGroup layout="block" styleClass="card">
+
+					<div class="p-grid p-nogutter">
+						<div class="p-col-6 table-toolbar">
+							<h:outputText
+								value="#{labels['general.reportResult']}: #{searchBean.resultList.rowCount == null ? 0 : searchBean.resultList.rowCount}"
+								styleClass="form-label" />
+						</div>
+
+						<div class="p-col-6 lang" style="text-align: right;">
+							<p:commandButton id="lanBtn"
+								value="#{systemData.decodeItem(NSIConstants.CODE_CLASSIF_LANG, searchBean.lang, 1, null)}"
+								type="button" icon="fa fa-globe" />
+
+							<p:menu overlay="true" trigger="lanBtn" my="left top"
+								at="left bottom">
+								<c:forEach
+									items="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_LANG, now, 1)}"
+									var="lang">
+
+									<p:menuitem value="#{lang.tekst}"
+										outcome="#{view.viewId}?faces-redirect=true&amp;includeViewParams=true&amp;lang=#{lang.code}"
+										immediate="true" ajax="false" icon="fa fa-flag">
+									</p:menuitem>
+								</c:forEach>
+							</p:menu>
+						</div>
+					</div>
+
+
+					<p:dataTable id="tblClassif" value="#{searchBean.resultList}"
+						var="pos" widgetVar="tblPos" rowKey="#{pos[0]}" rowIndexVar="idx"						
+						lazy="true" rows="10" reflow="true"
+						emptyMessage="#{ui_labels['general.norows']}" paginator="true"
+						paginatorPosition="bottom" paginatorAlwaysVisible="false"
+						paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} ">
+
+
+						<p:column width="20" exportable="false"							
+							headerText="#{ui_labels['general.No-symbol']}">
+							<h:outputText value="#{idx + 1}" />
+						</p:column>
+						
+						<p:column width="20" exportable="false">
+							<h:link target="_blank" rendered="#{isVanshno==1}"
+								outcome="position?position=#{pos[0]}&amp;idObj=#{pos[13]}&amp;lang=#{searchBean.lang}&amp;locale=#{param['locale']}&amp;parent=#{pos[14]}&amp;search_text=#{searchBean.nameSearch}"
+								title="#{ui_labels['general.view']}">
+								<i class="fas fa-eye"
+									style="vertical-align: middle; font-size: 16px"></i>
+								<f:param name="locale"
+									value="#{param['locale']!=null?param['locale']:'bg'}" />
+							</h:link>
+							<h:link target="_blank" rendered="#{isVanshno==2}"
+								outcome="versionEdit?position=#{pos[0]}&amp;idClassif=#{pos[15]}&amp;idObj=#{pos[13]}&amp;lang=#{searchBean.lang}&amp;locale=#{param['locale']}&amp;parent=#{pos[14]}&amp;search_text=#{searchBean.nameSearch}"
+								title="#{ui_labels['general.view']}">
+								<i class="fas fa-eye"
+									style="vertical-align: middle; font-size: 16px"></i>
+								<f:param name="locale"
+									value="#{param['locale']!=null?param['locale']:'bg'}" />
+							</h:link>
+						</p:column>
+
+						<p:column exportable="false" 
+							headerText="#{labels['search.classif']}">
+							<h:outputText value="#{pos[1]}" />
+						</p:column>
+						
+						<p:column exportable="false" 
+							headerText="#{labels['search.version']}">
+							<h:outputText value="#{pos[2]}" />
+						</p:column>
+						
+						<p:column exportable="false" 
+							headerText="#{labels['search.position']}">
+							<h:outputText value="#{pos[3]}" />
+						</p:column>
+						
+						<p:column exportable="false" 
+							headerText="#{labels['position.offiName']}">
+							<h:outputText value="#{pos[4]}" />
+						</p:column>
+						
+						<p:column exportable="false" 
+							headerText="#{labels['search.foundIn']}">
+							<h:outputText value="#{searchBean.checkWhereFound(pos)}" />
+
+						</p:column>
+						
+					</p:dataTable>
+				</h:panelGroup>
+			</h:panelGroup>
+  
+</ui:composition> 

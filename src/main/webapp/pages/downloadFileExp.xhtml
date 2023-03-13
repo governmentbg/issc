@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui" xmlns:jsf="http://xmlns.jcp.org/jsf"
+	lang="bg">
+
+<f:view locale="#{param['locale']!=null?param['locale']:'bg'}">
+
+	<h:head>
+		<f:facet name="first">
+			<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+			<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+			<meta name="viewport"
+				content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+			<meta name="apple-mobile-web-app-capable" content="yes" />
+			<link rel="stylesheet" type="text/css" href="css/primeflex.css" />
+		</f:facet>
+
+		<title><ui:insert name="title">NSICLassif</ui:insert></title>
+
+		<ui:insert name="head" />
+	</h:head>
+
+	<h:body>
+
+
+		<div class="layout-wrapper">
+			<p:tooltip />
+			
+			<!-- MENU -->
+			 
+			
+			<div class="layout-main">
+				<div class="layout-content">
+					<p:messages id="messagesGl" showDetail="true" closable="true">
+						<p:autoUpdate />
+					</p:messages>
+					
+					<h:form id="formDownloadExp">
+						<ui:include src="/include/downloadFileExpInc.xhtml" />
+					</h:form>
+				</div>
+
+			</div>
+		</div>
+
+
+		<h:outputStylesheet name="css/nsicSite.css" />
+		<h:outputStylesheet name="css/nsiclassif.css" />
+		<h:outputStylesheet name="css/all.css" library="font-awesome" />
+
+ 
+
+	</h:body>
+</f:view>
+</html>

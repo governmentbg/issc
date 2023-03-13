@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jboss-deployment-structure>
+	<deployment>
+		<dependencies>
+			<!-- <module name="com.h2database.h2" />  -->
+			<module name="org.apache.commons.lang3" />
+ 			<module name="javax.mail.api" /> 
+<!-- 			<module name="com.h2database.h2" /> -->
+			
+		</dependencies>
+		<exclusions>
+             <module name="javax.mail.api"/> 
+            <!--  test. s nego garmi e Avtentikaciata -->
+            <!-- <module name="org.apache.xerces" /> --> 
+        </exclusions>
+          
+	</deployment>
+</jboss-deployment-structure>

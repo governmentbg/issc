@@ -1,0 +1,422 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui" 
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:jsf="http://xmlns.jcp.org/jsf"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:ibg="http://java.sun.com/jsf/composite/components"
+	template="/templateSite/template.xhtml">	
+
+	<f:metadata>
+	    <f:viewAction action="#{publExtControler.controlPublData}" />
+	    <f:viewParam name="lang" />
+		<f:viewParam name="locale" />	
+	    <f:viewParam name="sect" />	   
+	</f:metadata>
+		
+	<ui:define name="title"> #{systemData.decodeItem(NSIConstants.CODE_SYSCLASS_SECT_PUBL, publExtList.codeSection, publExtList.lang, now)} </ui:define> 
+	<!-- Navigation menu (NAVBAR) -->
+	
+	<ui:define name="content">
+	
+		<style>
+			
+			.publication-list-item {
+				display: flex;
+				height: 100%;
+				border: 1px solid #ddd;
+				border-radius: 3px;
+				background-color: #ffffff;
+				margin: 0.5em 0;
+			   	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+			   	transition: box-shadow 0.1s linear;
+			}
+			
+						
+			.publication-list-item .image-wrapper {
+				width: 210px;
+				float: left;
+				display: block;
+				position: relative;
+			}
+			
+			.publication-list-item .image-wrapper > div {
+				height: 100%;
+			}
+			
+			.publication-list-item .image-wrapper:empty {
+				display: none;
+			}
+			
+			.publication-list-item .publication-image {
+				height: 100%;
+				width: 100%;
+				/*object-fit: cover;*/
+				/*font-family: "object-fit: cover;";*/
+				border-top-left-radius: 3px;
+				border-bottom-left-radius: 3px;
+			}
+			
+			.publication-list-item .publication-contents {
+			    width: calc(100% - 200px);
+			    padding: 0.5em 1em;
+			    position: relative;
+			    overflow: hidden;
+			}
+			
+			.publication-list-item .publication-title {
+				font-size: 1.25em;
+				font-variant: small-caps;
+				margin-bottom: 0.5em;
+				color: #0288d1;
+			}
+			
+			.grid_publication-title {
+				font-size: 1.25em;
+				font-variant: small-caps;
+				margin-bottom: 0.5em;
+				color: #0288d1;
+			}
+			
+			
+			.publication-list-item .publication-text {
+				overflow: hidden;
+				margin-bottom: 1.5em;
+			}
+			
+			.publication-list-item .publication-date {
+				position: absolute;
+				bottom: 0;
+				left: 1em;
+				height: 20px;
+				width: 100%;
+				font-size: 0.85em;
+			}
+			
+			.ui-lg-3 .publication-list-item {
+				flex-direction: column;
+			}
+			
+			.ui-lg-3 .publication-list-item .image-wrapper {
+				width: 100%;
+				float: none;
+			}
+			
+			.ui-lg-3 .publication-list-item .image-wrapper:empty {
+				display: none;
+			}
+			
+			.ui-lg-3 .publication-list-item .publication-contents {
+				width: 100%;
+			}
+			
+			@media only screen and (max-width: 640px) {
+				.publication-list-item {
+					flex-direction: column;
+				}
+				
+				.publication-list-item .image-wrapper {
+					width: 100%;
+					float: none;
+				}
+								
+				.publication-list-item .publication-contents {
+					width: 100%;
+				}
+			}
+			
+						
+			body.color-blind .publication-list-item {
+				background-color: #000000;
+				color: #ffffff;
+			}
+			
+			body.color-blind .publication-list-item .publication-title {
+				color: #ffff00;
+			}
+
+		    .ui-panelgrid.showcase-text-align-center .ui-grid-responsive .ui-panelgrid-cell {
+		        text-align: center;
+		    }
+		
+		    .customPanelGrid .ui-panelgrid-content {
+		        align-items: center;
+		    }
+		    
+		    .ui-datagrid.padding-between .ui-datagrid-column.ui-md-6 {
+			padding-left: 4px;
+			padding-right: 4px;
+		}
+		
+		.no-border .ui-datagrid-content {
+			border: none;
+		}
+		
+		.no-background .ui-datagrid-content {
+			background: none;
+		}
+		
+		.grid-image-wrapper {
+				width: 210px;
+				float: left;
+				display: block;
+				position: relative;
+		}
+		
+		.grid-image-wrapper > div {
+			height: 100%;
+		}
+		
+		.grid-image-wrapper:empty {
+			display: none;
+		}
+		
+		.grid-publication-image {
+			height: 100%;
+			width: 100%;
+			/*object-fit: cover;*/
+			/*font-family: "object-fit: cover;";*/
+			border-top-left-radius: 3px;
+			border-bottom-left-radius: 3px;
+		}
+
+			
+		</style>
+		
+		<ui:define name="metadata">
+			<f:metadata>
+				<f:importConstants type="com.ib.nsiclassif.system.NSIConstants" />
+				<f:importConstants type="com.ib.indexui.system.Constants" />
+				<f:viewParam name="lang" />
+				<f:viewParam name="locale" />
+				
+			</f:metadata>
+		</ui:define>
+
+		<h:form id="formExtList" >
+			
+			<p:tooltip/>
+			
+			
+						
+			
+	<!-- SEARCH FILTER -->
+	<p:panel header="#{labels['section.criteriaFind']}:"  toggleable="true" toggleOrientation="vertical" styleClass="marker" id="idPanelFilter" >
+	
+		<div class="container">
+			<div class="p-grid" >
+				<div class="p-col-12 p-md-12">
+					<h4 >#{systemData.decodeItem(NSIConstants.CODE_SYSCLASS_SECT_PUBL, publExtList.codeSection, publExtList.lang, now)}</h4>
+				</div>							
+				<!-- SEARCH FIELD + BUTTON -->
+				<div class="p-col-12 p-md-12" align="left">
+					<p:inputText id="idTitle2" value="#{publExtList.titleF}" placeholder="#{labels['section.title']}" style="width: 70%;"/>
+				</div>
+
+				<div class="p-col-12 p-md-3" >
+					<p:selectOneMenu id="idPer" value="#{publExtList.period}" styleClass="period-picker">
+                          	<f:selectItem itemLabel="--#{labels['section.period']}--" itemValue="#{null}"/>       
+            				<f:selectItems value="#{systemData.getSysClassification(NSIConstants.CODE_CLASSIF_PERIOD_NOFUTURE, publExtList.currentDate, publExtList.lang)}" 
+                          		var="clPer" itemLabel="#{clPer.tekst}" itemValue="#{clPer.code}" />
+                           	<p:ajax event="change" update="dateOt dateDo idPer"  listener="#{publExtList.changePeriod()}"   />  
+                      	</p:selectOneMenu>
+				</div>
+
+				<div class="p-col-6 p-md-4">
+					<p:calendar id="dateOt" pattern="dd.MM.yyyy" mask="true"  showOn="button" 
+						timeZone="#{publExtList.timeZone}" size="10" locale="bg"
+			         	value="#{publExtList.dateFrom}" label="#{labels['section.dateFrom']}" placeholder="#{labels['section.dateFrom']}">
+			          	<p:ajax event="dateSelect" listener="#{publExtList.checkDates(1)}"  update="formExtList:dateOt formExtList:dateDo formExtList:idPer" />
+			          	<p:ajax event="change" listener="#{publExtList.checkDates(1)}" update="formExtList:dateOt formExtList:dateDo formExtList:idPer" />
+			        </p:calendar>
+				</div>
+				
+				<div class="p-col-6 p-md-5">
+					<p:calendar id="dateDo" pattern="dd.MM.yyyy" mask="true" showOn="button"
+						timeZone="#{publExtList.timeZone}" size="10" locale="bg"
+			         	value="#{publExtList.dateTo}" label="#{labels['section.dateTo']}" placeholder="#{labels['section.dateTo']}">
+		          		<p:ajax event="dateSelect" listener="#{publExtList.checkDates(2)}" update="formExtList:dateOt formExtList:dateDo formExtList:idPer" />
+		          		<p:ajax event="change" listener="#{publExtList.checkDates(2)}" update="formExtList:dateOt formExtList:dateDo formExtList:idPer" />
+					</p:calendar>
+				</div>
+						
+				
+				<br/>
+			
+				<div class="p-col-12 p-md-7">
+	 				<p:commandButton action="#{publExtList.actionClear()}" update="formExtList" value="#{labels['section.clear']}" styleClass="orange-button" ajax="false" /> 
+			 	</div>	
+				<div class="p-col-12 p-md-5" style="text-align: left;">
+					<p:commandButton styleClass="blue-button" value="#{labels['section.search']}" update="formExtList" action="#{publExtList.actionFind()}"  
+						icon="fa fa-fw fa-search" /> 
+				</div>
+								
+		
+			</div>
+		</div>
+	
+	</p:panel>
+	
+	<div class="container page-content"> 
+		<p:outputPanel id="panelData" rendered="#{publExtList.pubListT.rowCount > 0}">
+	
+			<!-- NUMBER OF RESULS -->
+			<div class="p-grid">
+				<h:panelGroup class="results-summary p-grid p-align-center p-justify-between p-col-12" layout="block" >
+       				<div class="results-count bolded">
+       					<h:outputText value="#{systemData.decodeItem(NSIConstants.CODE_SYSCLASS_SECT_PUBL, publExtList.codeSection, publExtList.lang, now)}: " />
+						<h:outputText value="#{publExtList.pubListT.rowCount}"/>
+       				</div>
+       				
+       				<div class="results-count" style="display: flex;">
+       					
+	       			    
+	       			    <div style="width: 175px">
+	       					<p:selectOneMenu id="idSort" value="#{publExtList.sortCol}"  style="horizontal-align:center;">
+	                            <f:selectItem itemLabel="--#{labels['section.sortRep']}--" itemValue="#{null}"/> 
+	                            <f:selectItem itemLabel="#{labels['section.title']}" itemValue="A1" />
+					            <f:selectItem itemLabel="#{labels['section.dateFrom']}" itemValue="A4" />
+	                              <p:ajax event="itemSelect" update="tableGrid"  listener="#{publExtList.sortReport()}" />  
+	                         </p:selectOneMenu>
+                         </div>
+                        
+                    </div>
+       			</h:panelGroup>
+      		</div>
+      			
+
+			<!-- ITEMS DATA GRID -->
+	    	 <p:dataView var="row" value="#{publExtList.pubListT}" id="tableGrid" rows="8" paginator="true" paginatorPosition="bottom"
+                    rowsPerPageTemplate="6,12,16" lazy="true"  emptyMessage="#{labels['general.norows']}" 
+                    paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                    gridIcon="pi pi-th-large" listIcon="pi pi-bars" styleClass="datagrid no-border no-background paginator-custom padding-between" >
+                    
+                   
+                   
+                   <p:dataViewListItem id="listId" >
+ 
+	                   	<div class="publication-list-item">
+
+	                   		<div class="image-wrapper" >
+	                   			<p:graphicImage value="#{publExtList.createImageCont(row[3],50)}" stream="false" alt="no image"  width="100%"
+				        			class="publication-image fittable-image" rendered="#{row[3] ne null}"/>
+			        		</div>
+							
+							<h:panelGroup layout="block" styleClass="publication-contents">	
+							
+								<!--  Inform material and Images withOut Link-->
+			        			<ui:remove>
+			        			<div jsf:rendered="#{row[6] != NSIConstants.CODE_ZNACHENIE_TYPE_PUBL_VIDEO and (row[7] == null and row[7] == '' and null eq row[5] and '' eq row[5]) }"> 
+				        			<a href="publExtData?faces-redirect=true&amp;idPubl=#{row[0]}&amp;sect=#{publExtList.codeSection}" class="publication-title" >
+				        				<p:ajax event="click"  listener="#{publExtList.changePage()}" />
+				        				<h:outputText value="#{row[1]}" escape="false"/>
+				        			</a>
+				        		</div> 
+				        		</ui:remove>
+				        		
+				        		<div jsf:rendered="#{row[6] ne NSIConstants.CODE_ZNACHENIE_TYPE_PUBL_VIDEO or null eq row[5] or '' eq row[5]}"> 
+				        			<a href="publExtData?faces-redirect=true&amp;idPubl=#{row[0]}&amp;locale=#{publExtList.locale}&amp;sect=#{publExtList.codeSection}" class="publication-title" >
+				        				<p:ajax event="click"  listener="#{publExtList.changePage()}" />
+				        				<h:outputText value="#{row[1]}" escape="false"/>
+				        			</a>
+				        		</div>
+				        	
+				        		<!--  Video with Link row[5] -->	
+				        		<div jsf:rendered="#{(null ne row[5] and '' ne row[5] ) and row[6] eq NSIConstants.CODE_ZNACHENIE_TYPE_PUBL_VIDEO}">
+				        			<a href="#{row[5]}" class="publication-title" target="blank" >
+				        				<p:ajax event="click" listener="#{publExtList.changePage()}" />
+				        				<h:outputText value="#{row[1]}" escape="false"/>
+				        			</a>
+				        		</div>
+
+				        		<!--  Inform material and Images with Link  	-->
+			        			<ui:remove>
+			        			<div jsf:rendered="#{(null ne row[7] and row[6] ne NSIConstants.CODE_ZNACHENIE_TYPE_PUBL_VIDEO)}"> 
+				        			<a href="#{row[7]}=#{row[0]}" class="publication-title" >
+				        				<p:ajax event="click"  listener="#{publExtList.changePage()}" />
+				        				<h:outputText value="#{row[1]}" escape="false"/>
+				        			</a>
+				        		</div>
+				        		</ui:remove>
+				        		
+				        		
+			        			
+			        			<div class="publication-text">
+				        			<h:outputText value="#{row[2]}" escape="false" rendered="#{null ne row[2]}"/>
+				        		</div>
+				        		
+				        		<div class="publication-date">
+				        			<h:outputText value="#{labels['section.dateFrom']}: " />
+				        			<h:outputText value="#{row[4]}" rendered="#{row[4] ne null}">
+				        				<f:convertDateTime type="date" pattern="dd.MM.yyyy" timeZone=""/>
+				        			</h:outputText>
+				        		</div>
+					        		
+					        </h:panelGroup>
+                	
+               			</div>
+               			
+                   	
+                  	</p:dataViewListItem>
+                     
+                   	<p:dataViewGridItem  id="gridId" columns="4"> 
+    	
+  			        	<h:panelGroup layout="block" styleClass="publication-contents">	
+			        		<div jsf:rendered="#{null eq row[5]}" >
+				        		<a href="publExtData?idPubl=#{row[0]}" class="grid_publication-title">
+				        			<p:graphicImage value="#{publExtList.createImageCont(row[3],50)}" stream="false"  alt="no image" width="100%" 
+				        				rendered="#{row[3] ne null}" class="publication-image fittable-image"/> 
+				        		</a>
+			        		</div>
+			        		<div jsf:rendered="#{null eq row[5]}" >
+			        			<a href="publExtData?faces-redirect=true&amp;idPubl=#{row[0]}&amp;locale=#{!empty(param['locale'])?param['locale']:'bg'}&amp;lang=#{!empty(param['lang'])?param['lang']:1}" class="grid_publication-title" >
+			        				<p:ajax event="click"  listener="#{publExtList.changePage()}" />
+			        				<h:outputText value="#{row[1]}" escape="false"/>
+			        			</a>
+			        		</div>
+			        		<div jsf:rendered="#{null ne row[5]}" >
+				        		<a href="#{row[5]}" class="grid_publication-title" >
+				        			<p:graphicImage value="#{publExtList.createImageCont(row[3],50)}" stream="false"  alt="no image" width="100%" 
+				        				rendered="#{row[3] ne null}" class="publication-image fittable-image"/> 
+				        		</a>
+			        		</div>
+		
+		        			<div jsf:rendered="#{null ne row[5]}" >
+			        			<a href="#{row[5]}" class="grid_publication-title" >
+			        				<p:ajax event="click" listener="#{publExtList.changePage()}"/>
+			        				<h:outputText value="#{row[1]}" escape="false" />
+			        			</a>
+			        		</div>
+				
+		        			<div class="publication-text" jsf:rendered="#{null ne row[2]}">
+			        			<h:outputText value="#{row[2]}" escape="false" />
+			        		</div>
+			        		
+			        		<div class="publication-date">
+			        			<h:outputText value="#{labels['section.dateFrom']}: " />
+			        			<h:outputText value="#{row[4]}" rendered="#{row[4] ne null}">
+			        				<f:convertDateTime type="date" pattern="dd.MM.yyyy" timeZone=""/>
+			        			</h:outputText>
+			        		</div>
+				        		
+				        </h:panelGroup>
+				       
+
+               		</p:dataViewGridItem>
+                  
+                  
+             	</p:dataView>	
+	
+			</p:outputPanel>
+		</div>
+				
+	</h:form>
+		
+				
+			
+	</ui:define>
+
+</ui:composition>
+
